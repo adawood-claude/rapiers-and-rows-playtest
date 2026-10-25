@@ -1,0 +1,1798 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>html{color-scheme:dark}body{margin:0}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box}</style>
+<script>window.RR_VARIANT = {"label": "Test B", "short": "Test B (blasts off)", "note": "Powder Blasts are off in this version.", "blasts": false};</script>
+<title>Rapiers &amp; Rows Test B</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=EB+Garamond:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one-screen portrait app. Score strip on top, parchment board in the middle, Armory rack and Volley button at thumb height. Single dark-wood look by design. */
+:root {
+  --wood: #23140f;
+  --wood-2: #351f16;
+  --wood-3: #4a2c1f;
+  --parchment: #eadcbf;
+  --ink: #f2e6cd;
+  --ink-dim: #c9b59a;
+  --brass: #cfa54c;
+  --brass-dim: #8a6b2c;
+  --crimson: #9b2a47;
+  --display: "IM Fell English SC", "Iowan Old Style", Georgia, serif;
+  --body: "EB Garamond", "Iowan Old Style", Georgia, serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body {
+  background: var(--wood);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 16px;
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+#app {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  padding-left: max(12px, env(safe-area-inset-left, 0px));
+  padding-right: max(12px, env(safe-area-inset-right, 0px));
+  padding-block: 6px;
+  gap: 6px;
+  max-width: 560px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+/* Score strip */
+.hud {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+}
+.honor { display: flex; flex-direction: column; line-height: 1; }
+.label {
+  font-family: var(--display);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--ink-dim);
+}
+.honor .num {
+  font-size: 26px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--ink);
+  margin-top: 3px;
+}
+.goal { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.goal .text {
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bar { height: 6px; background: var(--wood-3); border-radius: 3px; overflow: hidden; }
+.bar > i { display: block; height: 100%; width: 0; background: var(--brass); transition: width 0.25s; }
+.speed { text-align: right; line-height: 1.1; }
+.speed .num { font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.iconbtn {
+  width: 40px; height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--wood-3);
+  background: var(--wood-2);
+  color: var(--ink);
+  font: 600 15px var(--body);
+  cursor: pointer;
+}
+.iconbtn:focus-visible, button:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+/* Board */
+#stage { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 0; }
+#zone { touch-action: none; display: flex; flex-direction: column; align-items: center; position: relative; }
+#boardWrap {
+  position: relative;
+  padding: 5px;
+  background: linear-gradient(#5a3420, #3b2216);
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px #7a5232, 0 0 0 1px #160c08;
+}
+#board { display: block; border-radius: 2px; }
+#boardWrap.loose { animation: goldflash 0.9s ease-in-out infinite; }
+@keyframes goldflash {
+  0%, 100% { box-shadow: inset 0 0 0 1px #7a5232, 0 0 0 2px var(--brass), 0 0 10px rgba(207, 165, 76, 0.3); }
+  50% { box-shadow: inset 0 0 0 1px #7a5232, 0 0 0 4px #f3d36f, 0 0 26px rgba(243, 211, 111, 0.75); }
+}
+#strip {
+  height: 42px;
+  width: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  color: var(--ink-dim);
+  text-align: center;
+}
+#stripText { font-style: italic; }
+#popup {
+  position: absolute;
+  left: 0; right: 0; top: 18%;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+}
+#popup .big {
+  font-family: var(--display);
+  font-size: 26px;
+  color: #2a160c;
+  text-shadow: 0 1px 0 rgba(255, 245, 220, 0.8);
+}
+#popup .small { font-size: 15px; font-weight: 600; color: #4a2a12; margin-top: 2px; }
+#popup.show { animation: pop 1.3s ease-out forwards; }
+@keyframes pop {
+  0% { opacity: 0; transform: translateY(8px) scale(0.96); }
+  12% { opacity: 1; transform: translateY(0) scale(1); }
+  75% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+/* Armory rack */
+.rack {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 10px;
+  align-items: stretch;
+  min-height: 80px;
+  padding: 8px;
+  background: linear-gradient(#5b1a2a, #3e1019);
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 1px #7d2b3d;
+}
+.slot {
+  position: relative;
+  border: 1px solid rgba(255, 220, 200, 0.18);
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 0;
+  color: var(--ink);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px;
+}
+.slot canvas { display: block; }
+.slot .name { font-size: 12px; color: var(--ink-dim); }
+.slot.chosen { border-color: var(--brass); box-shadow: inset 0 0 0 1px var(--brass); }
+.slot.chosen::after {
+  content: "Next";
+  position: absolute; top: -1px; right: 8px;
+  background: var(--brass);
+  color: #2a160c;
+  font: 600 10px var(--body);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 1px 6px 2px;
+  border-radius: 0 0 4px 4px;
+}
+#volley {
+  width: 76px;
+  border-radius: 999px;
+  border: 2px solid var(--brass-dim);
+  background: var(--wood-2);
+  color: var(--ink-dim);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  font: 600 13px var(--body);
+  padding: 0;
+}
+#volley .fill { position: absolute; left: 0; right: 0; bottom: 0; height: 0; background: rgba(207, 165, 76, 0.35); transition: height 0.25s; }
+#volley .txt { position: relative; display: flex; flex-direction: column; align-items: center; gap: 1px; line-height: 1.05; }
+#volley .txt b { font-family: var(--display); font-weight: 400; font-size: 15px; }
+#volley .txt span { font-variant-numeric: tabular-nums; font-size: 12px; }
+#volley.ready { border-color: #f3d36f; color: #2a160c; background: var(--brass); animation: pulse 0.8s ease-in-out infinite; }
+#volley.ready .fill { background: transparent; }
+#volley.ready.nudge { animation: nudge 0.6s ease-in-out, pulse 0.8s ease-in-out infinite; }
+@keyframes pulse {
+  0%, 100% { background: var(--brass); box-shadow: 0 0 0 0 rgba(243, 211, 111, 0.6); }
+  50% { background: #f3d36f; box-shadow: 0 0 0 8px rgba(243, 211, 111, 0.35), 0 0 22px rgba(243, 211, 111, 0.6); }
+}
+@keyframes nudge {
+  20%, 60% { transform: rotate(-8deg) scale(1.08); }
+  40%, 80% { transform: rotate(8deg) scale(1.08); }
+}
+/* Overlays */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(20, 10, 6, 0.78);
+  display: flex; align-items: center; justify-content: center;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 16px;
+  z-index: 20;
+  overflow-y: auto;
+}
+.card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--wood-2);
+  border: 1px solid var(--wood-3);
+  border-radius: 12px;
+  padding: 22px 20px;
+  display: flex; flex-direction: column; gap: 14px;
+  max-height: 100%;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+.card h1 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 38px;
+  line-height: 1;
+  margin: 0;
+  text-align: center;
+  text-wrap: balance;
+}
+.card h2 { font-family: var(--display); font-weight: 400; font-size: 28px; margin: 0; text-align: center; }
+.card p { margin: 0; line-height: 1.4; color: var(--ink-dim); text-align: center; }
+.modes { display: flex; flex-direction: column; gap: 8px; }
+.modebtn, .btn {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  align-items: center;
+  gap: 4px 10px;
+  text-align: left;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--wood-3);
+  background: var(--wood);
+  color: var(--ink);
+  font: 500 17px var(--body);
+  cursor: pointer;
+}
+.modebtn .tag { font-family: var(--display); color: var(--brass); font-size: 17px; }
+.modebtn .sub { grid-column: 2; font-size: 13px; color: var(--ink-dim); }
+.btn { display: block; text-align: center; font-weight: 600; }
+.btn.primary { background: var(--brass); color: #2a160c; border-color: var(--brass); }
+.row { display: flex; gap: 8px; }
+.row .btn { flex: 1; }
+.help { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 14px; color: var(--ink-dim); }
+.help dt { color: var(--ink); font-weight: 600; }
+.help dd { margin: 0; }
+.stats { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; font-size: 16px; }
+.stats dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.stats dt { color: var(--ink-dim); }
+.note { font-size: 13px; color: var(--ink-dim); text-align: center; line-height: 1.4; }
+.kbd { font-size: 13px; color: var(--ink-dim); text-align: center; }
+.styles { display: flex; flex-direction: column; gap: 6px; }
+.seg {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  padding: 3px;
+  background: var(--wood);
+  border: 1px solid var(--wood-3);
+  border-radius: 8px;
+}
+.seg button {
+  border: 0;
+  background: transparent;
+  color: var(--ink-dim);
+  font: 500 15px var(--body);
+  padding: 8px 2px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.seg button[aria-pressed="true"] { background: var(--brass); color: #2a160c; font-weight: 600; }
+.seg.seg3 { grid-template-columns: repeat(3, 1fr); }
+.seg.seg4 { grid-template-columns: repeat(2, 1fr); }
+.linkbtn {
+  align-self: center;
+  background: none; border: 0; padding: 2px;
+  color: var(--ink-dim);
+  font: italic 14px var(--body);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.hint {
+  color: var(--ink);
+  font-size: 13.5px; line-height: 1.25;
+  max-width: 100%;
+}
+.hint::before {
+  content: "Tip ";
+  font-family: var(--display);
+  letter-spacing: 0.04em;
+  color: var(--brass);
+}
+@media (prefers-reduced-motion: reduce) {
+  #popup.show { animation-duration: 0.9s; }
+  #volley.ready, #volley.ready.nudge { animation: none; box-shadow: 0 0 0 4px rgba(243, 211, 111, 0.5); }
+  #boardWrap.loose { animation: none; box-shadow: inset 0 0 0 1px #7a5232, 0 0 0 3px #f3d36f; }
+}
+</style>
+
+</head>
+<body>
+<div id="app">
+  <header class="hud">
+    <div class="honor"><span class="label">Honor</span><span class="num" id="honor">0</span></div>
+    <div class="goal">
+      <span class="text" id="goalText">Endless</span>
+      <div class="bar"><i id="goalBar"></i></div>
+    </div>
+    <div class="speed"><span class="label" id="dial">Steady</span><div class="num" id="level">Lv 1</div></div>
+    <button class="iconbtn" id="pauseBtn" aria-label="Pause">II</button>
+  </header>
+
+  <main id="stage">
+    <div id="zone">
+      <div id="boardWrap">
+        <canvas id="board" aria-label="Game board"></canvas>
+        <div id="popup"><div class="big" id="popBig"></div><div class="small" id="popSmall"></div></div>
+      </div>
+      <div id="strip"><span id="stripText">Drag here to move · flick down to drop</span><span id="hint" class="hint" hidden></span></div>
+    </div>
+  </main>
+
+  <footer class="rack" aria-label="Armory">
+    <button class="slot" id="slot0" aria-label="Armory slot 1"><canvas width="10" height="10"></canvas><span class="name"></span></button>
+    <button class="slot" id="slot1" aria-label="Armory slot 2"><canvas width="10" height="10"></canvas><span class="name"></span></button>
+    <button id="volley" aria-label="Fire Volley"><span class="fill" id="volleyFill"></span><span class="txt"><b>Volley</b><span id="volleyNum">0</span></span></button>
+  </footer>
+</div>
+
+<div class="overlay" id="menu">
+  <div class="card">
+    <h1>Rapiers &amp; Rows</h1>
+    <p id="menuNote">Playable prototype. Rules follow design doc v2.2, plus Powder Blasts.</p>
+    <div class="modes">
+      <button class="modebtn" data-mode="endless"><span class="tag">∞</span>Endless<span class="sub" id="bestLine">Speed rises every 10 rows · bonus every 30</span></button>
+      <button class="modebtn" data-mode="loose"><span class="tag">∞</span>Bonus trial<span class="sub">Endless, opening with the 30-second Guards Scatter bonus</span></button>
+      <button class="modebtn" data-mode="s11"><span class="tag">1.1</span>The Courtyard Ambush<span class="sub">Open board · reach 5,000 Honor · speed 1</span></button>
+      <button class="modebtn" data-mode="s12"><span class="tag">1.2</span>Overturned Tables<span class="sub">Break all 8 tables · speed 2</span></button>
+      <button class="modebtn" data-mode="s13"><span class="tag">1.3</span>The Wine Cellar Barricade<span class="sub">9-column lane · reach 8,000 Honor · speed 3</span></button>
+    </div>
+    <div class="styles">
+      <span class="label">Art style</span>
+      <div class="seg" role="group" aria-label="Art style">
+        <button data-style="plain">Plain</button><button data-style="engraved">Engraved</button><button data-style="enamel">Enamel</button><button data-style="painted">Painted</button>
+      </div>
+    </div>
+    <div class="styles">
+      <span class="label">Settings</span>
+      <div class="seg seg4" role="group" aria-label="Settings">
+        <button data-toggle="sound">Sound on</button><button data-toggle="music">Music on</button><button data-toggle="hints">Hints on</button><button data-toggle="blasts">Powder Blasts on</button>
+      </div>
+      <button class="linkbtn" data-reset-hints>Show all hints again</button>
+    </div>
+    <dl class="help">
+      <dt>Move</dt><dd>Drag sideways on the board or the strip below it</dd>
+      <dt>Rotate</dt><dd>Tap right half for clockwise, left half for counter-clockwise</dd>
+      <dt>Drop</dt><dd>Drag down slowly to ease down, flick down to drop</dd>
+      <dt>Armory</dt><dd>Tap a slot to choose the next weapon</dd>
+      <dt>Volley</dt><dd>When full, tap it to blast the top 4 cells of 3 columns</dd>
+      <dt>Kegs</dt><dd>Point a musket's muzzle straight at a powder keg to blow a 3×3 hole</dd>
+    </dl>
+    <p class="kbd">Keyboard: ← → move · ↓ ease down · ↑ or X rotate · Z rotate back · Space drop · 1/2 Armory · V Volley · P pause</p>
+  </div>
+</div>
+
+<div class="overlay" id="pause" hidden>
+  <div class="card">
+    <h2>Paused</h2>
+    <button class="btn primary" id="resumeBtn">Resume</button>
+    <div class="styles">
+      <span class="label">Art style</span>
+      <div class="seg" role="group" aria-label="Art style">
+        <button data-style="plain">Plain</button><button data-style="engraved">Engraved</button><button data-style="enamel">Enamel</button><button data-style="painted">Painted</button>
+      </div>
+    </div>
+    <div class="styles">
+      <span class="label">Settings</span>
+      <div class="seg seg4" role="group" aria-label="Settings">
+        <button data-toggle="sound">Sound on</button><button data-toggle="music">Music on</button><button data-toggle="hints">Hints on</button><button data-toggle="blasts">Powder Blasts on</button>
+      </div>
+    </div>
+    <div class="row"><button class="btn" id="restartBtn">Restart</button><button class="btn" id="menuBtn">Menu</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="end" hidden>
+  <div class="card">
+    <h2 id="endTitle">Overrun</h2>
+    <p id="endSub"></p>
+    <dl class="stats" id="endStats"></dl>
+    <p class="note">Playtest check: at speed 1, a typical player should need about 6 locks or fewer per row cleared. The best possible is about 4.</p>
+    <div class="row"><button class="btn primary" id="againBtn">Play again</button><button class="btn" id="endMenuBtn">Menu</button></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  // Playtest variants: the hosted site sets window.RR_VARIANT before this script; the Claude demo leaves it unset.
+  const VARIANT = window.RR_VARIANT || null;
+  const COLS = 15, ROWS = 25, TOT = 28;
+  const SPEEDS = [1.0, 1.3, 1.6, 2.0, 2.5, 3.1, 3.9, 4.9, 6.1, 7.6, 9.5, 12, 15, 19, 24];
+  const DIAL = ["Steady", "Steady", "Steady", "Steady", "Brisk", "Brisk", "Brisk", "Brisk", "Gallop", "Gallop", "Gallop", "Gallop", "Fury", "Fury", "Fury"];
+  const BASE = [0, 150, 400, 900, 1600, 2500];
+  const KICKS = [[0, 0], [-1, 0], [1, 0], [0, 1], [-2, 0], [2, 0]];
+  const LOCK_DELAY = 0.5, MAX_RESETS = 15, SOFT_RATE = 20;
+
+  // S = steel, F = firearm, C = cloth. Spawn orientation, top row first.
+  const PIECES = {
+    1: { name: "Dagger", rows: ["S"], single: true },
+    2: { name: "Powder Kegs", rows: ["FF"], single: false },
+    3: { name: "Flintlock", rows: ["FFF"], single: true },
+    4: { name: "Fencing Step", rows: ["S.", "SS"], single: false },
+    5: { name: "True Blade", rows: ["SSSS"], single: true },
+    6: { name: "Cavalier Hat", rows: ["CC", "CC"], single: true },
+    7: { name: "Heavy Volley", rows: ["FFFFF"], single: false },
+    8: { name: "King's Corner", rows: ["F.", "F.", "F.", "FF"], single: false },
+    9: { name: "Queen's Guard", rows: ["SS", "SS", "S."], single: false },
+    10: { name: "Crossguard", rows: [".S.", "SSS", ".S."], single: false },
+    11: { name: "Ammunition Box", rows: ["F.F", "FFF"], single: false },
+    12: { name: "The Plume", rows: ["CCC", ".C.", ".C."], single: false }
+  };
+  const BAG = [1, 2, 3, 3, 4, 4, 5, 5, 6, 7, 8, 9, 10, 11, 12]; // 15 pieces: one Powder Kegs per bag
+  const BULKY = new Set([6, 7, 8, 9, 10, 11, 12]);
+
+  const MODES = {
+    endless: { title: "Endless", speed: 1, endless: true },
+    loose: { title: "Endless: bonus trial", speed: 1, endless: true, bonusStart: true },
+    s11: { title: "1.1 The Courtyard Ambush", speed: 1, goal: { type: "honor", value: 5000 } },
+    s12: {
+      title: "1.2 Overturned Tables", speed: 2, goal: { type: "tables" },
+      tables: [[0, 0], [4, 0], [8, 0], [12, 0], [2, 2], [6, 2], [10, 2], [13, 2]]
+    },
+    s13: { title: "1.3 The Wine Cellar Barricade", speed: 3, goal: { type: "honor", value: 8000 }, walls: [0, 1, 2, 12, 13, 14] }
+  };
+  // Stage 1.2 redesign trial: 4 tables, all in the bottom 2 rows, with gaps 2-3 squares wide.
+  if (VARIANT && VARIANT.stage12 === "v2") MODES.s12.tables = [[0, 0], [4, 0], [9, 0], [13, 0]];
+
+  const MAT = {
+    S: { fill: "#a9c0d6", edge: "#34495d", mark: "#f4f8fc" },
+    F: { fill: "#9c6233", edge: "#3f2410", mark: "#e2bb62" },
+    C: { fill: "#9b2a47", edge: "#3f0b1a", mark: "#f3e8d8" }
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const canvas = $("board"), ctx = canvas.getContext("2d");
+  const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let cs = 20, dpr = 1, G = null, lastMode = "endless";
+
+  // ---------- helpers ----------
+  const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const matOf = (id) => PIECES[id].rows.map((r) => [...r].map((ch) => (ch === "." ? null : ch)));
+  function rotMat(m, dir) {
+    const h = m.length, w = m[0].length, out = [];
+    for (let r = 0; r < w; r++) {
+      out.push([]);
+      for (let c = 0; c < h; c++) out[r].push(dir > 0 ? m[h - 1 - c][r] : m[c][w - 1 - r]);
+    }
+    return out;
+  }
+  function cellsOf(m, x, y) {
+    const out = [];
+    for (let r = 0; r < m.length; r++) for (let c = 0; c < m[r].length; c++) if (m[r][c]) out.push({ gx: x + c, gy: y - r, m: m[r][c], r, c });
+    return out;
+  }
+  function collides(m, x, y) {
+    for (const k of cellsOf(m, x, y)) {
+      if (k.gx < 0 || k.gx >= COLS || k.gy < 0 || k.gy >= TOT) return true;
+      if (G.grid[k.gy][k.gx]) return true;
+    }
+    return false;
+  }
+  const fmt = (n) => n.toLocaleString("en-US");
+  // Each playtest variant keeps its own saved scores and settings, since they share one web address.
+  const keyPrefix = VARIANT ? VARIANT.label.replace(/\s+/g, "").toLowerCase() + ":" : "";
+  const store = {
+    get(k) { try { return localStorage.getItem(keyPrefix + k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(keyPrefix + k, v); } catch (e) { /* storage unavailable */ } }
+  };
+
+  // ---------- sound: synthesized with Web Audio, no audio files ----------
+  const AU = { ctx: null, sfx: null, mus: null, noise: null, on: true, musicOn: true };
+  function audioInit() {
+    try {
+      if (AU.ctx) { if (AU.ctx.state === "suspended") AU.ctx.resume(); return; }
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      const c = new AC();
+      AU.ctx = c;
+      const master = c.createGain(); master.gain.value = 0.9; master.connect(c.destination);
+      AU.sfx = c.createGain(); AU.sfx.gain.value = AU.on ? 0.8 : 0; AU.sfx.connect(master);
+      AU.mus = c.createGain(); AU.mus.gain.value = AU.musicOn ? 0.3 : 0; AU.mus.connect(master);
+      const buf = c.createBuffer(1, c.sampleRate, c.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      AU.noise = buf;
+    } catch (e) { AU.ctx = null; }
+  }
+  ["pointerdown", "keydown"].forEach((ev) => window.addEventListener(ev, audioInit, { passive: true }));
+  function nz(t, dur, o) {
+    const c = AU.ctx, src = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+    src.buffer = AU.noise;
+    f.type = o.type || "bandpass"; f.Q.value = o.q || 1;
+    f.frequency.setValueAtTime(o.f0 || 1000, t);
+    if (o.f1) f.frequency.exponentialRampToValueAtTime(o.f1, t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(o.gain || 0.2, t + (o.a || 0.005));
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(f); f.connect(g); g.connect(o.out || AU.sfx);
+    src.start(t, Math.random() * 0.4); src.stop(t + dur + 0.05);
+  }
+  function tn(t, freq, dur, o) {
+    const c = AU.ctx, os = c.createOscillator(), g = c.createGain();
+    os.type = o.type || "sine";
+    os.frequency.setValueAtTime(freq, t);
+    if (o.f1) os.frequency.exponentialRampToValueAtTime(o.f1, t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(o.gain || 0.1, t + (o.a || 0.005));
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    let node = os;
+    if (o.lp) { const f = c.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = o.lp; os.connect(f); node = f; }
+    node.connect(g); g.connect(o.out || AU.sfx);
+    os.start(t); os.stop(t + dur + 0.05);
+  }
+  function bell(t, f, dur, gain, out) { [[1, 1], [2.76, 0.45], [5.4, 0.2], [8.93, 0.1]].forEach(([m, a]) => tn(t, f * m, dur / Math.sqrt(m), { gain: gain * a, out })); }
+  function boom(t, gain) { nz(t, 0.9, { type: "lowpass", f0: 900, f1: 90, gain }); tn(t, 110, 0.6, { f1: 36, gain: gain * 0.8 }); }
+  const midi = (n) => 440 * Math.pow(2, (n - 69) / 12);
+  function fanfare(t, notes, gain) { notes.forEach((n, i) => tn(t + i * 0.06, midi(n), 0.9, { type: "sawtooth", lp: 1800, gain, a: 0.03 })); }
+  const play = (fn) => { if (!AU.ctx || !AU.on) return; try { fn(AU.ctx.currentTime + 0.01); } catch (e) { /* audio unavailable */ } };
+  const SFX = {
+    move: () => play((t) => nz(t, 0.07, { f0: 2400, f1: 900, q: 0.8, gain: 0.04 })),
+    rotate: () => play((t) => { nz(t, 0.08, { type: "highpass", f0: 5000, gain: 0.07 }); tn(t, 2650, 0.14, { gain: 0.035 }); tn(t + 0.01, 3970, 0.12, { gain: 0.025 }); }),
+    refuse: () => play((t) => tn(t, 210, 0.09, { type: "triangle", gain: 0.08 })),
+    lock: (cloth) => play((t) => {
+      if (cloth) { nz(t, 0.14, { type: "lowpass", f0: 420, gain: 0.25 }); nz(t + 0.02, 0.16, { f0: 3200, f1: 1500, gain: 0.03 }); }
+      else { nz(t, 0.05, { type: "lowpass", f0: 1800, gain: 0.18 }); tn(t, 330, 0.09, { type: "triangle", gain: 0.08 }); tn(t + 0.045, 520, 0.07, { type: "triangle", gain: 0.05 }); }
+    }),
+    clear: (n) => play((t) => {
+      if (n === 1) { nz(t, 0.24, { f0: 500, f1: 5200, q: 1.4, gain: 0.22 }); bell(t + 0.18, 3100, 0.5, 0.05); }
+      else if (n === 2) {
+        for (let i = 0; i < 2; i++) { const s = t + i * 0.12; nz(s, 0.06, { type: "highpass", f0: 2500, gain: 0.25 }); tn(s, 720, 0.08, { type: "square", lp: 2000, gain: 0.05 }); }
+        nz(t + 0.22, 0.3, { f0: 1600, f1: 500, q: 0.6, gain: 0.12 });
+      } else if (n === 3) { [2200, 2650, 3300].forEach((f, i) => bell(t + i * 0.09, f, 1.0, 0.08)); nz(t + 0.25, 0.4, { type: "highpass", f0: 6000, gain: 0.04 }); }
+      else {
+        boom(t, 0.6); fanfare(t + 0.15, [62, 66, 69, 74], 0.05);
+        if (n >= 5) { boom(t + 0.25, 0.5); fanfare(t + 0.55, [69, 74, 78, 81], 0.045); }
+        nz(t + 0.3, 1.3, { f0: 1100, q: 0.4, gain: 0.07, a: 0.35 });
+      }
+    }),
+    interlock: () => play((t) => bell(t, 2800, 1.5, 0.11)),
+    volley: () => play((t) => { for (let i = 0; i < 6; i++) nz(t + i * 0.03 + Math.random() * 0.02, 0.03, { type: "highpass", f0: 3000, gain: 0.14 }); boom(t + 0.22, 0.55); }),
+    ready: (soft) => play((t) => {
+      const g = soft ? 0.5 : 1;
+      nz(t, 0.03, { type: "highpass", f0: 4000, gain: 0.12 * g });
+      nz(t + 0.06, 0.03, { type: "highpass", f0: 3000, gain: 0.1 * g });
+      tn(t + 0.12, midi(81), 0.3, { type: "triangle", gain: 0.08 * g });
+      tn(t + 0.22, midi(86), 0.5, { type: "triangle", gain: 0.08 * g });
+    }),
+    blast: () => play((t) => { boom(t, 0.7); nz(t + 0.08, 0.7, { f0: 2600, f1: 380, q: 0.5, gain: 0.16 }); }),
+    scatter: () => play((t) => [74, 78, 81, 86].forEach((n, i) => tn(t + i * 0.08, midi(n), 0.3, { type: "triangle", gain: 0.07 }))),
+    restore: () => play((t) => [81, 78, 74].forEach((n, i) => tn(t + i * 0.09, midi(n), 0.3, { type: "triangle", gain: 0.06 }))),
+    end: (won) => play((t) => {
+      if (won) fanfare(t, [62, 66, 69, 74, 78], 0.05);
+      else [69, 65, 62, 57].forEach((n, i) => tn(t + i * 0.22, midi(n), 0.5, { type: "triangle", gain: 0.09 }));
+    })
+  };
+
+  // Music: an original tune in D minor, one eighth note per step (0 = rest). It tightens as the stack rises:
+  // calm (lute and bass), tense (adds snare, faster), danger (melody up an octave, brass, pocket-watch tick).
+  const MEL = [62, 0, 65, 67, 69, 0, 67, 65, 64, 65, 67, 64, 62, 0, 60, 0, 62, 64, 65, 0, 67, 69, 70, 69, 67, 65, 64, 0, 62, 0, 0, 0];
+  const BASS = [50, 0, 0, 0, 57, 0, 0, 0, 48, 0, 0, 0, 55, 0, 0, 0, 46, 0, 0, 0, 53, 0, 0, 0, 45, 0, 0, 0, 50, 0, 0, 0];
+  const MUS = { timer: 0, next: 0, step: 0 };
+  const musicTier = () => { const top = G && G.top != null ? G.top : 0; return top >= 18 ? 2 : top >= 10 ? 1 : 0; };
+  function musicStep(i, t, tier) {
+    const out = AU.mus, n = MEL[i], b = BASS[i];
+    if (n) { const f = midi(tier === 2 ? n + 12 : n); tn(t, f, 0.45, { type: "sawtooth", lp: 1500, gain: 0.05, out }); tn(t, f * 2, 0.2, { gain: 0.02, out }); }
+    if (b) {
+      tn(t, midi(b), 0.7, { type: "triangle", gain: 0.12, out });
+      if (tier === 2) { tn(t, midi(b + 12), 0.9, { type: "sawtooth", lp: 800, gain: 0.035, out, a: 0.05 }); tn(t, midi(b + 19), 0.9, { type: "sawtooth", lp: 800, gain: 0.025, out, a: 0.05 }); }
+    }
+    if (tier >= 1 && (i % 8 === 2 || i % 8 === 6)) nz(t, 0.12, { type: "highpass", f0: 1500, gain: 0.07, out });
+    if (tier >= 1 && i % 8 === 7) nz(t, 0.05, { type: "highpass", f0: 1800, gain: 0.03, out });
+    if (tier === 2 && i % 2 === 0) tn(t, 2100, 0.03, { type: "square", lp: 4000, gain: 0.02, out });
+  }
+  function musicTick() {
+    const want = !!(AU.ctx && AU.musicOn && G && !G.paused && G.state !== "over");
+    if (want && !MUS.timer) {
+      MUS.next = AU.ctx.currentTime + 0.08;
+      MUS.timer = setInterval(() => {
+        if (!AU.ctx) return;
+        // Tempo follows both the stack height (tier) and the game speed level.
+        const tier = musicTier(), bpm = [100, 112, 124][tier] + ((G ? G.level : 1) - 1) * 3, step = 60 / (bpm * 2);
+        // If the page stalled, skip the missed notes instead of playing them all at once.
+        if (MUS.next < AU.ctx.currentTime) MUS.next = AU.ctx.currentTime + 0.03;
+        while (MUS.next < AU.ctx.currentTime + 0.15) {
+          try { musicStep(MUS.step, MUS.next, tier); } catch (e) { /* audio unavailable */ }
+          MUS.next += step; MUS.step = (MUS.step + 1) % 32;
+        }
+      }, 30);
+    } else if (!want && MUS.timer) { clearInterval(MUS.timer); MUS.timer = 0; }
+  }
+
+  // ---------- effects: particles, explosions, banners, screen shake ----------
+  const FX = { parts: [], rings: [], banner: null, shake: 0 };
+  function burst(x, y, n, kind, o) {
+    o = o || {};
+    if (reduced && kind !== "smoke") n = Math.ceil(n / 3);
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2, sp = (o.speed || 120) * (0.4 + Math.random());
+      FX.parts.push({
+        x, y, vx: Math.cos(a) * sp + (o.vx || 0), vy: Math.sin(a) * sp + (o.vy || 0), life: 0,
+        max: (o.life || 0.6) * (0.6 + Math.random() * 0.8), kind, rot: Math.random() * 6,
+        size: (o.size || 3) * (0.6 + Math.random() * 0.8), color: o.colors ? o.colors[i % o.colors.length] : null
+      });
+    }
+  }
+  function fxUpdate(dt) {
+    for (const p of FX.parts) {
+      p.life += dt;
+      if (p.kind === "smoke") { p.vx *= 0.96; p.vy = p.vy * 0.96 - 12 * dt; } else p.vy += 420 * dt;
+      p.x += p.vx * dt; p.y += p.vy * dt; p.rot += dt * 8;
+    }
+    FX.parts = FX.parts.filter((p) => p.life < p.max);
+    for (const r of FX.rings) r.t += dt;
+    FX.rings = FX.rings.filter((r) => r.t < r.dur);
+    if (FX.banner) { FX.banner.t += dt; if (FX.banner.t > FX.banner.dur) FX.banner = null; }
+    const bw = $("boardWrap");
+    if (FX.shake > 0 && !reduced) {
+      FX.shake = Math.max(0, FX.shake - dt);
+      const a = FX.shake * 7;
+      bw.style.transform = "translate(" + ((Math.random() - 0.5) * a).toFixed(1) + "px," + ((Math.random() - 0.5) * a).toFixed(1) + "px)";
+    } else { FX.shake = 0; if (bw.style.transform) bw.style.transform = ""; }
+  }
+  function drawFx(W, H) {
+    for (const r of FX.rings) {
+      const k = r.t / r.dur, rad = r.rad * (0.5 + k);
+      const g = ctx.createRadialGradient(r.x, r.y, 0, r.x, r.y, rad);
+      g.addColorStop(0, "rgba(255, 245, 200, " + (1 - k).toFixed(3) + ")");
+      g.addColorStop(0.5, "rgba(255, 150, 40, " + (0.8 * (1 - k)).toFixed(3) + ")");
+      g.addColorStop(1, "rgba(255, 90, 20, 0)");
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(r.x, r.y, rad, 0, Math.PI * 2); ctx.fill();
+    }
+    for (const p of FX.parts) {
+      const a = Math.max(0, 1 - p.life / p.max);
+      if (p.kind === "smoke") { ctx.fillStyle = "rgba(110, 100, 90, " + (0.45 * a).toFixed(3) + ")"; ctx.beginPath(); ctx.arc(p.x, p.y, p.size * (1 + (1 - a) * 2.5), 0, Math.PI * 2); ctx.fill(); }
+      else if (p.kind === "spark") { ctx.strokeStyle = "rgba(255, 225, 140, " + a.toFixed(3) + ")"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.vx * 0.03, p.y - p.vy * 0.03); ctx.stroke(); }
+      else {
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.globalAlpha = a;
+        ctx.fillStyle = p.color || (p.kind === "splinter" ? "#8a5a30" : "#d9b24c");
+        ctx.fillRect(-p.size, -p.size * 0.35, p.size * 2, p.size * 0.7);
+        ctx.restore();
+      }
+    }
+    if (FX.banner) {
+      const b = FX.banner, k = b.t / b.dur, a = k < 0.15 ? k / 0.15 : k > 0.8 ? (1 - k) / 0.2 : 1;
+      const fs = Math.round(Math.min(cs * 1.5, (W - 48) / (b.text.length * 0.55)));
+      ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, a));
+      ctx.font = fs + 'px "IM Fell English SC", Georgia, serif';
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      const tw = ctx.measureText(b.text).width, y = H * 0.42;
+      ctx.fillStyle = "rgba(28, 14, 8, 0.86)"; rr(ctx, W / 2 - tw / 2 - 16, y - fs * 0.8, tw + 32, fs * 1.6, 10); ctx.fill();
+      ctx.strokeStyle = "#cfa54c"; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = "#f3d36f"; ctx.fillText(b.text, W / 2, y + 1);
+      ctx.restore();
+    }
+  }
+
+  // Line-clear animations. 1 row: one rapier lunge. 2: two thrusts from opposite sides, wood splinters.
+  // 3: three crossing slashes with a burst of sparks. 4: musket smoke, gold flash, "All for one!". 5: the same plus confetti.
+  const SWEEPS = { 1: [[1, 0]], 2: [[1, 0], [-1, 0.16]], 3: [[1, 0], [-1, 0.1], [1, 0.2]] };
+  function startClearFx(n, rows) {
+    SFX.clear(n);
+    G.clearRowsSorted = rows.slice().sort((a, b) => a - b);
+    G.parried = false;
+    if (n >= 4) {
+      FX.shake = n >= 5 ? 0.9 : 0.6;
+      FX.banner = { text: n >= 5 ? "The Royal Salute!" : "All for one!", t: 0, dur: G.clearDur + 0.5 };
+      for (const y of rows) {
+        if (y >= ROWS) continue;
+        const py = (ROWS - 1 - y) * cs + cs / 2;
+        burst(4, py, 5, "smoke", { speed: 40, vx: 60, life: 1.2, size: cs * 0.35 });
+        burst(4, py, 8, "spark", { speed: 220, vx: 160, life: 0.4 });
+        burst(COLS * cs - 4, py, 5, "smoke", { speed: 40, vx: -60, life: 1.2, size: cs * 0.35 });
+      }
+      if (n >= 5) burst((COLS * cs) / 2, 0, 60, "confetti", { speed: 220, vy: 60, life: 1.6, size: 4, colors: ["#cfa54c", "#9b2a47", "#3e6f9f", "#f3e8d8"] });
+    }
+  }
+  function sweepX(i, n, k, W) {
+    const s = SWEEPS[n][i % SWEEPS[n].length], local = Math.max(0, Math.min(1, (k - s[1]) / 0.62));
+    return { dir: s[0], local, x: s[0] > 0 ? W * local : W * (1 - local) };
+  }
+  function clearFxTick() {
+    const n = G.clearN, k = 1 - G.clearT / G.clearDur, W = COLS * cs;
+    if (n > 3 || reduced) return;
+    G.clearRowsSorted.forEach((y, i) => {
+      if (y >= ROWS) return;
+      const sw = sweepX(i, n, k, W);
+      if (sw.local <= 0 || sw.local >= 1) return;
+      const py = (ROWS - 1 - y) * cs + cs / 2;
+      if (Math.random() < 0.7) burst(sw.x, py, 1, n === 2 ? "splinter" : "spark", { speed: 90, vx: -sw.dir * 60, vy: -80, life: 0.5, size: 3 });
+    });
+    if (n === 3 && !G.parried && k > 0.55) {
+      G.parried = true;
+      burst(W / 2, (ROWS - 1 - G.clearRowsSorted[1]) * cs + cs / 2, 24, "spark", { speed: 260, life: 0.5 });
+    }
+  }
+  function drawClearFx(W, H, bd) {
+    const n = G.clearN, k = 1 - G.clearT / G.clearDur;
+    G.clearRowsSorted.forEach((y, i) => {
+      if (y >= ROWS) return;
+      const py = (ROWS - 1 - y) * cs;
+      if (n >= 4 || reduced) {
+        ctx.fillStyle = "rgba(255, 215, 120, " + (0.7 * (1 - k)).toFixed(3) + ")"; ctx.fillRect(0, py, W, cs);
+        ctx.globalAlpha = Math.min(1, k * 1.3); ctx.fillStyle = bd.bg; ctx.fillRect(0, py, W, cs); ctx.globalAlpha = 1;
+        return;
+      }
+      const sw = sweepX(i, n, k, W);
+      ctx.fillStyle = bd.bg;
+      if (sw.dir > 0) ctx.fillRect(0, py, sw.x, cs); else ctx.fillRect(sw.x, py, W - sw.x, cs);
+      if (sw.local > 0 && sw.local < 1) {
+        const tail = cs * 2.6, cy = py + cs / 2;
+        const g = ctx.createLinearGradient(sw.x - sw.dir * tail, cy, sw.x, cy);
+        g.addColorStop(0, "rgba(255, 255, 255, 0)"); g.addColorStop(1, "rgba(255, 255, 255, 0.95)");
+        ctx.strokeStyle = g; ctx.lineWidth = Math.max(2, cs * 0.14); ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(sw.x - sw.dir * tail, cy); ctx.lineTo(sw.x, cy); ctx.stroke();
+        ctx.fillStyle = "rgba(255, 250, 220, 0.9)"; ctx.beginPath(); ctx.arc(sw.x, cy, cs * 0.18, 0, Math.PI * 2); ctx.fill();
+      }
+    });
+  }
+
+  // ---------- Powder Blasts: a musket muzzle pointed straight at a powder keg sets it off ----------
+  // Muzzle direction by rotation (x right, y up): spawn orientation points right.
+  const MUZ = [[1, 0], [0, -1], [-1, 0], [0, 1]];
+  const isKeg = (c) => !!(c && c.t === "piece" && c.pid === 2);
+  const isGun = (c) => !!(c && c.t === "piece" && c.m === "F" && c.pid !== 2);
+  function muzzleTargets() {
+    const hits = [];
+    for (let y = 0; y < TOT; y++) for (let x = 0; x < COLS; x++) {
+      const c = G.grid[y][x];
+      if (!isGun(c)) continue;
+      const [dx, dy] = MUZ[c.rot || 0];
+      const t = cellAt(x + dx, y + dy);
+      if (c.single && t && t.inst === c.inst) continue; // only the Flintlock's muzzle end fires
+      if (isKeg(t)) hits.push([x + dx, y + dy]);
+    }
+    return hits;
+  }
+  // Each keg clears the 3x3 around it; kegs caught in a blast go off too.
+  function detonate(list) {
+    const q = list.slice(), done = new Set(), tids = new Set(), holes = [];
+    let cells = 0, kegs = 0;
+    while (q.length) {
+      const [kx, ky] = q.shift(), key = kx + "," + ky;
+      if (done.has(key) || !isKeg(cellAt(kx, ky))) continue;
+      done.add(key); kegs++;
+      const px = kx * cs + cs / 2, py = (ROWS - 1 - ky) * cs + cs / 2;
+      FX.rings.push({ x: px, y: py, rad: cs * 2.2, t: 0, dur: 0.45 });
+      burst(px, py, 14, "spark", { speed: 260, life: 0.5 });
+      burst(px, py, 6, "splinter", { speed: 200, life: 0.8, size: 3 });
+      burst(px, py, 4, "smoke", { speed: 30, life: 1.3, size: cs * 0.4 });
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        const x = kx + dx, y = ky + dy, c = cellAt(x, y);
+        if (!c || c.t === "wall") continue;
+        if ((dx || dy) && isKeg(c)) { q.push([x, y]); continue; }
+        if (c.t === "table") tids.add(c.tid);
+        G.grid[y][x] = null; cells++; holes.push([x, y]);
+      }
+    }
+    cells += breakTables(tids, holes);
+    collapse(holes);
+    if (!kegs) return 0;
+    const pts = 25 * cells + 50 * kegs;
+    G.score += pts;
+    // Every Powder Blast raises the speed one level for the rest of the game.
+    const before = G.level;
+    G.blasts = (G.blasts || 0) + 1;
+    if (!G.mode.endless) G.rushLevels = Math.min(3, (G.rushLevels || 0) + 1);
+    setLevel();
+    // In story stages, each blast also scatters the guards for 30 seconds to offset the speed-up.
+    if (!G.mode.endless) {
+      const was = G.looseT > 0;
+      G.looseT = 30;
+      setTimeout(() => { if (G && G.state !== "over") { popup("The Guards Scatter!", "30 seconds · faster, and miniatures scatter"); if (!was) SFX.scatter(); } }, 1000);
+    }
+    FX.shake = Math.max(FX.shake, 0.45);
+    SFX.blast();
+    popup(kegs > 1 ? "Powder Blast ×" + kegs + "!" : "Powder Blast!", cells + " cells · +" + fmt(pts) + (G.level > before ? " · Speed up!" : ""));
+    return cells;
+  }
+  // A table hit by a Volley or a blast breaks completely, the same as when one of its rows clears.
+  function breakTables(tids, holes) {
+    let n = 0;
+    if (!tids.size) return 0;
+    for (let y = 0; y < TOT; y++) for (let x = 0; x < COLS; x++) {
+      const c = G.grid[y][x];
+      if (c && c.t === "table" && tids.has(c.tid)) { G.grid[y][x] = null; n++; if (holes) holes.push([x, y]); }
+    }
+    return n;
+  }
+  // After a blast, everything above each blasted cell drops down to fill the hole, column by column.
+  function collapse(holes) {
+    const byCol = new Map();
+    for (const [x, y] of holes) { if (!byCol.has(x)) byCol.set(x, []); byCol.get(x).push(y); }
+    for (const [x, ys] of byCol) {
+      if (G.walls.has(x)) continue;
+      ys.sort((a, b) => b - a);
+      for (const r of ys) {
+        for (let y = r; y < TOT - 1; y++) G.grid[y][x] = G.grid[y + 1][x];
+        G.grid[TOT - 1][x] = null;
+      }
+    }
+  }
+  // Speed level. Endless: start + 1 every 10 rows + 1 per Powder Blast, permanent.
+  // Story stages: start + 1 per blast (max +3), only while the guards are scattered. Max 15.
+  function setLevel() {
+    G.level = Math.min(15, G.mode.speed + (G.mode.endless ? Math.floor(G.rows / 10) + (G.blasts || 0) : (G.rushLevels || 0)));
+  }
+
+  // ---------- hints: each shows once, the first time it matters ----------
+  const HINTS = {
+    move: "Drag sideways to move. Tap the right half to rotate clockwise, the left half to turn back.",
+    drop: "Flick down to drop instantly. Drag down slowly to ease a piece down.",
+    armory: "Tap an Armory slot to pick which weapon deploys next.",
+    volley: "Volley ready! Tap the brass button to blast the top of 3 columns.",
+    keg: "Powder Kegs explode when a musket's muzzle points right at them, clearing the 3×3 around each keg.",
+    hat: "Clear a row that holds the Cavalier Hat for a +500 Crowned Row.",
+    blade: "Stand two True Blades upright side by side for an Interlocking Guard.",
+    danger: "The stack is getting high. Clear low rows or fire a Volley.",
+    combo: "Rows made mostly of firearms score double."
+  };
+  let hintsOn = true, hintSeen = {}, hintQ = [], hintTimer = 0, blastsOn = true;
+  function hint(key) {
+    if (!hintsOn || hintSeen[key] || !HINTS[key]) return;
+    hintSeen[key] = true;
+    store.set("rr-hints-seen", JSON.stringify(hintSeen));
+    hintQ.push(HINTS[key]);
+    if (!hintTimer) nextHint();
+  }
+  function nextHint() {
+    const el = $("hint");
+    if (!hintQ.length) { el.hidden = true; $("stripText").hidden = false; hintTimer = 0; return; }
+    el.textContent = hintQ.shift();
+    el.hidden = false;
+    $("stripText").hidden = true;
+    hintTimer = setTimeout(nextHint, 5200);
+  }
+
+  // ---------- settings ----------
+  function syncToggles() {
+    document.querySelectorAll("[data-toggle]").forEach((b) => {
+      const k = b.dataset.toggle, on = k === "sound" ? AU.on : k === "music" ? AU.musicOn : k === "blasts" ? blastsOn : hintsOn;
+      b.setAttribute("aria-pressed", String(on));
+      b.textContent = { sound: "Sound", music: "Music", hints: "Hints", blasts: "Powder Blasts" }[k] + (on ? " on" : " off");
+    });
+  }
+  function initSettings() {
+    AU.on = store.get("rr-sound") !== "off";
+    AU.musicOn = store.get("rr-music") !== "off";
+    hintsOn = store.get("rr-hints") !== "off";
+    blastsOn = store.get("rr-blasts") !== "off";
+    if (VARIANT && typeof VARIANT.blasts === "boolean") {
+      blastsOn = VARIANT.blasts;
+      document.querySelectorAll('[data-toggle="blasts"]').forEach((b) => { b.hidden = true; });
+    }
+    if (VARIANT) {
+      $("menuNote").textContent = VARIANT.label + ". " + VARIANT.note;
+      if (VARIANT.stage12 === "v2") document.querySelector('[data-mode="s12"] .sub').textContent = "Break all 4 tables · speed 2";
+    }
+    try { hintSeen = JSON.parse(store.get("rr-hints-seen") || "{}") || {}; } catch (e) { hintSeen = {}; }
+    syncToggles();
+  }
+  document.querySelectorAll("[data-toggle]").forEach((b) => b.addEventListener("click", () => {
+    const k = b.dataset.toggle;
+    if (k === "sound") { AU.on = !AU.on; store.set("rr-sound", AU.on ? "on" : "off"); if (AU.sfx) AU.sfx.gain.value = AU.on ? 0.8 : 0; }
+    else if (k === "music") { AU.musicOn = !AU.musicOn; store.set("rr-music", AU.musicOn ? "on" : "off"); if (AU.mus) AU.mus.gain.value = AU.musicOn ? 0.3 : 0; }
+    else if (k === "blasts") { blastsOn = !blastsOn; store.set("rr-blasts", blastsOn ? "on" : "off"); }
+    else { hintsOn = !hintsOn; store.set("rr-hints", hintsOn ? "on" : "off"); if (!hintsOn) { hintQ = []; clearTimeout(hintTimer); nextHint(); } }
+    syncToggles();
+  }));
+  document.querySelectorAll("[data-reset-hints]").forEach((b) => b.addEventListener("click", () => {
+    hintSeen = {};
+    store.set("rr-hints-seen", "{}");
+    b.textContent = "Hints will show again";
+  }));
+
+  // ---------- game setup ----------
+  function newGame(modeId) {
+    lastMode = modeId;
+    const mode = MODES[modeId];
+    G = {
+      mode, modeId,
+      grid: Array.from({ length: TOT }, () => Array(COLS).fill(null)),
+      walls: new Set(mode.walls || []),
+      score: 0, gauge: 0, rows: 0, locks: 0, streak: 0,
+      level: mode.speed, piece: null, armory: [], choice: 0,
+      queue: [], hist: [], fall: 0, lockT: 0, resets: 0,
+      state: "play", paused: false, clearRows: null, clearT: 0, pendingGauge: 0,
+      inst: 1, softKey: false, time: 0, blasts: 0, fx: null, refuse: 0, tablesTotal: 0
+    };
+    for (const c of G.walls) for (let y = 0; y < TOT; y++) G.grid[y][c] = { t: "wall" };
+    (mode.tables || []).forEach(([x, y], i) => {
+      for (const [dx, dy] of [[0, 0], [1, 0], [0, 1], [1, 1]]) G.grid[y + dy][x + dx] = { t: "table", tid: i + 1 };
+    });
+    G.tablesTotal = (mode.tables || []).length;
+    G.armory = [draw(), draw()];
+    G.bonusCount = 0;
+    G.looseT = mode.bonusStart ? 30 : 0;
+    FX.parts = []; FX.rings = []; FX.banner = null; FX.shake = 0;
+    setTimeout(() => hint("move"), 700);
+    hideAll();
+    if (mode.bonusStart) setTimeout(() => { popup("The Guards Scatter!", "30 seconds · miniatures scatter as they land"); SFX.scatter(); }, 300);
+    spawn();
+    renderArmory();
+  }
+
+  function draw() {
+    while (G.queue.length < 34) G.queue.push(...shuffle(BAG.slice()));
+    const h = G.hist;
+    if (h.length >= 2 && BULKY.has(h[h.length - 1]) && BULKY.has(h[h.length - 2]) && BULKY.has(G.queue[0])) {
+      const j = G.queue.findIndex((id) => !BULKY.has(id));
+      if (j > 0) [G.queue[0], G.queue[j]] = [G.queue[j], G.queue[0]];
+    }
+    const id = G.queue.shift();
+    h.push(id);
+    if (h.length > 4) h.shift();
+    return id;
+  }
+
+  function spawn() {
+    const slot = G.choice;
+    const id = G.armory[slot];
+    G.armory[slot] = draw();
+    G.choice = 0;
+    const m = matOf(id), h = m.length, w = m[0].length;
+    const p = { id, m, w, h, x: 7 - Math.floor(w / 2), y: ROWS - 1 + h - 1, inst: G.inst++, rot: 0 };
+    G.fall = 0; G.lockT = 0; G.resets = 0;
+    if (collides(p.m, p.x, p.y)) { G.piece = null; renderArmory(); return gameOver(false); }
+    G.piece = p;
+    renderArmory();
+    if (blastsOn && (id === 2 || G.armory.includes(2))) hint("keg");
+    if (id === 6) hint("hat");
+    if (id === 5) hint("blade");
+  }
+
+  // ---------- movement ----------
+  const grounded = () => collides(G.piece.m, G.piece.x, G.piece.y - 1);
+  function afterMove() {
+    if (grounded() && G.resets < MAX_RESETS) { G.lockT = 0; G.resets++; }
+  }
+  function move(dx, dy) {
+    if (!canAct()) return false;
+    const p = G.piece;
+    if (collides(p.m, p.x + dx, p.y + dy)) return false;
+    p.x += dx; p.y += dy;
+    afterMove();
+    if (dx) SFX.move();
+    return true;
+  }
+  function rotate(dir) {
+    if (!canAct()) return;
+    const p = G.piece, nm = rotMat(p.m, dir), nh = nm.length, nw = nm[0].length;
+    const bx = p.x + (Math.floor((p.w - 1) / 2) - Math.floor((nw - 1) / 2));
+    const by = p.y - Math.floor((p.h - 1) / 2) + Math.floor((nh - 1) / 2);
+    for (const [kx, ky] of KICKS) {
+      if (!collides(nm, bx + kx, by + ky)) {
+        Object.assign(p, { m: nm, w: nw, h: nh, x: bx + kx, y: by + ky, rot: (p.rot + dir + 4) % 4 });
+        afterMove();
+        SFX.rotate();
+        return;
+      }
+    }
+    G.refuse = 0.18;
+    SFX.refuse();
+  }
+  function hardDrop() {
+    if (!canAct()) return;
+    const p = G.piece;
+    while (!collides(p.m, p.x, p.y - 1)) p.y--;
+    lock();
+  }
+  const canAct = () => G && G.state === "play" && !G.paused && G.piece;
+
+  // ---------- lock, score, clear ----------
+  // The Guards Scatter: a 30-second bonus. Endless: each time the row count passes a multiple of 30.
+  // Story stages: after each Powder Blast.
+  // Miniatures scatter on landing; single objects stay whole.
+  const looseOn = () => !!(G && G.looseT > 0);
+
+  function lock() {
+    const p = G.piece;
+    const cells = cellsOf(p.m, p.x, p.y);
+    const single = PIECES[p.id].single;
+    G.piece = null;
+    G.locks++;
+    SFX.lock(cells.every((k) => k.m === "C"));
+    if (G.locks === 2) hint("drop");
+    if (G.locks === 4) hint("armory");
+    if (G.locks === 12) hint("combo");
+    if (!single && looseOn()) {
+      const moves = [];
+      for (const k of cells.slice().sort((a, b) => a.gy - b.gy)) {
+        let y = k.gy;
+        while (y - 1 >= 0 && !G.grid[y - 1][k.gx]) y--;
+        G.grid[y][k.gx] = { t: "piece", m: k.m, pid: p.id, inst: p.inst, single: false, rot: p.rot };
+        moves.push({ x: k.gx, y0: k.gy, y1: y, m: k.m });
+      }
+      for (const mv of moves) G.grid[mv.y1][mv.x] = null;
+      const drop = Math.max(0, ...moves.map((mv) => mv.y0 - mv.y1));
+      if (drop === 0) {
+        for (const mv of moves) G.grid[mv.y1][mv.x] = { t: "piece", m: mv.m, pid: p.id, inst: p.inst, single: false, rot: p.rot };
+        return resolveLock(p, cells);
+      }
+      G.settle = { moves, p, t: 0, dur: reduced ? 0.05 : Math.min(0.32, 0.1 + 0.03 * drop) };
+      G.state = "settling";
+      return;
+    }
+    for (const k of cells) G.grid[k.gy][k.gx] = { t: "piece", m: k.m, pid: p.id, inst: p.inst, single, rot: p.rot, cx: k.c, cy: k.r, bw: p.w, bh: p.h };
+    resolveLock(p, cells);
+  }
+
+  function finishSettle() {
+    const s = G.settle;
+    G.settle = null;
+    G.state = "play";
+    for (const mv of s.moves) G.grid[mv.y1][mv.x] = { t: "piece", m: mv.m, pid: s.p.id, inst: s.p.inst, single: false, rot: s.p.rot };
+    resolveLock(s.p, s.moves.map((mv) => ({ gx: mv.x, gy: mv.y1 })));
+  }
+
+  function resolveLock(p, cells) {
+    if (cells.every((k) => k.gy >= ROWS)) return gameOver(false);
+    const aimed = blastsOn ? muzzleTargets() : [];
+    if (aimed.length) detonate(aimed);
+
+    // Interlocking Guard: this True Blade upright, beside another intact upright True Blade on the same 4 rows.
+    let inter = false;
+    if (p.id === 5 && p.w === 1 && p.h === 4) {
+      const ys = [p.y, p.y - 1, p.y - 2, p.y - 3];
+      for (const nc of [p.x - 1, p.x + 1]) {
+        if (nc < 0 || nc >= COLS) continue;
+        const first = G.grid[ys[0]][nc];
+        if (first && first.t === "piece" && first.pid === 5 && ys.every((y) => { const c = G.grid[y][nc]; return c && c.inst === first.inst; })) { inter = true; break; }
+      }
+    }
+
+    const rows = [];
+    for (let y = 0; y < TOT; y++) if (G.grid[y].every((c) => c)) rows.push(y);
+    const n = rows.length;
+    let base = BASE[Math.min(n, 5)];
+    if (G.mode.endless) base = Math.round(base * (1 + 0.1 * (G.level - 1)));
+    const crowned = rows.some((y) => G.grid[y].some((c) => c && c.t === "piece" && c.pid === 6));
+    G.streak = n > 0 ? G.streak + 1 : 0;
+    const riposte = n > 0 ? 50 * (G.streak - 1) : 0;
+    const combo = rows.some((y) => {
+      const pc = G.grid[y].filter((c) => c && c.t === "piece");
+      return pc.length > 0 && pc.filter((c) => c.m === "F").length / pc.length >= 0.6;
+    });
+    const total = (base + (crowned ? 500 : 0) + (inter ? 250 : 0) + riposte) * (combo ? 2 : 1);
+    G.score += total;
+
+    const names = ["", "Lunge", "Double-Thrust", "Triple-Parry", "The Musketeer Salute", "The Royal Salute"];
+    const extras = [];
+    if (crowned) extras.push("Crowned Row");
+    if (inter) extras.push("Interlocking Guard");
+    if (riposte) extras.push("Riposte ×" + G.streak);
+    if (combo) extras.push("Volley Combo ×2");
+    if (n > 0) popup(names[Math.min(n, 5)] + "!", "+" + fmt(total) + (extras.length ? " · " + extras.join(" · ") : ""));
+    else if (inter) popup("Interlocking Guard!", "+250");
+    if (inter) SFX.interlock();
+
+    G.pendingGauge = 10 * n + (combo ? 50 : 0);
+    if (n > 0) {
+      G.rows += n;
+      G.state = "clearing";
+      G.clearRows = rows;
+      G.clearDur = reduced ? 0.15 : [0, 0.34, 0.44, 0.56, 0.9, 1.1][Math.min(n, 5)];
+      G.clearT = G.clearDur;
+      G.clearN = Math.min(n, 5);
+      startClearFx(G.clearN, rows);
+    } else finishTurn();
+  }
+
+  function finishClear() {
+    const rows = G.clearRows;
+    const tids = new Set();
+    for (const y of rows) for (const c of G.grid[y]) if (c && c.t === "table") tids.add(c.tid);
+    if (tids.size) for (let y = 0; y < TOT; y++) for (let x = 0; x < COLS; x++) { const c = G.grid[y][x]; if (c && c.t === "table" && tids.has(c.tid)) G.grid[y][x] = null; }
+    for (const r of rows.slice().sort((a, b) => b - a)) {
+      for (let x = 0; x < COLS; x++) {
+        if (G.walls.has(x)) continue;
+        for (let y = r; y < TOT - 1; y++) G.grid[y][x] = G.grid[y + 1][x];
+        G.grid[TOT - 1][x] = null;
+      }
+    }
+    G.clearRows = null;
+    G.state = "play";
+    finishTurn();
+  }
+
+  function finishTurn() {
+    const wasReady = G.gauge >= 100;
+    G.gauge = Math.min(100, G.gauge + G.pendingGauge);
+    if (!wasReady && G.gauge >= 100) { G.readyT = 0; volleyReady(false); }
+    G.pendingGauge = 0;
+    setLevel();
+    if (G.mode.endless && Math.floor(G.rows / 30) > G.bonusCount) {
+      G.bonusCount = Math.floor(G.rows / 30);
+      G.looseT = 30;
+      setTimeout(() => { if (G && G.state !== "over") { popup("The Guards Scatter!", "30 seconds · miniatures scatter as they land"); SFX.scatter(); } }, 900);
+    }
+    if (checkWin()) return gameOver(true);
+    spawn();
+  }
+
+  const tablesLeft = () => { let n = 0; for (const row of G.grid) for (const c of row) if (c && c.t === "table") n++; return n; };
+  function goalProgress() {
+    const g = G.mode.goal;
+    if (!g) return null;
+    if (g.type === "honor") return { text: "Reach " + fmt(g.value) + " Honor", frac: Math.min(1, G.score / g.value) };
+    const left = tablesLeft(), totalCells = G.tablesTotal * 4;
+    const broken = Math.round((totalCells - left) / 4);
+    return { text: "Tables broken · " + Math.min(broken, G.tablesTotal) + " of " + G.tablesTotal, frac: totalCells ? (totalCells - left) / totalCells : 1 };
+  }
+  function checkWin() {
+    const g = G.mode.goal;
+    if (!g) return false;
+    if (g.type === "honor") return G.score >= g.value;
+    return tablesLeft() === 0;
+  }
+
+  function volleyReady(reminder) {
+    SFX.ready(reminder);
+    const v = $("volley");
+    v.classList.remove("nudge"); void v.offsetWidth; v.classList.add("nudge");
+    setTimeout(() => v.classList.remove("nudge"), 650);
+  }
+
+  function fireVolley() {
+    if (!canAct() || G.gauge < 100) return;
+    const c0 = G.piece.x + Math.floor(G.piece.w / 2);
+    let destroyed = 0;
+    const cols = [], kegsHit = [], tids = new Set();
+    for (const c of [c0 - 1, c0, c0 + 1]) {
+      if (c < 0 || c >= COLS || G.walls.has(c)) continue;
+      cols.push(c);
+      let k = 0;
+      for (let y = TOT - 1; y >= 0 && k < 4; y--) {
+        const cell = G.grid[y][c];
+        if (cell && cell.t !== "wall") {
+          if (blastsOn && isKeg(cell)) kegsHit.push([c, y]);
+          else { if (cell.t === "table") tids.add(cell.tid); G.grid[y][c] = null; destroyed++; }
+          k++;
+        }
+      }
+    }
+    destroyed += breakTables(tids);
+    G.score += 50 * destroyed;
+    G.gauge = 0;
+    G.fx = { cols, t: 0.35 };
+    popup("Volley!", destroyed + " cells · +" + fmt(50 * destroyed));
+    SFX.volley();
+    FX.shake = Math.max(FX.shake, 0.3);
+    if (kegsHit.length) detonate(kegsHit);
+    if (checkWin()) gameOver(true);
+  }
+
+  function gameOver(won) {
+    G.state = "over";
+    SFX.end(won);
+    const mode = G.mode;
+    $("endTitle").textContent = won ? "Victory" : "Overrun";
+    $("endSub").textContent = mode.title + (won ? " cleared." : (mode.endless ? "" : " lost. The stack reached the top."));
+    const secs = Math.floor(G.time), mm = Math.floor(secs / 60), ss = String(secs % 60).padStart(2, "0");
+    const per = G.rows > 0 ? (G.locks / G.rows).toFixed(1) : "none yet";
+    let best = "";
+    if (G.modeId === "endless") {
+      const prev = parseInt(store.get("rr-best") || "0", 10) || 0;
+      if (G.score > prev) store.set("rr-best", String(G.score));
+      best = "<dt>Best Endless Honor</dt><dd>" + fmt(Math.max(prev, G.score)) + "</dd>";
+    }
+    $("endStats").innerHTML =
+      "<dt>Version</dt><dd>" + (VARIANT ? VARIANT.short : "Claude demo") + "</dd>" +
+      "<dt>Honor</dt><dd>" + fmt(G.score) + "</dd>" + best +
+      "<dt>Rows cleared</dt><dd>" + G.rows + "</dd>" +
+      "<dt>Pieces placed</dt><dd>" + G.locks + "</dd>" +
+      "<dt>Locks per row cleared</dt><dd>" + per + "</dd>" +
+      "<dt>Powder Blasts</dt><dd>" + (blastsOn ? (G.blasts || 0) : "off") + "</dd>" +
+      "<dt>Time</dt><dd>" + mm + ":" + ss + "</dd>";
+    $("end").hidden = false;
+    updateBest();
+  }
+
+  // ---------- loop ----------
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    if (G) update(dt);
+    fxUpdate(dt);
+    musicTick();
+    render();
+    requestAnimationFrame(frame);
+  }
+  function update(dt) {
+    if (G.paused || G.state === "over") return;
+    if (G.looseT > 0) {
+      G.looseT -= dt;
+      if (G.looseT <= 0) {
+        G.looseT = 0;
+        popup("Formation Restored", G.rushLevels ? "Pieces land whole · speed back to normal" : "Pieces land whole again");
+        G.rushLevels = 0;
+        setLevel();
+        SFX.restore();
+      }
+    }
+    if (G.fx) { G.fx.t -= dt; if (G.fx.t <= 0) G.fx = null; }
+    if (G.refuse > 0) G.refuse -= dt;
+    // A full Volley that goes unused chimes again every 15 seconds.
+    if (G.gauge >= 100) { G.readyT = (G.readyT || 0) + dt; if (G.readyT >= 15) { G.readyT = 0; volleyReady(true); } }
+    if (G.state === "clearing") { G.clearT -= dt; clearFxTick(); if (G.clearT <= 0) finishClear(); return; }
+    if (G.state === "settling") { G.settle.t += dt; if (G.settle.t >= G.settle.dur) finishSettle(); return; }
+    if (!G.piece) return;
+    G.time += dt;
+    const rate = G.softKey ? SOFT_RATE : SPEEDS[G.level - 1];
+    if (!grounded()) {
+      G.lockT = 0;
+      G.fall += dt * rate;
+      while (G.fall >= 1) {
+        G.fall -= 1;
+        if (collides(G.piece.m, G.piece.x, G.piece.y - 1)) { G.fall = 0; break; }
+        G.piece.y--;
+      }
+    } else {
+      G.fall = 0;
+      G.lockT += dt;
+      if (G.resets >= MAX_RESETS || G.lockT >= LOCK_DELAY) lock();
+    }
+  }
+
+  // ---------- drawing ----------
+  function rr(c, x, y, w, h, r) {
+    c.beginPath();
+    c.moveTo(x + r, y); c.lineTo(x + w - r, y); c.quadraticCurveTo(x + w, y, x + w, y + r);
+    c.lineTo(x + w, y + h - r); c.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    c.lineTo(x + r, y + h); c.quadraticCurveTo(x, y + h, x, y + h - r);
+    c.lineTo(x, y + r); c.quadraticCurveTo(x, y, x + r, y);
+    c.closePath();
+  }
+  // Draw one piece cell. nb = which sides join another cell of the same single object.
+  function drawPieceCell(c, px, py, s, m, single, nb) {
+    const col = MAT[m];
+    if (!single) {
+      const g = Math.max(1, s * 0.06);
+      c.fillStyle = col.fill;
+      rr(c, px + g, py + g, s - 2 * g, s - 2 * g, Math.max(2, s * 0.14));
+      c.fill();
+      c.strokeStyle = col.edge; c.lineWidth = Math.max(1, s * 0.05); c.stroke();
+      drawGlyph(c, px, py, s, m);
+      return;
+    }
+    const g = Math.max(1, s * 0.06);
+    const x0 = px + (nb.l ? 0 : g), x1 = px + s - (nb.r ? 0 : g);
+    const y0 = py + (nb.u ? 0 : g), y1 = py + s - (nb.d ? 0 : g);
+    c.fillStyle = col.fill;
+    c.fillRect(x0, y0, x1 - x0, y1 - y0);
+    c.strokeStyle = col.edge; c.lineWidth = Math.max(1.2, s * 0.07);
+    c.beginPath();
+    if (!nb.l) { c.moveTo(x0, y0); c.lineTo(x0, y1); }
+    if (!nb.r) { c.moveTo(x1, y0); c.lineTo(x1, y1); }
+    if (!nb.u) { c.moveTo(x0, y0); c.lineTo(x1, y0); }
+    if (!nb.d) { c.moveTo(x0, y1); c.lineTo(x1, y1); }
+    c.stroke();
+    // Continuous mark through the object: blade, barrel, or hat band.
+    const cx = px + s / 2, cy = py + s / 2;
+    c.strokeStyle = col.mark; c.lineCap = "round";
+    if (m === "C") {
+      if (!nb.d) { c.lineWidth = Math.max(1.5, s * 0.1); c.beginPath(); c.moveTo(nb.l ? px : px + s * 0.22, py + s * 0.72); c.lineTo(nb.r ? px + s : px + s * 0.78, py + s * 0.72); c.stroke(); }
+      if (!nb.u && !nb.l) { c.lineWidth = Math.max(1.2, s * 0.07); c.beginPath(); c.moveTo(px + s * 0.3, py + s * 0.75); c.quadraticCurveTo(px + s * 0.2, py + s * 0.2, px + s * 0.9, py + s * 0.35); c.stroke(); }
+      return;
+    }
+    c.lineWidth = Math.max(1.5, s * (m === "S" ? 0.11 : 0.16));
+    const any = nb.l || nb.r || nb.u || nb.d;
+    c.beginPath();
+    if (!any) { c.moveTo(px + s * 0.28, py + s * 0.72); c.lineTo(px + s * 0.72, py + s * 0.28); }
+    if (nb.l) { c.moveTo(cx, cy); c.lineTo(px, cy); }
+    if (nb.r) { c.moveTo(cx, cy); c.lineTo(px + s, cy); }
+    if (nb.u) { c.moveTo(cx, cy); c.lineTo(cx, py); }
+    if (nb.d) { c.moveTo(cx, cy); c.lineTo(cx, py + s); }
+    c.stroke();
+  }
+  function drawGlyph(c, px, py, s, m) {
+    const col = MAT[m];
+    c.strokeStyle = col.mark; c.fillStyle = col.mark; c.lineCap = "round";
+    if (m === "S") {
+      c.lineWidth = Math.max(1.2, s * 0.08);
+      c.beginPath(); c.moveTo(px + s * 0.3, py + s * 0.7); c.lineTo(px + s * 0.72, py + s * 0.28); c.stroke();
+      c.beginPath(); c.moveTo(px + s * 0.26, py + s * 0.55); c.lineTo(px + s * 0.45, py + s * 0.74); c.stroke();
+    } else if (m === "F") {
+      c.lineWidth = Math.max(1.5, s * 0.12);
+      c.beginPath(); c.moveTo(px + s * 0.24, py + s * 0.5); c.lineTo(px + s * 0.76, py + s * 0.5); c.stroke();
+      c.beginPath(); c.moveTo(px + s * 0.26, py + s * 0.5); c.lineTo(px + s * 0.26, py + s * 0.66); c.stroke();
+    } else {
+      c.beginPath(); c.arc(px + s * 0.5, py + s * 0.62, s * 0.2, Math.PI, 0); c.fill();
+      c.lineWidth = Math.max(1.2, s * 0.07);
+      c.beginPath(); c.moveTo(px + s * 0.22, py + s * 0.64); c.lineTo(px + s * 0.78, py + s * 0.64); c.stroke();
+    }
+  }
+  // ---------- art styles ----------
+  // Each style: board surface, a tile behind each cell, and paint for the parts of each illustration.
+  let artStyle = "engraved";
+  const ART = {
+    engraved: {
+      board: { bg: "#eadcbf", grid: "rgba(90, 60, 30, 0.10)", lane: "rgba(90, 60, 30, 0.28)" },
+      tile: { S: "#d6dfe5", F: "#e6cfa4", C: "#ecc2c3" }, tileEdge: "#2a1d15",
+      fill: { metal: "#f3f5f6", iron: "#6b655f", gold: "#d2ab58", leather: "#6e4127", wood: "#b9844d", cloth: "#a3283c", clothDark: "#741a2a", feather: "#fbf7ee", cord: "#3a2a1e" },
+      stroke: "#2a1d15", lw: 0.045
+    },
+    enamel: {
+      board: { bg: "#1b2130", grid: "rgba(224, 185, 85, 0.08)", lane: "rgba(224, 185, 85, 0.30)" },
+      tile: { S: "#3e6f9f", F: "#9b5626", C: "#9f203d" }, tileEdge: "#e0b955",
+      fill: { metal: "#f6efdc", iron: "#e2d6b8", gold: "#e8c463", leather: "#e2d6b8", wood: "#f6efdc", cloth: "#f6efdc", clothDark: "#e2d6b8", feather: "#ffffff", cord: "#e2d6b8" },
+      stroke: "rgba(20, 12, 8, 0.4)", lw: 0.03
+    },
+    painted: {
+      board: { bg: "#2b3a2c", grid: "rgba(0, 0, 0, 0.22)", lane: "rgba(230, 210, 150, 0.18)", grain: true },
+      tile: { S: ["#9cafc0", "#56687a"], F: ["#98683d", "#583820"], C: ["#983249", "#5a1426"] }, tileEdge: "rgba(15, 8, 4, 0.6)",
+      grad: {
+        metal: ["#ffffff", "#c3ccd4", "#76828d"], iron: ["#8e949a", "#4f555b", "#2a2e33"], gold: ["#fbe39a", "#d0a548", "#8a6620"],
+        leather: ["#9a6542", "#6a3f24", "#3f2414"], wood: ["#d29a60", "#9a6230", "#5f3a18"], cloth: ["#d24a64", "#9c2440", "#5e1024"],
+        clothDark: ["#a83550", "#741a30", "#460a1a"], feather: ["#ffffff", "#f1eadc", "#c8bba4"], cord: ["#5a4636", "#3a2a1e", "#22180f"]
+      },
+      stroke: "rgba(25, 12, 4, 0.55)", lw: 0.03
+    }
+  };
+  function painter(c, st, s) {
+    return (role, y0, y1) => {
+      if (st.grad) {
+        const g = c.createLinearGradient(0, y0, 0, y1), t = st.grad[role];
+        g.addColorStop(0, t[0]); g.addColorStop(0.45, t[1]); g.addColorStop(1, t[2]);
+        c.fillStyle = g;
+      } else c.fillStyle = st.fill[role];
+      c.fill();
+      c.strokeStyle = st.stroke; c.lineWidth = Math.max(0.6, s * st.lw); c.lineJoin = "round"; c.stroke();
+    };
+  }
+  // Miniatures, drawn in a cell from 0 to s.
+  function rapierMini(c, s, P) {
+    c.beginPath(); c.moveTo(0.40 * s, 0.455 * s); c.lineTo(0.94 * s, 0.5 * s); c.lineTo(0.40 * s, 0.545 * s); c.closePath(); P("metal", 0.45 * s, 0.55 * s);
+    c.beginPath(); c.rect(0.17 * s, 0.455 * s, 0.18 * s, 0.09 * s); P("leather", 0.45 * s, 0.55 * s);
+    c.beginPath(); c.ellipse(0.37 * s, 0.5 * s, 0.05 * s, 0.2 * s, 0, 0, Math.PI * 2); P("gold", 0.3 * s, 0.7 * s);
+    c.beginPath(); c.arc(0.12 * s, 0.5 * s, 0.055 * s, 0, Math.PI * 2); P("gold", 0.44 * s, 0.56 * s);
+  }
+  function musketMini(c, s, P) {
+    c.beginPath(); c.moveTo(0.05 * s, 0.40 * s); c.lineTo(0.38 * s, 0.45 * s); c.lineTo(0.64 * s, 0.49 * s); c.lineTo(0.64 * s, 0.56 * s); c.lineTo(0.30 * s, 0.58 * s); c.lineTo(0.05 * s, 0.68 * s); c.closePath(); P("wood", 0.4 * s, 0.68 * s);
+    c.beginPath(); c.rect(0.34 * s, 0.43 * s, 0.6 * s, 0.065 * s); P("iron", 0.43 * s, 0.5 * s);
+    c.beginPath(); c.rect(0.33 * s, 0.445 * s, 0.09 * s, 0.09 * s); P("metal", 0.44 * s, 0.54 * s);
+    c.beginPath(); c.rect(0.88 * s, 0.42 * s, 0.035 * s, 0.085 * s); P("gold", 0.42 * s, 0.51 * s);
+  }
+  function kegMini(c, s, P) {
+    c.beginPath(); c.moveTo(0.49 * s, 0.25 * s); c.lineTo(0.56 * s, 0.1 * s); c.lineTo(0.6 * s, 0.12 * s); c.lineTo(0.53 * s, 0.26 * s); c.closePath(); P("cord", 0.1 * s, 0.26 * s);
+    c.beginPath(); c.moveTo(0.30 * s, 0.24 * s); c.quadraticCurveTo(0.2 * s, 0.53 * s, 0.30 * s, 0.84 * s); c.lineTo(0.70 * s, 0.84 * s); c.quadraticCurveTo(0.8 * s, 0.53 * s, 0.70 * s, 0.24 * s); c.closePath(); P("wood", 0.24 * s, 0.84 * s);
+    c.beginPath(); c.rect(0.26 * s, 0.35 * s, 0.48 * s, 0.05 * s); P("iron", 0.35 * s, 0.4 * s);
+    c.beginPath(); c.rect(0.26 * s, 0.67 * s, 0.48 * s, 0.05 * s); P("iron", 0.67 * s, 0.72 * s);
+    c.beginPath(); c.arc(0.6 * s, 0.1 * s, 0.035 * s, 0, Math.PI * 2); P("gold", 0.06 * s, 0.14 * s);
+  }
+  // Cavalier hat in a z-by-z box: swept brim, plume, band. Used for minis (z = s) and the 2x2 Cavalier Hat (z = 2s).
+  function hatShape(c, z, P) {
+    const q = (v) => v * z;
+    c.beginPath(); c.moveTo(q(0.40), q(0.48)); c.bezierCurveTo(q(0.12), q(0.44), q(0.06), q(0.16), q(0.30), q(0.12)); c.bezierCurveTo(q(0.52), q(0.08), q(0.76), q(0.2), q(0.88), q(0.40)); c.bezierCurveTo(q(0.70), q(0.30), q(0.54), q(0.32), q(0.44), q(0.48)); c.closePath(); P("feather", q(0.1), q(0.48));
+    c.beginPath(); c.moveTo(q(0.30), q(0.68)); c.bezierCurveTo(q(0.30), q(0.34), q(0.70), q(0.34), q(0.72), q(0.68)); c.closePath(); P("cloth", q(0.36), q(0.68));
+    c.beginPath(); c.rect(q(0.30), q(0.60), q(0.42), q(0.07)); P("gold", q(0.6), q(0.67));
+    c.beginPath(); c.ellipse(q(0.5), q(0.72), q(0.46), q(0.12), -0.14, 0, Math.PI * 2); P("clothDark", q(0.6), q(0.84));
+  }
+  // Single objects, drawn in their own box (dagger 1x1, flintlock 3x1, True Blade 4x1).
+  function daggerObj(c, s, P) {
+    c.beginPath(); c.moveTo(0.44 * s, 0.43 * s); c.lineTo(0.92 * s, 0.5 * s); c.lineTo(0.44 * s, 0.57 * s); c.closePath(); P("metal", 0.43 * s, 0.57 * s);
+    c.beginPath(); c.rect(0.2 * s, 0.45 * s, 0.18 * s, 0.1 * s); P("leather", 0.45 * s, 0.55 * s);
+    c.beginPath(); c.rect(0.37 * s, 0.16 * s, 0.06 * s, 0.68 * s); P("gold", 0.16 * s, 0.84 * s);
+    c.beginPath(); c.arc(0.15 * s, 0.5 * s, 0.06 * s, 0, Math.PI * 2); P("gold", 0.44 * s, 0.56 * s);
+  }
+  function flintObj(c, s, P) {
+    c.beginPath(); c.moveTo(0.05 * s, 0.28 * s); c.lineTo(1.0 * s, 0.42 * s); c.lineTo(2.2 * s, 0.47 * s); c.lineTo(2.2 * s, 0.6 * s); c.lineTo(1.05 * s, 0.6 * s); c.lineTo(0.66 * s, 0.76 * s); c.lineTo(0.05 * s, 0.82 * s); c.closePath(); P("wood", 0.28 * s, 0.82 * s);
+    c.beginPath(); c.rect(0.98 * s, 0.39 * s, 1.97 * s, 0.09 * s); P("iron", 0.39 * s, 0.48 * s);
+    c.beginPath(); c.rect(0.98 * s, 0.44 * s, 0.36 * s, 0.13 * s); P("metal", 0.44 * s, 0.57 * s);
+    c.beginPath(); c.moveTo(1.04 * s, 0.45 * s); c.lineTo(0.98 * s, 0.28 * s); c.lineTo(1.1 * s, 0.26 * s); c.lineTo(1.14 * s, 0.45 * s); c.closePath(); P("iron", 0.26 * s, 0.45 * s);
+    c.beginPath(); c.moveTo(1.0 * s, 0.6 * s); c.quadraticCurveTo(1.12 * s, 0.82 * s, 1.26 * s, 0.6 * s); c.lineTo(1.21 * s, 0.6 * s); c.quadraticCurveTo(1.12 * s, 0.74 * s, 1.05 * s, 0.6 * s); c.closePath(); P("gold", 0.6 * s, 0.8 * s);
+    c.beginPath(); c.rect(0.04 * s, 0.28 * s, 0.05 * s, 0.54 * s); P("gold", 0.28 * s, 0.82 * s);
+    c.beginPath(); c.rect(2.86 * s, 0.37 * s, 0.05 * s, 0.13 * s); P("gold", 0.37 * s, 0.5 * s);
+    c.beginPath(); c.rect(2.1 * s, 0.46 * s, 0.05 * s, 0.15 * s); P("gold", 0.46 * s, 0.61 * s);
+  }
+  function bladeObj(c, s, P) {
+    c.beginPath(); c.moveTo(0.94 * s, 0.44 * s); c.lineTo(3.88 * s, 0.485 * s); c.lineTo(3.97 * s, 0.5 * s); c.lineTo(3.88 * s, 0.515 * s); c.lineTo(0.94 * s, 0.56 * s); c.closePath(); P("metal", 0.44 * s, 0.56 * s);
+    c.beginPath(); c.rect(1.0 * s, 0.49 * s, 2.2 * s, 0.02 * s); P("iron", 0.49 * s, 0.51 * s);
+    c.beginPath(); c.rect(0.34 * s, 0.42 * s, 0.46 * s, 0.16 * s); P("leather", 0.42 * s, 0.58 * s);
+    c.beginPath(); c.moveTo(0.82 * s, 0.2 * s); c.quadraticCurveTo(0.45 * s, 0.12 * s, 0.30 * s, 0.42 * s); c.lineTo(0.36 * s, 0.42 * s); c.quadraticCurveTo(0.5 * s, 0.2 * s, 0.82 * s, 0.26 * s); c.closePath(); P("gold", 0.12 * s, 0.42 * s);
+    c.beginPath(); c.rect(0.80 * s, 0.08 * s, 0.05 * s, 0.84 * s); P("gold", 0.08 * s, 0.92 * s);
+    c.beginPath(); c.ellipse(0.88 * s, 0.5 * s, 0.09 * s, 0.32 * s, 0, 0, Math.PI * 2); P("gold", 0.18 * s, 0.82 * s);
+    c.beginPath(); c.arc(0.24 * s, 0.5 * s, 0.11 * s, 0, Math.PI * 2); P("gold", 0.39 * s, 0.61 * s);
+  }
+  // pid: [draw function, canonical width, canonical height, turns with the piece]
+  const OBJ = { 1: [daggerObj, 1, 1, false], 3: [flintObj, 3, 1, true], 5: [bladeObj, 4, 1, true], 6: [null, 2, 2, false] };
+
+  function drawTile(c, px, py, s, m, single, nb, st) {
+    const g = Math.max(1, s * 0.05), r = Math.max(2, s * 0.16);
+    const x0 = px + (nb.l ? 0 : g), x1 = px + s - (nb.r ? 0 : g), y0 = py + (nb.u ? 0 : g), y1 = py + s - (nb.d ? 0 : g);
+    const t = st.tile[m];
+    if (Array.isArray(t)) { const gr = c.createLinearGradient(0, py, 0, py + s); gr.addColorStop(0, t[0]); gr.addColorStop(1, t[1]); c.fillStyle = gr; }
+    else c.fillStyle = t;
+    c.strokeStyle = st.tileEdge;
+    if (!single) {
+      rr(c, x0, y0, x1 - x0, y1 - y0, r); c.fill();
+      c.lineWidth = Math.max(1, s * 0.05); c.stroke();
+      return;
+    }
+    c.fillRect(x0, y0, x1 - x0, y1 - y0);
+    c.lineWidth = Math.max(1, s * 0.06);
+    c.beginPath();
+    if (!nb.l) { c.moveTo(x0, y0); c.lineTo(x0, y1); }
+    if (!nb.r) { c.moveTo(x1, y0); c.lineTo(x1, y1); }
+    if (!nb.u) { c.moveTo(x0, y0); c.lineTo(x1, y0); }
+    if (!nb.d) { c.moveTo(x0, y1); c.lineTo(x1, y1); }
+    c.stroke();
+  }
+
+  // Draw one piece cell in the current art style. A single object is drawn whole and clipped to the cell,
+  // so a partly cleared object shows exactly the slice that remains.
+  function drawCell(c, px, py, s, cell, nb) {
+    if (artStyle === "plain") return drawPieceCell(c, px, py, s, cell.m, cell.single, nb);
+    const st = ART[artStyle];
+    drawTile(c, px, py, s, cell.m, cell.single, nb, st);
+    const P = painter(c, st, s);
+    c.save();
+    c.beginPath(); c.rect(px, py, s, s); c.clip();
+    if (cell.single && OBJ[cell.pid]) {
+      const [fn, cw, ch, turns] = OBJ[cell.pid];
+      const rot = turns ? (cell.rot || 0) : 0;
+      const bw = cell.bw || cw, bh = cell.bh || ch;
+      const ox = px - (cell.cx || 0) * s, oy = py - (cell.cy || 0) * s;
+      c.translate(ox + (bw * s) / 2, oy + (bh * s) / 2);
+      c.rotate((rot * Math.PI) / 2);
+      if (cell.pid === 1) c.rotate(-Math.PI / 4);
+      c.translate((-cw * s) / 2, (-ch * s) / 2);
+      if (cell.pid === 6) hatShape(c, 2 * s, P); else fn(c, s, P);
+    } else {
+      const kind = cell.m === "C" ? "hat" : cell.m === "S" ? "rapier" : cell.pid === 2 ? "keg" : "musket";
+      c.translate(px + s / 2, py + s / 2);
+      if (kind === "rapier") { c.rotate(-Math.PI / 4 + ((cell.rot || 0) * Math.PI) / 2); c.scale(1.18, 1.18); }
+      else if (kind === "musket") c.rotate(((cell.rot || 0) * Math.PI) / 2);
+      c.translate(-s / 2, -s / 2);
+      if (kind === "rapier") rapierMini(c, s, P);
+      else if (kind === "musket") musketMini(c, s, P);
+      else if (kind === "keg") kegMini(c, s, P);
+      else hatShape(c, s, P);
+    }
+    c.restore();
+  }
+
+  // Cached drawing: each distinct cell image is drawn once and reused, so every frame stays cheap.
+  let spriteCache = new Map(), bgCache = null;
+  function clearCaches() { spriteCache = new Map(); bgCache = null; }
+  function drawCellCached(c, px, py, s, cell, nb) {
+    const key = artStyle + "|" + cell.pid + "|" + cell.m + "|" + (cell.single ? 1 : 0) + "|" + (cell.rot || 0) + "|" +
+      (cell.cx || 0) + "," + (cell.cy || 0) + "," + (cell.bw || 0) + "," + (cell.bh || 0) + "|" +
+      (nb.l ? 1 : 0) + (nb.r ? 1 : 0) + (nb.u ? 1 : 0) + (nb.d ? 1 : 0) + "|" + s;
+    let img = spriteCache.get(key);
+    if (!img) {
+      img = document.createElement("canvas");
+      img.width = Math.ceil(s * dpr); img.height = Math.ceil(s * dpr);
+      const oc = img.getContext("2d");
+      oc.setTransform(dpr, 0, 0, dpr, 0, 0);
+      drawCell(oc, 0, 0, s, cell, nb);
+      spriteCache.set(key, img);
+    }
+    c.drawImage(img, px, py, s, s);
+  }
+
+  function setStyle(k) {
+    if (k !== "plain" && !ART[k]) k = "engraved";
+    artStyle = k;
+    clearCaches();
+    store.set("rr-style", k);
+    document.querySelectorAll("[data-style]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.style === k)));
+    if (G) renderArmory();
+  }
+  document.querySelectorAll("[data-style]").forEach((b) => b.addEventListener("click", () => setStyle(b.dataset.style)));
+
+  function drawObstacle(c, px, py, s, cell, nb) {
+    if (cell.t === "wall") {
+      c.fillStyle = "#3a2215"; c.fillRect(px, py, s, s);
+      c.strokeStyle = "#6e4a2c"; c.lineWidth = Math.max(1, s * 0.08);
+      c.beginPath(); c.moveTo(px, py + s * 0.3); c.lineTo(px + s, py + s * 0.3); c.moveTo(px, py + s * 0.7); c.lineTo(px + s, py + s * 0.7); c.stroke();
+      c.strokeStyle = "rgba(0,0,0,0.35)"; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(px + s * 0.5, py); c.lineTo(px + s * 0.5, py + s); c.stroke();
+      return;
+    }
+    const g = Math.max(1, s * 0.05);
+    const x0 = px + (nb.l ? 0 : g), x1 = px + s - (nb.r ? 0 : g), y0 = py + (nb.u ? 0 : g), y1 = py + s - (nb.d ? 0 : g);
+    c.fillStyle = "#b3a184"; c.fillRect(x0, y0, x1 - x0, y1 - y0);
+    c.save();
+    c.beginPath(); c.rect(x0, y0, x1 - x0, y1 - y0); c.clip();
+    c.strokeStyle = "rgba(70, 55, 35, 0.35)"; c.lineWidth = 1;
+    c.beginPath();
+    for (let k = -s; k < s; k += Math.max(4, s * 0.25)) { c.moveTo(px + k, py + s); c.lineTo(px + k + s, py); }
+    c.stroke();
+    c.restore();
+    c.strokeStyle = "#5c4b34";
+    c.lineWidth = Math.max(1.2, s * 0.08);
+    c.beginPath();
+    if (!nb.l) { c.moveTo(x0, y0); c.lineTo(x0, y1); }
+    if (!nb.r) { c.moveTo(x1, y0); c.lineTo(x1, y1); }
+    if (!nb.u) { c.moveTo(x0, y0); c.lineTo(x1, y0); }
+    if (!nb.d) { c.moveTo(x0, y1); c.lineTo(x1, y1); }
+    c.stroke();
+  }
+  const same = (a, b) => a && b && ((a.t === "piece" && b.t === "piece" && a.single && a.inst === b.inst) || (a.t === "table" && b.t === "table" && a.tid === b.tid));
+  const cellAt = (x, y) => (x < 0 || x >= COLS || y < 0 || y >= TOT ? null : G.grid[y][x]);
+
+  function render() {
+    const W = COLS * cs, H = ROWS * cs;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const bd = artStyle === "plain" ? ART.engraved.board : ART[artStyle].board;
+    const bgKey = artStyle + "|" + cs + "|" + dpr;
+    if (!bgCache || bgCache.key !== bgKey) {
+      const img = document.createElement("canvas");
+      img.width = Math.ceil(W * dpr); img.height = Math.ceil(H * dpr);
+      const b = img.getContext("2d");
+      b.setTransform(dpr, 0, 0, dpr, 0, 0);
+      b.fillStyle = bd.bg; b.fillRect(0, 0, W, H);
+      if (bd.grain) {
+        b.strokeStyle = "rgba(200, 230, 190, 0.04)"; b.lineWidth = 1;
+        b.beginPath();
+        for (let y = 3; y < H; y += 5) { const o = Math.sin(y * 0.37) * 3; b.moveTo(0, y + o); b.bezierCurveTo(W * 0.3, y - o, W * 0.6, y + o * 1.5, W, y); }
+        b.stroke();
+      }
+      b.strokeStyle = bd.grid; b.lineWidth = 1;
+      b.beginPath();
+      for (let x = 1; x < COLS; x++) { b.moveTo(x * cs + 0.5, 0); b.lineTo(x * cs + 0.5, H); }
+      for (let y = 1; y < ROWS; y++) { b.moveTo(0, y * cs + 0.5); b.lineTo(W, y * cs + 0.5); }
+      b.stroke();
+      b.strokeStyle = bd.lane; b.setLineDash([3, 4]);
+      b.beginPath(); b.moveTo(5 * cs + 0.5, 0); b.lineTo(5 * cs + 0.5, H); b.moveTo(10 * cs + 0.5, 0); b.lineTo(10 * cs + 0.5, H); b.stroke();
+      bgCache = { key: bgKey, img };
+    }
+    ctx.drawImage(bgCache.img, 0, 0, W, H);
+    if (!G) return;
+
+    for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) {
+      const cell = G.grid[y][x];
+      if (!cell) continue;
+      const px = x * cs, py = (ROWS - 1 - y) * cs;
+      const nb = { l: same(cell, cellAt(x - 1, y)), r: same(cell, cellAt(x + 1, y)), u: same(cell, cellAt(x, y + 1)), d: same(cell, cellAt(x, y - 1)) };
+      if (cell.t === "piece") drawCellCached(ctx, px, py, cs, cell, nb);
+      else drawObstacle(ctx, px, py, cs, cell, nb);
+    }
+
+    const p = G.piece;
+    if (p && G.state === "play") {
+      // Lantern Light: glow on the surface of each column the piece covers.
+      const covered = new Map();
+      for (const k of cellsOf(p.m, p.x, p.y)) covered.set(k.gx, Math.min(covered.has(k.gx) ? covered.get(k.gx) : 99, k.gy));
+      for (const [x, lowY] of covered) {
+        let sy = -1;
+        for (let y = Math.min(lowY - 1, TOT - 1); y >= 0; y--) if (G.grid[y][x]) { sy = y; break; }
+        const py = (ROWS - 1 - sy) * cs;
+        if (py < 0) continue;
+        const grd = ctx.createLinearGradient(0, py - cs * 0.9, 0, py + 2);
+        grd.addColorStop(0, "rgba(255, 196, 92, 0)");
+        grd.addColorStop(1, "rgba(255, 176, 60, 0.55)");
+        ctx.fillStyle = grd;
+        ctx.fillRect(x * cs + 1, py - cs * 0.9, cs - 2, cs * 0.9);
+      }
+      const single = PIECES[p.id].single;
+      for (const k of cellsOf(p.m, p.x, p.y)) {
+        if (k.gy >= ROWS) continue;
+        const has = (r, c) => r >= 0 && r < p.h && c >= 0 && c < p.w && !!p.m[r][c];
+        const nb = single ? { l: has(k.r, k.c - 1), r: has(k.r, k.c + 1), u: has(k.r - 1, k.c), d: has(k.r + 1, k.c) } : {};
+        drawCellCached(ctx, k.gx * cs, (ROWS - 1 - k.gy) * cs, cs, { m: k.m, pid: p.id, single, rot: p.rot, cx: k.c, cy: k.r, bw: p.w, bh: p.h }, nb);
+      }
+      if (G.refuse > 0) { ctx.fillStyle = "rgba(120, 20, 30, 0.12)"; ctx.fillRect(0, 0, W, H); }
+    }
+
+    if (G.state === "settling" && G.settle) {
+      const k = Math.min(1, G.settle.t / G.settle.dur), e = k * k;
+      for (const mv of G.settle.moves) {
+        const y = mv.y0 + (mv.y1 - mv.y0) * e;
+        if (y >= ROWS) continue;
+        drawCellCached(ctx, mv.x * cs, (ROWS - 1 - y) * cs, cs, { m: mv.m, pid: G.settle.p.id, single: false, rot: G.settle.p.rot }, {});
+      }
+    }
+    if (G.state === "clearing" && G.clearRows) drawClearFx(W, H, bd);
+    if (G.fx) {
+      ctx.fillStyle = "rgba(255, 170, 60, " + (G.fx.t * 1.2) + ")";
+      for (const c of G.fx.cols) ctx.fillRect(c * cs, 0, cs, H);
+    }
+    drawFx(W, H);
+    // Danger line: top 3 rows tint when the stack is high.
+    let top = -1;
+    for (let y = TOT - 1; y >= 0 && top < 0; y--) for (let x = 0; x < COLS; x++) { const c = G.grid[y][x]; if (c && c.t !== "wall") { top = y; break; } }
+    G.top = top;
+    if (top >= 16 && G.state === "play") hint("danger");
+    if (top >= 18) { ctx.fillStyle = "rgba(155, 42, 71, 0.10)"; ctx.fillRect(0, 0, W, cs * 4); }
+    updateHUD();
+  }
+
+  let hudCache = {};
+  function setText(id, v) { if (hudCache[id] !== v) { hudCache[id] = v; $(id).textContent = v; } }
+  function updateHUD() {
+    setText("honor", fmt(G.score));
+    setText("level", "Lv " + G.level);
+    setText("dial", DIAL[G.level - 1]);
+    const gp = goalProgress();
+    if (gp) { setText("goalText", looseOn() ? "Scattered " + Math.ceil(G.looseT) + "s · " + gp.text.replace("Tables broken · ", "Tables ").replace("Reach ", "") : gp.text); $("goalBar").style.width = (gp.frac * 100).toFixed(1) + "%"; }
+    else {
+      setText("goalText", looseOn() ? "The Guards Scatter · " + Math.ceil(G.looseT) + "s left" : G.rows + " rows · bonus at " + ((Math.floor(G.rows / 30) + 1) * 30));
+      $("goalBar").style.width = (looseOn() ? (G.looseT / 30) * 100 : ((G.rows % 30) / 30) * 100) + "%";
+    }
+    setText("volleyNum", G.gauge >= 100 ? "Ready" : G.gauge + " / 100");
+    $("volleyFill").style.height = G.gauge + "%";
+    $("volley").classList.toggle("ready", G.gauge >= 100);
+    if (G.gauge >= 100 && G.state !== "over") hint("volley");
+    $("boardWrap").classList.toggle("loose", looseOn());
+  }
+
+  function renderArmory() {
+    for (let i = 0; i < 2; i++) {
+      const el = $("slot" + i), cv = el.querySelector("canvas"), c = cv.getContext("2d");
+      const id = G.armory[i], m = matOf(id), h = m.length, w = m[0].length;
+      const box = el.getBoundingClientRect();
+      const bw = Math.max(40, box.width - 16), bh = Math.max(30, box.height - 26);
+      const s = Math.floor(Math.min(bw / w, bh / h, 20));
+      cv.style.width = w * s + "px"; cv.style.height = h * s + "px";
+      cv.width = Math.round(w * s * dpr); cv.height = Math.round(h * s * dpr);
+      c.setTransform(dpr, 0, 0, dpr, 0, 0);
+      c.clearRect(0, 0, w * s, h * s);
+      const single = PIECES[id].single;
+      const has = (r, cc) => r >= 0 && r < h && cc >= 0 && cc < w && !!m[r][cc];
+      for (let r = 0; r < h; r++) for (let cc = 0; cc < w; cc++) {
+        if (!m[r][cc]) continue;
+        const nb = single ? { l: has(r, cc - 1), r: has(r, cc + 1), u: has(r - 1, cc), d: has(r + 1, cc) } : {};
+        drawCell(c, cc * s, r * s, s, { m: m[r][cc], pid: id, single, rot: 0, cx: cc, cy: r, bw: w, bh: h }, nb);
+      }
+      el.querySelector(".name").textContent = PIECES[id].name;
+      el.classList.toggle("chosen", G.choice === i);
+      el.setAttribute("aria-label", "Armory slot " + (i + 1) + ": " + PIECES[id].name + (G.choice === i ? ", deploys next" : ""));
+    }
+  }
+  function choose(i) { if (!G || G.state === "over") return; G.choice = i; renderArmory(); }
+
+  let popTimer = 0;
+  function popup(big, small) {
+    const el = $("popup");
+    $("popBig").textContent = big; $("popSmall").textContent = small;
+    el.classList.remove("show"); void el.offsetWidth; el.classList.add("show");
+    clearTimeout(popTimer); popTimer = setTimeout(() => el.classList.remove("show"), 1400);
+  }
+
+  // ---------- layout ----------
+  function layout() {
+    dpr = Math.min(3, window.devicePixelRatio || 1);
+    const stage = $("stage").getBoundingClientRect();
+    const strip = 42, frame = 10;
+    cs = Math.max(10, Math.floor(Math.min((stage.width - frame) / COLS, (stage.height - strip - frame) / ROWS)));
+    canvas.style.width = COLS * cs + "px"; canvas.style.height = ROWS * cs + "px";
+    canvas.width = COLS * cs * dpr; canvas.height = ROWS * cs * dpr;
+    clearCaches();
+    if (G) renderArmory();
+  }
+  window.addEventListener("resize", layout);
+
+  // ---------- input ----------
+  const zone = $("zone");
+  let gest = null;
+  zone.addEventListener("pointerdown", (e) => {
+    if (!canAct()) return;
+    zone.setPointerCapture(e.pointerId);
+    gest = { id: e.pointerId, x0: e.clientX, y0: e.clientY, t0: performance.now(), axis: null, cols: 0, rows: 0, samples: [{ y: e.clientY, t: performance.now() }] };
+  });
+  zone.addEventListener("pointermove", (e) => {
+    if (!gest || e.pointerId !== gest.id) return;
+    const dx = e.clientX - gest.x0, dy = e.clientY - gest.y0;
+    gest.samples.push({ y: e.clientY, t: performance.now() });
+    if (gest.samples.length > 8) gest.samples.shift();
+    if (!gest.axis && Math.hypot(dx, dy) > 12) gest.axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+    if (gest.axis === "x") {
+      const target = Math.trunc(dx / cs);
+      while (gest.cols < target) { move(1, 0); gest.cols++; }
+      while (gest.cols > target) { move(-1, 0); gest.cols--; }
+    } else if (gest.axis === "y" && dy > 0) {
+      const target = Math.trunc(dy / cs);
+      while (gest.rows < target) { move(0, -1); gest.rows++; }
+    }
+  });
+  function endGesture(e) {
+    if (!gest || e.pointerId !== gest.id) return;
+    const g = gest; gest = null;
+    const now = performance.now(), dx = e.clientX - g.x0, dy = e.clientY - g.y0;
+    if (!g.axis && Math.hypot(dx, dy) < 12 && now - g.t0 < 350) {
+      const r = zone.getBoundingClientRect();
+      rotate(e.clientX >= r.left + r.width / 2 ? 1 : -1);
+      return;
+    }
+    if (g.axis === "y" && dy > 24) {
+      let ref = g.samples[0];
+      for (const s of g.samples) if (now - s.t <= 90) { ref = s; break; }
+      const v = (e.clientY - ref.y) / Math.max(1, now - ref.t);
+      if (v > 0.7) hardDrop();
+    }
+  }
+  zone.addEventListener("pointerup", endGesture);
+  zone.addEventListener("pointercancel", () => { gest = null; });
+
+  $("slot0").addEventListener("click", () => choose(0));
+  $("slot1").addEventListener("click", () => choose(1));
+  $("volley").addEventListener("click", fireVolley);
+  $("pauseBtn").addEventListener("click", () => setPaused(true));
+  $("resumeBtn").addEventListener("click", () => setPaused(false));
+  $("restartBtn").addEventListener("click", () => newGame(lastMode));
+  $("menuBtn").addEventListener("click", showMenu);
+  $("againBtn").addEventListener("click", () => newGame(lastMode));
+  $("endMenuBtn").addEventListener("click", showMenu);
+  document.querySelectorAll(".modebtn").forEach((b) => b.addEventListener("click", () => newGame(b.dataset.mode)));
+
+  window.addEventListener("keydown", (e) => {
+    if (!G || G.state === "over") return;
+    const k = e.key;
+    if (k === "p" || k === "P" || k === "Escape") { setPaused(!G.paused); e.preventDefault(); return; }
+    if (G.paused) return;
+    if (k === "ArrowLeft") move(-1, 0);
+    else if (k === "ArrowRight") move(1, 0);
+    else if (k === "ArrowDown") G.softKey = true;
+    else if (k === "ArrowUp" || k === "x" || k === "X") rotate(1);
+    else if (k === "z" || k === "Z") rotate(-1);
+    else if (k === " ") hardDrop();
+    else if (k === "1") choose(0);
+    else if (k === "2") choose(1);
+    else if (k === "v" || k === "V") fireVolley();
+    else return;
+    e.preventDefault();
+  });
+  window.addEventListener("keyup", (e) => { if (G && e.key === "ArrowDown") G.softKey = false; });
+  document.addEventListener("visibilitychange", () => { if (document.hidden && G && G.state !== "over") setPaused(true); });
+
+  function setPaused(on) {
+    if (!G || G.state === "over") return;
+    G.paused = on;
+    G.softKey = false;
+    $("pause").hidden = !on;
+  }
+  function hideAll() { $("menu").hidden = true; $("pause").hidden = true; $("end").hidden = true; }
+  function showMenu() { if (G) { G.paused = true; G.state = "over"; } hideAll(); $("menu").hidden = false; updateBest(); }
+  function updateBest() {
+    const b = parseInt(store.get("rr-best") || "0", 10) || 0;
+    $("bestLine").textContent = b ? "Speed rises every 10 rows · best " + fmt(b) : "Speed rises every 10 rows · bonus every 30";
+  }
+
+  // A board with a sample game behind the menu, so the first frame shows the game.
+  function sampleBackdrop() {
+    G = {
+      mode: MODES.endless, grid: Array.from({ length: TOT }, () => Array(COLS).fill(null)), walls: new Set(),
+      score: 0, gauge: 40, rows: 0, level: 1, armory: [5, 6], choice: 0, state: "over", paused: true, piece: null, inst: 1
+    };
+    const put = (id, x, y, rot) => {
+      let m = matOf(id);
+      for (let i = 0; i < (rot || 0); i++) m = rotMat(m, 1);
+      const inst = G.inst++;
+      for (const k of cellsOf(m, x, y)) G.grid[k.gy][k.gx] = { t: "piece", m: k.m, pid: id, inst, single: PIECES[id].single, rot: rot || 0, cx: k.c, cy: k.r, bw: m[0].length, bh: m.length };
+    };
+    put(7, 0, 0); put(11, 5, 1); put(6, 8, 1); put(3, 10, 0); put(2, 13, 0); put(9, 13, 3);
+    put(5, 0, 1); put(12, 2, 4); put(4, 6, 3); put(1, 4, 1); put(8, 10, 4);
+  }
+
+  layout();
+  sampleBackdrop();
+  setStyle(store.get("rr-style") || "engraved");
+  initSettings();
+  renderArmory();
+  updateBest();
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body>
+</html>
