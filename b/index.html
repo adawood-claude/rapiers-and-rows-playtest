@@ -191,6 +191,7 @@ body {
 #volley .txt { position: relative; display: flex; flex-direction: column; align-items: center; gap: 1px; line-height: 1.05; }
 #volley .txt b { font-family: var(--display); font-weight: 400; font-size: 15px; }
 #volley .txt span { font-variant-numeric: tabular-nums; font-size: 12px; }
+#volley .cicon { width: 34px; height: 20px; display: block; }
 #volley.ready { border-color: #f3d36f; color: #2a160c; background: var(--brass); animation: pulse 0.8s ease-in-out infinite; }
 #volley.ready .fill { background: transparent; }
 #volley.ready.nudge { animation: nudge 0.6s ease-in-out, pulse 0.8s ease-in-out infinite; }
@@ -340,7 +341,7 @@ body {
   <footer class="rack" aria-label="Armory">
     <button class="slot" id="slot0" aria-label="Armory slot 1"><canvas width="10" height="10"></canvas><span class="name"></span></button>
     <button class="slot" id="slot1" aria-label="Armory slot 2"><canvas width="10" height="10"></canvas><span class="name"></span></button>
-    <button id="volley" aria-label="Fire Volley"><span class="fill" id="volleyFill"></span><span class="txt"><b>Volley</b><span id="volleyNum">0</span></span></button>
+    <button id="volley" aria-label="Fire the cannon"><span class="fill" id="volleyFill"></span><span class="txt"><svg class="cicon" viewBox="0 0 40 24" aria-hidden="true"><path d="M3 8 L27 4 L30 6 L30 13 L27 15 L3 12 Z" fill="currentColor"/><circle cx="11" cy="17" r="5.5" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="36" cy="9.5" r="3" fill="currentColor"/></svg><b>Cannon</b><span id="volleyNum">0</span></span></button>
   </footer>
 </div>
 
@@ -351,9 +352,9 @@ body {
     <div class="modes">
       <button class="modebtn" data-mode="endless"><span class="tag">∞</span>Endless<span class="sub" id="bestLine">Speed rises every 10 rows · bonus every 30</span></button>
       <button class="modebtn" data-mode="loose"><span class="tag">∞</span>Bonus trial<span class="sub">Endless, opening with the 30-second Guards Scatter bonus</span></button>
-      <button class="modebtn" data-mode="s11"><span class="tag">1.1</span>The Courtyard Ambush<span class="sub">Open board · reach 5,000 Honor · speed 1</span></button>
-      <button class="modebtn" data-mode="s12"><span class="tag">1.2</span>Overturned Tables<span class="sub">Break all 8 tables · speed 2</span></button>
-      <button class="modebtn" data-mode="s13"><span class="tag">1.3</span>The Wine Cellar Barricade<span class="sub">9-column lane · reach 8,000 Honor · speed 3</span></button>
+      <button class="modebtn" data-mode="s11"><span class="tag">1.1</span>The Courtyard Ambush<span class="sub">Open board · reach 5,000 Honor · speed 1 · blasts off</span></button>
+      <button class="modebtn" data-mode="s12"><span class="tag">1.2</span>Overturned Tables<span class="sub">Break all 8 tables · speed 2 · blasts on</span></button>
+      <button class="modebtn" data-mode="s13"><span class="tag">1.3</span>The Wine Cellar Barricade<span class="sub">9-column lane · reach 8,000 Honor · speed 3 · blasts off</span></button>
     </div>
     <div class="styles">
       <span class="label">Art style</span>
@@ -364,7 +365,7 @@ body {
     <div class="styles">
       <span class="label">Settings</span>
       <div class="seg seg4" role="group" aria-label="Settings">
-        <button data-toggle="sound">Sound on</button><button data-toggle="music">Music on</button><button data-toggle="hints">Hints on</button><button data-toggle="blasts">Powder Blasts on</button>
+        <button data-toggle="sound">Sound on</button><button data-toggle="music">Music on</button><button data-toggle="hints">Hints on</button><button data-toggle="blasts">Endless blasts on</button>
       </div>
       <button class="linkbtn" data-reset-hints>Show all hints again</button>
     </div>
@@ -373,10 +374,10 @@ body {
       <dt>Rotate</dt><dd>Tap right half for clockwise, left half for counter-clockwise</dd>
       <dt>Drop</dt><dd>Drag down slowly to ease down, flick down to drop</dd>
       <dt>Armory</dt><dd>Tap a slot to choose the next weapon</dd>
-      <dt>Volley</dt><dd>When full, tap it to blast the top 4 cells of 3 columns</dd>
+      <dt>Cannon</dt><dd>When the gauge is full, tap it to fire a cannonball into the top 4 cells of 3 columns</dd>
       <dt>Kegs</dt><dd>Point a musket's muzzle straight at a powder keg to blow a 3×3 hole</dd>
     </dl>
-    <p class="kbd">Keyboard: ← → move · ↓ ease down · ↑ or X rotate · Z rotate back · Space drop · 1/2 Armory · V Volley · P pause</p>
+    <p class="kbd">Keyboard: ← → move · ↓ ease down · ↑ or X rotate · Z rotate back · Space drop · 1/2 Armory · C cannon · P pause</p>
   </div>
 </div>
 
@@ -393,7 +394,7 @@ body {
     <div class="styles">
       <span class="label">Settings</span>
       <div class="seg seg4" role="group" aria-label="Settings">
-        <button data-toggle="sound">Sound on</button><button data-toggle="music">Music on</button><button data-toggle="hints">Hints on</button><button data-toggle="blasts">Powder Blasts on</button>
+        <button data-toggle="sound">Sound on</button><button data-toggle="music">Music on</button><button data-toggle="hints">Hints on</button><button data-toggle="blasts">Endless blasts on</button>
       </div>
     </div>
     <div class="row"><button class="btn" id="restartBtn">Restart</button><button class="btn" id="menuBtn">Menu</button></div>
@@ -443,12 +444,12 @@ body {
   const MODES = {
     endless: { title: "Endless", speed: 1, endless: true },
     loose: { title: "Endless: bonus trial", speed: 1, endless: true, bonusStart: true },
-    s11: { title: "1.1 The Courtyard Ambush", speed: 1, goal: { type: "honor", value: 5000 } },
+    s11: { title: "1.1 The Courtyard Ambush", speed: 1, goal: { type: "honor", value: 5000 }, blasts: false },
     s12: {
-      title: "1.2 Overturned Tables", speed: 2, goal: { type: "tables" },
+      title: "1.2 Overturned Tables", speed: 2, goal: { type: "tables" }, blasts: true,
       tables: [[0, 0], [4, 0], [8, 0], [12, 0], [2, 2], [6, 2], [10, 2], [13, 2]]
     },
-    s13: { title: "1.3 The Wine Cellar Barricade", speed: 3, goal: { type: "honor", value: 8000 }, walls: [0, 1, 2, 12, 13, 14] }
+    s13: { title: "1.3 The Wine Cellar Barricade", speed: 3, goal: { type: "honor", value: 8000 }, walls: [0, 1, 2, 12, 13, 14], blasts: false }
   };
   // Stage 1.2 redesign trial: 4 tables, all in the bottom 2 rows, with gaps 2-3 squares wide.
   if (VARIANT && VARIANT.stage12 === "v2") MODES.s12.tables = [[0, 0], [4, 0], [9, 0], [13, 0]];
@@ -564,13 +565,14 @@ body {
       }
     }),
     interlock: () => play((t) => bell(t, 2800, 1.5, 0.11)),
-    volley: () => play((t) => { for (let i = 0; i < 6; i++) nz(t + i * 0.03 + Math.random() * 0.02, 0.03, { type: "highpass", f0: 3000, gain: 0.14 }); boom(t + 0.22, 0.55); }),
+    // Cannon: the shot leaves the muzzle at 0.15 s with a whistle as it falls; the impact is a separate, bigger boom.
+    cannonFire: () => play((t) => { boom(t + 0.15, 0.4); nz(t + 0.15, 0.25, { type: "highpass", f0: 2500, gain: 0.1 }); tn(t + 0.18, 1500, 0.22, { f1: 420, gain: 0.04 }); }),
+    cannonHit: () => play((t) => { boom(t, 0.75); nz(t + 0.04, 0.6, { f0: 2400, f1: 350, q: 0.5, gain: 0.18 }); }),
     ready: (soft) => play((t) => {
       const g = soft ? 0.5 : 1;
-      nz(t, 0.03, { type: "highpass", f0: 4000, gain: 0.12 * g });
-      nz(t + 0.06, 0.03, { type: "highpass", f0: 3000, gain: 0.1 * g });
-      tn(t + 0.12, midi(81), 0.3, { type: "triangle", gain: 0.08 * g });
-      tn(t + 0.22, midi(86), 0.5, { type: "triangle", gain: 0.08 * g });
+      nz(t, 0.35, { type: "highpass", f0: 3500, gain: 0.07 * g, a: 0.05 }); // a lit fuse hisses
+      tn(t + 0.3, midi(81), 0.3, { type: "triangle", gain: 0.08 * g });
+      tn(t + 0.4, midi(86), 0.5, { type: "triangle", gain: 0.08 * g });
     }),
     blast: () => play((t) => { boom(t, 0.7); nz(t + 0.08, 0.7, { f0: 2600, f1: 380, q: 0.5, gain: 0.16 }); }),
     scatter: () => play((t) => [74, 78, 81, 86].forEach((n, i) => tn(t + i * 0.08, midi(n), 0.3, { type: "triangle", gain: 0.07 }))),
@@ -837,14 +839,22 @@ body {
     move: "Drag sideways to move. Tap the right half to rotate clockwise, the left half to turn back.",
     drop: "Flick down to drop instantly. Drag down slowly to ease a piece down.",
     armory: "Tap an Armory slot to pick which weapon deploys next.",
-    volley: "Volley ready! Tap the brass button to blast the top of 3 columns.",
+    volley: "Cannon loaded! Tap the cannon button to fire a cannonball into the top of 3 columns.",
     keg: "Powder Kegs explode when a musket's muzzle points right at them, clearing the 3×3 around each keg.",
     hat: "Clear a row that holds the Cavalier Hat for a +500 Crowned Row.",
     blade: "Stand two True Blades upright side by side for an Interlocking Guard.",
-    danger: "The stack is getting high. Clear low rows or fire a Volley.",
+    danger: "The stack is getting high. Clear low rows or fire the cannon.",
     combo: "Rows made mostly of firearms score double."
   };
   let hintsOn = true, hintSeen = {}, hintQ = [], hintTimer = 0, blastsOn = true;
+  // Powder Blasts: each story stage sets its own; Endless follows the player's switch. Old test builds force one value.
+  const endlessBlasts = () => (VARIANT && typeof VARIANT.blasts === "boolean" ? VARIANT.blasts : blastsOn);
+  const blastsActive = () => {
+    if (VARIANT && typeof VARIANT.blasts === "boolean") return VARIANT.blasts;
+    if (G && G.mode && typeof G.mode.blasts === "boolean") return G.mode.blasts;
+    return blastsOn;
+  };
+  const bestKey = () => (endlessBlasts() ? "rr-best" : "rr-best-off");
   function hint(key) {
     if (!hintsOn || hintSeen[key] || !HINTS[key]) return;
     hintSeen[key] = true;
@@ -866,7 +876,7 @@ body {
     document.querySelectorAll("[data-toggle]").forEach((b) => {
       const k = b.dataset.toggle, on = k === "sound" ? AU.on : k === "music" ? AU.musicOn : k === "blasts" ? blastsOn : hintsOn;
       b.setAttribute("aria-pressed", String(on));
-      b.textContent = { sound: "Sound", music: "Music", hints: "Hints", blasts: "Powder Blasts" }[k] + (on ? " on" : " off");
+      b.textContent = { sound: "Sound", music: "Music", hints: "Hints", blasts: "Endless blasts" }[k] + (on ? " on" : " off");
     });
   }
   function initSettings() {
@@ -889,7 +899,7 @@ body {
     const k = b.dataset.toggle;
     if (k === "sound") { AU.on = !AU.on; store.set("rr-sound", AU.on ? "on" : "off"); if (AU.sfx) AU.sfx.gain.value = AU.on ? 0.8 : 0; }
     else if (k === "music") { AU.musicOn = !AU.musicOn; store.set("rr-music", AU.musicOn ? "on" : "off"); if (AU.mus) AU.mus.gain.value = AU.musicOn ? 0.3 : 0; }
-    else if (k === "blasts") { blastsOn = !blastsOn; store.set("rr-blasts", blastsOn ? "on" : "off"); }
+    else if (k === "blasts") { blastsOn = !blastsOn; store.set("rr-blasts", blastsOn ? "on" : "off"); updateBest(); }
     else { hintsOn = !hintsOn; store.set("rr-hints", hintsOn ? "on" : "off"); if (!hintsOn) { hintQ = []; clearTimeout(hintTimer); nextHint(); } }
     syncToggles();
   }));
@@ -924,6 +934,7 @@ body {
     FX.parts = []; FX.rings = []; FX.banner = null; FX.shake = 0;
     setTimeout(() => hint("move"), 700);
     hideAll();
+    if (!mode.endless) setTimeout(() => { if (G && G.mode === mode) popup(mode.title.replace(/^\d\.\d /, ""), blastsActive() ? "Powder Blasts on" : "Powder Blasts off · the powder is damp"); }, 250);
     if (mode.bonusStart) setTimeout(() => { popup("The Guards Scatter!", "30 seconds · miniatures scatter as they land"); SFX.scatter(); }, 300);
     spawn();
     renderArmory();
@@ -953,7 +964,7 @@ body {
     if (collides(p.m, p.x, p.y)) { G.piece = null; renderArmory(); return gameOver(false); }
     G.piece = p;
     renderArmory();
-    if (blastsOn && (id === 2 || G.armory.includes(2))) hint("keg");
+    if (blastsActive() && (id === 2 || G.armory.includes(2))) hint("keg");
     if (id === 6) hint("hat");
     if (id === 5) hint("blade");
   }
@@ -1044,7 +1055,7 @@ body {
 
   function resolveLock(p, cells) {
     if (cells.every((k) => k.gy >= ROWS)) return gameOver(false);
-    const aimed = blastsOn ? muzzleTargets() : [];
+    const aimed = blastsActive() ? muzzleTargets() : [];
     if (aimed.length) detonate(aimed);
 
     // Interlocking Guard: this True Blade upright, beside another intact upright True Blade on the same 4 rows.
@@ -1150,9 +1161,31 @@ body {
     setTimeout(() => v.classList.remove("nudge"), 650);
   }
 
+  // The Cannon (formerly the Volley). Firing plays out over about 0.7 seconds while play pauses:
+  // the cannon slides in over the falling piece, fires, the ball drops, and lands at CANNON_HIT.
+  const CANNON_HIT = reduced ? 0.12 : 0.4, CANNON_END = reduced ? 0.25 : 0.72;
   function fireVolley() {
     if (!canAct() || G.gauge < 100) return;
-    const c0 = G.piece.x + Math.floor(G.piece.w / 2);
+    const c0 = Math.max(0, Math.min(COLS - 1, G.piece.x + Math.floor(G.piece.w / 2)));
+    let iy = -1;
+    for (const c of [c0 - 1, c0, c0 + 1]) {
+      if (c < 0 || c >= COLS || G.walls.has(c)) continue;
+      for (let y = TOT - 1; y >= 0; y--) { const cell = G.grid[y][c]; if (cell && cell.t !== "wall") { iy = Math.max(iy, y); break; } }
+    }
+    G.gauge = 0;
+    G.readyT = 0;
+    G.cannon = { c0, iy, t: 0, impacted: false, fired: false };
+    G.state = "firing";
+    SFX.cannonFire();
+  }
+  // Where the ball lands, in board pixels: the top of the highest stack in its 3 columns, or the floor.
+  function cannonImpactY() {
+    const iy = G.cannon.iy;
+    return iy < 0 ? ROWS * cs - cs / 2 : Math.max(cs * 0.5, (ROWS - 1 - Math.min(iy, ROWS - 1)) * cs + cs / 2);
+  }
+  // The ball lands: it smashes the top 4 cells of each of the 3 columns it covers.
+  function cannonImpact() {
+    const c0 = G.cannon.c0;
     let destroyed = 0;
     const cols = [], kegsHit = [], tids = new Set();
     for (const c of [c0 - 1, c0, c0 + 1]) {
@@ -1162,7 +1195,7 @@ body {
       for (let y = TOT - 1; y >= 0 && k < 4; y--) {
         const cell = G.grid[y][c];
         if (cell && cell.t !== "wall") {
-          if (blastsOn && isKeg(cell)) kegsHit.push([c, y]);
+          if (blastsActive() && isKeg(cell)) kegsHit.push([c, y]);
           else { if (cell.t === "table") tids.add(cell.tid); G.grid[y][c] = null; destroyed++; }
           k++;
         }
@@ -1170,13 +1203,50 @@ body {
     }
     destroyed += breakTables(tids);
     G.score += 50 * destroyed;
-    G.gauge = 0;
     G.fx = { cols, t: 0.35 };
-    popup("Volley!", destroyed + " cells · +" + fmt(50 * destroyed));
-    SFX.volley();
-    FX.shake = Math.max(FX.shake, 0.3);
+    const ix = c0 * cs + cs / 2, iyPx = cannonImpactY();
+    FX.rings.push({ x: ix, y: iyPx, rad: cs * 2.8, t: 0, dur: 0.5 });
+    burst(ix, iyPx, 18, "spark", { speed: 280, life: 0.5 });
+    burst(ix, iyPx, 10, "splinter", { speed: 220, life: 0.9, size: 3 });
+    burst(ix, iyPx, 6, "smoke", { speed: 35, life: 1.4, size: cs * 0.45 });
+    popup("Cannonball!", destroyed + " cells · +" + fmt(50 * destroyed));
+    SFX.cannonHit();
+    FX.shake = Math.max(FX.shake, 0.5);
     if (kegsHit.length) detonate(kegsHit);
     if (checkWin()) gameOver(true);
+  }
+  function drawCannon() {
+    const k = G.cannon, t = k.t, cx = k.c0 * cs + cs / 2;
+    const bh = cs * 2.4, bw = cs * 1.15;
+    const slide = Math.min(1, t / 0.14);
+    const recoil = t > 0.16 && t < 0.32 ? (1 - (t - 0.16) / 0.16) * cs * 0.45 : 0;
+    const fade = t > 0.48 ? Math.max(0, 1 - (t - 0.48) / 0.24) : 1;
+    const y0 = -bh + slide * bh * 0.85 - recoil, my = y0 + bh;
+    ctx.save();
+    ctx.globalAlpha = fade;
+    const g = ctx.createLinearGradient(cx - bw / 2, 0, cx + bw / 2, 0);
+    g.addColorStop(0, "#5a3d16"); g.addColorStop(0.45, "#d4a54c"); g.addColorStop(1, "#4a3010");
+    ctx.fillStyle = g; ctx.strokeStyle = "#2a1a08"; ctx.lineWidth = Math.max(1, cs * 0.06);
+    ctx.beginPath(); ctx.moveTo(cx - bw / 2, y0); ctx.lineTo(cx + bw / 2, y0); ctx.lineTo(cx + bw * 0.36, my); ctx.lineTo(cx - bw * 0.36, my); ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "#3a2508";
+    for (const f of [0.22, 0.55, 0.92]) { const half = bw / 2 - (bw / 2 - bw * 0.36) * f + 1; ctx.fillRect(cx - half, y0 + bh * f - cs * 0.07, half * 2, cs * 0.14); }
+    ctx.beginPath(); ctx.ellipse(cx, my, bw * 0.4, cs * 0.13, 0, 0, Math.PI * 2); ctx.fillStyle = "#140c04"; ctx.fill();
+    ctx.restore();
+    if (t > 0.15 && t < 0.26) {
+      const f = 1 - (t - 0.15) / 0.11;
+      ctx.fillStyle = "rgba(255, 214, 120, " + f.toFixed(2) + ")";
+      ctx.beginPath(); ctx.arc(cx, my + cs * 0.35, cs * (0.55 + 0.6 * (1 - f)), 0, Math.PI * 2); ctx.fill();
+    }
+    if (t >= 0.16 && t < CANNON_HIT) {
+      const yHit = Math.max(my, cannonImpactY()), u = (t - 0.16) / (CANNON_HIT - 0.16), y = my + (yHit - my) * u * u;
+      const tr = ctx.createLinearGradient(0, y - cs * 2, 0, y);
+      tr.addColorStop(0, "rgba(60, 50, 40, 0)"); tr.addColorStop(1, "rgba(60, 50, 40, 0.45)");
+      ctx.fillStyle = tr; ctx.fillRect(cx - cs * 0.3, y - cs * 2, cs * 0.6, cs * 2);
+      const bg = ctx.createRadialGradient(cx - cs * 0.12, y - cs * 0.12, cs * 0.05, cx, y, cs * 0.45);
+      bg.addColorStop(0, "#8a8f96"); bg.addColorStop(0.5, "#2e3237"); bg.addColorStop(1, "#0d0f12");
+      ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(cx, y, cs * 0.42, 0, Math.PI * 2); ctx.fill();
+    }
   }
 
   function gameOver(won) {
@@ -1189,8 +1259,8 @@ body {
     const per = G.rows > 0 ? (G.locks / G.rows).toFixed(1) : "none yet";
     let best = "";
     if (G.modeId === "endless") {
-      const prev = parseInt(store.get("rr-best") || "0", 10) || 0;
-      if (G.score > prev) store.set("rr-best", String(G.score));
+      const prev = parseInt(store.get(bestKey()) || "0", 10) || 0;
+      if (G.score > prev) store.set(bestKey(), String(G.score));
       best = "<dt>Best Endless Honor</dt><dd>" + fmt(Math.max(prev, G.score)) + "</dd>";
     }
     $("endStats").innerHTML =
@@ -1199,7 +1269,7 @@ body {
       "<dt>Rows cleared</dt><dd>" + G.rows + "</dd>" +
       "<dt>Pieces placed</dt><dd>" + G.locks + "</dd>" +
       "<dt>Locks per row cleared</dt><dd>" + per + "</dd>" +
-      "<dt>Powder Blasts</dt><dd>" + (blastsOn ? (G.blasts || 0) : "off") + "</dd>" +
+      "<dt>Powder Blasts</dt><dd>" + (blastsActive() ? (G.blasts || 0) : "off") + "</dd>" +
       "<dt>Time</dt><dd>" + mm + ":" + ss + "</dd>";
     $("end").hidden = false;
     updateBest();
@@ -1234,6 +1304,14 @@ body {
     if (G.gauge >= 100) { G.readyT = (G.readyT || 0) + dt; if (G.readyT >= 15) { G.readyT = 0; volleyReady(true); } }
     if (G.state === "clearing") { G.clearT -= dt; clearFxTick(); if (G.clearT <= 0) finishClear(); return; }
     if (G.state === "settling") { G.settle.t += dt; if (G.settle.t >= G.settle.dur) finishSettle(); return; }
+    if (G.state === "firing") {
+      const k = G.cannon;
+      k.t += dt;
+      if (!k.fired && k.t >= 0.16) { k.fired = true; burst(k.c0 * cs + cs / 2, cs * 2, 6, "smoke", { speed: 40, life: 1, size: cs * 0.4 }); }
+      if (!k.impacted && k.t >= CANNON_HIT) { k.impacted = true; cannonImpact(); }
+      if (G.state === "firing" && k.t >= CANNON_END) { G.state = "play"; G.cannon = null; }
+      return;
+    }
     if (!G.piece) return;
     G.time += dt;
     const rate = G.softKey ? SOFT_RATE : SPEEDS[G.level - 1];
@@ -1569,7 +1647,7 @@ body {
     }
 
     const p = G.piece;
-    if (p && G.state === "play") {
+    if (p && (G.state === "play" || G.state === "firing")) {
       // Lantern Light: glow on the surface of each column the piece covers.
       const covered = new Map();
       for (const k of cellsOf(p.m, p.x, p.y)) covered.set(k.gx, Math.min(covered.has(k.gx) ? covered.get(k.gx) : 99, k.gy));
@@ -1607,6 +1685,7 @@ body {
       ctx.fillStyle = "rgba(255, 170, 60, " + (G.fx.t * 1.2) + ")";
       for (const c of G.fx.cols) ctx.fillRect(c * cs, 0, cs, H);
     }
+    if (G.state === "firing" && G.cannon) drawCannon();
     drawFx(W, H);
     // Danger line: top 3 rows tint when the stack is high.
     let top = -1;
@@ -1748,7 +1827,7 @@ body {
     else if (k === " ") hardDrop();
     else if (k === "1") choose(0);
     else if (k === "2") choose(1);
-    else if (k === "v" || k === "V") fireVolley();
+    else if (k === "c" || k === "C" || k === "v" || k === "V") fireVolley();
     else return;
     e.preventDefault();
   });
@@ -1764,8 +1843,8 @@ body {
   function hideAll() { $("menu").hidden = true; $("pause").hidden = true; $("end").hidden = true; }
   function showMenu() { if (G) { G.paused = true; G.state = "over"; } hideAll(); $("menu").hidden = false; updateBest(); }
   function updateBest() {
-    const b = parseInt(store.get("rr-best") || "0", 10) || 0;
-    $("bestLine").textContent = b ? "Speed rises every 10 rows · best " + fmt(b) : "Speed rises every 10 rows · bonus every 30";
+    const b = parseInt(store.get(bestKey()) || "0", 10) || 0;
+    $("bestLine").textContent = "Speed rises every 10 rows · blasts " + (endlessBlasts() ? "on" : "off") + (b ? " · best " + fmt(b) : "");
   }
 
   // A board with a sample game behind the menu, so the first frame shows the game.
