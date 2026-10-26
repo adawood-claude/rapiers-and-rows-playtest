@@ -288,6 +288,7 @@ body {
 }
 .seg button[aria-pressed="true"] { background: var(--brass); color: #2a160c; font-weight: 600; }
 .seg.seg3 { grid-template-columns: repeat(3, 1fr); }
+.diffnote { font-size: 13.5px; color: var(--ink-dim); text-align: center; }
 .seg.seg4 { grid-template-columns: repeat(2, 1fr); }
 .linkbtn {
   align-self: center;
@@ -355,6 +356,13 @@ body {
       <button class="modebtn" data-mode="s11"><span class="tag">1.1</span>The Courtyard Ambush<span class="sub">Open board · reach 5,000 Honor · speed 1 · blasts off</span></button>
       <button class="modebtn" data-mode="s12"><span class="tag">1.2</span>Overturned Tables<span class="sub">Break all 8 tables · speed 2 · blasts on</span></button>
       <button class="modebtn" data-mode="s13"><span class="tag">1.3</span>The Wine Cellar Barricade<span class="sub">9-column lane · reach 8,000 Honor · speed 3 · blasts off</span></button>
+    </div>
+    <div class="styles">
+      <span class="label">Story difficulty</span>
+      <div class="seg" role="group" aria-label="Story difficulty">
+        <button data-diff="aspirant">Aspirant</button><button data-diff="cadet">Cadet</button><button data-diff="musketeer">Musketeer</button><button data-diff="captain">Captain</button>
+      </div>
+      <span class="diffnote" id="diffNote"></span>
     </div>
     <div class="styles">
       <span class="label">Art style</span>
@@ -792,13 +800,13 @@ body {
     // Every Powder Blast raises the speed one level for the rest of the game.
     const before = G.level;
     G.blasts = (G.blasts || 0) + 1;
-    if (!G.mode.endless) G.rushLevels = Math.min(3, (G.rushLevels || 0) + 1);
+    if (!G.mode.endless && G.diff !== "aspirant") G.rushLevels = Math.min(3, (G.rushLevels || 0) + 1);
     setLevel();
     // In story stages, each blast also scatters the guards for 30 seconds to offset the speed-up.
     if (!G.mode.endless) {
       const was = G.looseT > 0;
       G.looseT = 30;
-      setTimeout(() => { if (G && G.state !== "over") { popup("The Guards Scatter!", "30 seconds · faster, and miniatures scatter"); if (!was) SFX.scatter(); } }, 1000);
+      setTimeout(() => { if (G && G.state !== "over") { popup("The Guards Scatter!", G.diff === "aspirant" ? "30 seconds · miniatures scatter as they land" : "30 seconds · faster, and miniatures scatter"); if (!was) SFX.scatter(); } }, 1000);
     }
     FX.shake = Math.max(FX.shake, 0.45);
     SFX.blast();
@@ -831,7 +839,7 @@ body {
   // Speed level. Endless: start + 1 every 10 rows + 1 per Powder Blast, permanent.
   // Story stages: start + 1 per blast (max +3), only while the guards are scattered. Max 15.
   function setLevel() {
-    G.level = Math.min(15, G.mode.speed + (G.mode.endless ? Math.floor(G.rows / 10) + (G.blasts || 0) : (G.rushLevels || 0)));
+    G.level = Math.min(15, G.mode.speed + (G.mode.endless ? Math.floor(G.rows / 10) + (G.blasts || 0) : (G.rushLevels || 0) + rowSteps()));
   }
 
   // ---------- hints: each shows once, the first time it matters ----------
@@ -884,6 +892,7 @@ body {
     AU.musicOn = store.get("rr-music") !== "off";
     hintsOn = store.get("rr-hints") !== "off";
     blastsOn = store.get("rr-blasts") !== "off";
+    setDifficulty(store.get("rr-difficulty") || "cadet");
     if (VARIANT && typeof VARIANT.blasts === "boolean") {
       blastsOn = VARIANT.blasts;
       document.querySelectorAll('[data-toggle="blasts"]').forEach((b) => { b.hidden = true; });
@@ -903,6 +912,28 @@ body {
     else { hintsOn = !hintsOn; store.set("rr-hints", hintsOn ? "on" : "off"); if (!hintsOn) { hintQ = []; clearTimeout(hintTimer); nextHint(); } }
     syncToggles();
   }));
+  // Story difficulty. Aspirant: blasts scatter the guards but never change the speed.
+  // Cadet: blasts also add speed while the guards are scattered. Musketeer: Cadet plus +1 speed
+  // every 15 rows cleared. Captain of the Guard: Cadet plus +1 speed every 10 rows. Endless keeps its own rules.
+  const DIFF_NAMES = { aspirant: "Aspirant", cadet: "Cadet", musketeer: "Musketeer", captain: "Captain of the Guard" };
+  const DIFF_NOTES = {
+    aspirant: "Blasts scatter the guards. The speed never changes.",
+    cadet: "Blasts scatter the guards and add speed for those 30 seconds.",
+    musketeer: "As Cadet, plus +1 speed every 15 rows cleared.",
+    captain: "As Cadet, plus +1 speed every 10 rows cleared."
+  };
+  let difficulty = "cadet";
+  function setDifficulty(d) {
+    if (!DIFF_NAMES[d]) d = "cadet";
+    difficulty = d;
+    store.set("rr-difficulty", d);
+    document.querySelectorAll("[data-diff]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.diff === d)));
+    $("diffNote").textContent = DIFF_NOTES[d];
+  }
+  document.querySelectorAll("[data-diff]").forEach((b) => b.addEventListener("click", () => setDifficulty(b.dataset.diff)));
+  // Speed levels earned by clearing rows in a story stage, by difficulty.
+  const rowSteps = () => (G.diff === "musketeer" ? Math.floor(G.rows / 15) : G.diff === "captain" ? Math.floor(G.rows / 10) : 0);
+
   document.querySelectorAll("[data-reset-hints]").forEach((b) => b.addEventListener("click", () => {
     hintSeen = {};
     store.set("rr-hints-seen", "{}");
@@ -928,13 +959,15 @@ body {
       for (const [dx, dy] of [[0, 0], [1, 0], [0, 1], [1, 1]]) G.grid[y + dy][x + dx] = { t: "table", tid: i + 1 };
     });
     G.tablesTotal = (mode.tables || []).length;
+    G.diff = mode.endless ? null : difficulty;
+    G.lastSteps = 0;
     G.armory = [draw(), draw()];
     G.bonusCount = 0;
     G.looseT = mode.bonusStart ? 30 : 0;
     FX.parts = []; FX.rings = []; FX.banner = null; FX.shake = 0;
     setTimeout(() => hint("move"), 700);
     hideAll();
-    if (!mode.endless) setTimeout(() => { if (G && G.mode === mode) popup(mode.title.replace(/^\d\.\d /, ""), blastsActive() ? "Powder Blasts on" : "Powder Blasts off · the powder is damp"); }, 250);
+    if (!mode.endless) setTimeout(() => { if (G && G.mode === mode) popup(mode.title.replace(/^\d\.\d /, ""), DIFF_NAMES[G.diff] + " · " + (blastsActive() ? "Powder Blasts on" : "Powder Blasts off, the powder is damp")); }, 250);
     if (mode.bonusStart) setTimeout(() => { popup("The Guards Scatter!", "30 seconds · miniatures scatter as they land"); SFX.scatter(); }, 300);
     spawn();
     renderArmory();
@@ -1129,6 +1162,10 @@ body {
     if (!wasReady && G.gauge >= 100) { G.readyT = 0; volleyReady(false); }
     G.pendingGauge = 0;
     setLevel();
+    if (G.diff) {
+      const st = rowSteps();
+      if (st > G.lastSteps) { G.lastSteps = st; setTimeout(() => { if (G && G.state !== "over") popup("Speed up!", "The guard presses harder"); }, 700); }
+    }
     if (G.mode.endless && Math.floor(G.rows / 30) > G.bonusCount) {
       G.bonusCount = Math.floor(G.rows / 30);
       G.looseT = 30;
@@ -1265,6 +1302,7 @@ body {
     }
     $("endStats").innerHTML =
       "<dt>Version</dt><dd>" + (VARIANT ? VARIANT.short : "Claude demo") + "</dd>" +
+      (G.diff ? "<dt>Difficulty</dt><dd>" + DIFF_NAMES[G.diff] + "</dd>" : "") +
       "<dt>Honor</dt><dd>" + fmt(G.score) + "</dd>" + best +
       "<dt>Rows cleared</dt><dd>" + G.rows + "</dd>" +
       "<dt>Pieces placed</dt><dd>" + G.locks + "</dd>" +
