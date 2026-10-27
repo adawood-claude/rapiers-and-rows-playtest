@@ -1677,7 +1677,7 @@ body {
   // Second tap (or 5 seconds) fires: every piece square in those 3 rows is destroyed, objects stay,
   // and what is above drops down column by column, as after a Powder Blast. It scores like the Cannon
   // and never counts as clearing rows.
-  const BS_SPEED = { aspirant: 5, cadet: 8, musketeer: 11, captain: 15 }; // rows per second
+  const BS_SPEED = { aspirant: 7.5, cadet: 12, musketeer: 16.5, captain: 22.5 }; // rows per second (1.5x the first version)
   const BS_AIM = 5, BS_BALL = reduced ? 0.15 : 0.32, BS_END = reduced ? 0.3 : 0.6;
   function stackTop() {
     for (let y = ROWS - 1; y >= 0; y--) for (let x = 0; x < COLS; x++) { const c = G.grid[y][x]; if (c && c.t !== "wall") return y; }
@@ -1686,9 +1686,8 @@ body {
   function startBroadside() {
     if (!canAct() || !(G.broadsides > 0)) return;
     G.broadsides--;
-    const top = stackTop();
-    const maxR = Math.max(0, Math.min(ROWS - 3, top - 1));
-    const speed = (G.diff ? BS_SPEED[G.diff] : 9) * (reduced ? 0.6 : 1);
+    const maxR = ROWS - 3; // sweeps the full board height; a shot through empty rows is a miss
+    const speed = (G.diff ? BS_SPEED[G.diff] : 13.5) * (reduced ? 0.6 : 1);
     G.bs = { t: 0, pos: 0, dir: 1, maxR, speed, row: 0, fireT: 0, done: false, col: 0, holes: [], kegs: [], cells: 0 };
     G.state = "aiming";
     SFX.ready(false);
