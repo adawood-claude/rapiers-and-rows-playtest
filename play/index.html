@@ -156,6 +156,7 @@ body {
 }
 /* Armory rack */
 .rack {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr auto;
   gap: 10px;
@@ -203,6 +204,29 @@ body {
   font: 600 13px var(--body);
   padding: 0;
 }
+#broadside {
+  position: absolute; right: 8px; bottom: calc(100% + 8px);
+  min-width: 96px; height: 46px; padding: 0 14px;
+  border-radius: 23px;
+  border: 2px solid #f3d36f;
+  background: radial-gradient(circle at 50% 35%, #8e2436, #3e1019);
+  color: #fbeed2;
+  font: 400 16px var(--display);
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  box-shadow: 0 0 0 3px rgba(243, 211, 111, 0.25), 0 4px 14px rgba(0, 0, 0, 0.5);
+  animation: bsglow 1.4s ease-in-out infinite;
+  z-index: 5;
+}
+#broadside .bscount {
+  position: absolute; top: -8px; right: -6px;
+  min-width: 20px; height: 20px; border-radius: 10px;
+  background: #f3d36f; color: #2a160c; font: 700 12px var(--body); line-height: 20px;
+}
+#broadside.fire { background: radial-gradient(circle at 50% 35%, #e0552c, #8a1a12); font-size: 20px; animation: bsfire 0.35s ease-in-out infinite; }
+@keyframes bsglow { 50% { box-shadow: 0 0 0 6px rgba(243, 211, 111, 0.45), 0 4px 18px rgba(0, 0, 0, 0.5); } }
+@keyframes bsfire { 50% { transform: scale(1.07); } }
+@media (prefers-reduced-motion: reduce) { #broadside, #broadside.fire { animation: none; } }
 #volley .fill { position: absolute; left: 0; right: 0; bottom: 0; height: 0; background: rgba(207, 165, 76, 0.35); transition: height 0.25s; }
 #volley .txt { position: relative; display: flex; flex-direction: column; align-items: center; gap: 1px; line-height: 1.05; }
 #volley .txt b { font-family: var(--display); font-weight: 400; font-size: 15px; }
@@ -359,6 +383,7 @@ body {
   </main>
 
   <footer class="rack" aria-label="Armory" data-i18n-aria="armory">
+    <button id="broadside" hidden aria-label="Broadside" data-i18n-aria="broadside"><span class="bslabel" id="bsLabel">Broadside</span><span class="bscount" hidden></span></button>
     <button class="slot" id="slot0" aria-label="Armory slot 1"><canvas width="10" height="10"></canvas><span class="name"></span></button>
     <button class="slot" id="slot1" aria-label="Armory slot 2"><canvas width="10" height="10"></canvas><span class="name"></span></button>
     <button id="volley" aria-label="Fire the cannon" data-i18n-aria="fireCannon"><span class="fill" id="volleyFill"></span><span class="txt"><svg class="cicon" viewBox="0 0 40 24" aria-hidden="true"><path d="M3 8 L27 4 L30 6 L30 13 L27 15 L3 12 Z" fill="currentColor"/><circle cx="11" cy="17" r="5.5" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="36" cy="9.5" r="3" fill="currentColor"/></svg><b data-i18n="cannon">Cannon</b><span id="volleyNum">0</span></span></button>
@@ -409,8 +434,9 @@ body {
       <dt data-i18n="help_armory">Armory</dt><dd data-i18n="help_armory_d">Tap a slot to choose the next weapon</dd>
       <dt data-i18n="help_cannon">Cannon</dt><dd data-i18n="help_cannon_d">When the gauge is full, tap it to fire a cannonball into the top 4 cells of 3 columns</dd>
       <dt data-i18n="help_kegs">Kegs</dt><dd data-i18n="help_kegs_d">Point a musket's muzzle straight at a powder keg to blow a 3×3 hole</dd>
+      <dt data-i18n="help_broadside">Broadside</dt><dd data-i18n="help_broadside_d">Fire the Cannon 3 times to earn one. Tap it, then tap FIRE! as the side cannon passes the rows you want gone</dd>
     </dl>
-    <p class="kbd" data-i18n="kbd">Keyboard: ← → move · ↓ ease down · ↑ or X rotate · Z rotate back · Space drop · 1/2 Armory · C cannon · P pause</p>
+    <p class="kbd" data-i18n="kbd">Keyboard: ← → move · ↓ ease down · ↑ or X rotate · Z rotate back · Space drop · 1/2 Armory · C cannon · B Broadside · P pause</p>
   </div>
 </div>
 
@@ -491,7 +517,7 @@ body {
       help_armory: "Armory", help_armory_d: "Tap a slot to choose the next weapon",
       help_cannon: "Cannon", help_cannon_d: "When the gauge is full, tap it to fire a cannonball into the top 4 cells of 3 columns",
       help_kegs: "Kegs", help_kegs_d: "Point a musket's muzzle straight at a powder keg to blow a 3×3 hole",
-      kbd: "Keyboard: ← → move · ↓ ease down · ↑ or X rotate · Z rotate back · Space drop · 1/2 Armory · C cannon · P pause",
+      kbd: "Keyboard: ← → move · ↓ ease down · ↑ or X rotate · Z rotate back · Space drop · 1/2 Armory · C cannon · B Broadside · P pause",
       paused: "Paused", resume: "Resume", restart: "Restart", menu: "Menu", playAgain: "Play again",
       victory: "Victory", overrun: "Overrun", cleared: "{mode} cleared.", lost: "{mode} lost. The stack reached the top.",
       st_version: "Version", st_difficulty: "Difficulty", st_honor: "Honor", st_best: "Best Endless Honor",
@@ -514,6 +540,10 @@ body {
       speedUp: "Speed up!", guardPresses: "The guard presses harder",
       blastsOnStage: "Powder Blasts on", blastsOffStage: "Powder Blasts off, the powder is damp",
       cannonball: "Cannonball!",
+      broadside: "Broadside", fire: "FIRE!", broadsideHit: "Broadside!", miss: "Miss!",
+      broadsideReady: "Broadside ready!", broadsideReadySub: "Tap it to aim, then tap FIRE!",
+      help_broadside: "Broadside", help_broadside_d: "Fire the Cannon 3 times to earn one. Tap it, then tap FIRE! as the side cannon passes the rows you want gone",
+      hint_broadside: "Broadside: a cannon sweeps up and down beside the board. Tap FIRE! to blast the 3 rows it is aimed at.",
       clear1: "Lunge", clear2: "Double-Thrust", clear3: "Triple-Parry", clear4: "The Musketeer Salute", clear5: "The Royal Salute",
       allForOne: "All for one!", royalSalute: "The Royal Salute!",
       crowned: "Crowned Row", interlock: "Interlocking Guard", riposte: "Riposte ×{n}", combo: "Volley Combo ×2",
@@ -561,7 +591,7 @@ body {
       help_armory: "Armería", help_armory_d: "Toca una ranura para elegir la siguiente arma",
       help_cannon: "Cañón", help_cannon_d: "Cuando el indicador esté lleno, tócalo para disparar una bala de cañón a las 4 casillas superiores de 3 columnas",
       help_kegs: "Barriles", help_kegs_d: "Apunta la boca de un mosquete directo a un barril de pólvora para abrir un hueco de 3×3",
-      kbd: "Teclado: ← → mover · ↓ bajar · ↑ o X girar · Z girar atrás · Espacio soltar · 1/2 Armería · C cañón · P pausa",
+      kbd: "Teclado: ← → mover · ↓ bajar · ↑ o X girar · Z girar atrás · Espacio soltar · 1/2 Armería · C cañón · B Andanada · P pausa",
       paused: "En pausa", resume: "Continuar", restart: "Reiniciar", menu: "Menú", playAgain: "Jugar otra vez",
       victory: "Victoria", overrun: "Arrollado", cleared: "{mode}: superado.", lost: "{mode}: perdido. La pila llegó arriba.",
       st_version: "Versión", st_difficulty: "Dificultad", st_honor: "Honor", st_best: "Mejor Honor en Sin fin",
@@ -584,6 +614,10 @@ body {
       speedUp: "¡Más rápido!", guardPresses: "La guardia aprieta más",
       blastsOnStage: "Explosiones de pólvora activadas", blastsOffStage: "Sin explosiones: la pólvora está húmeda",
       cannonball: "¡Cañonazo!",
+      broadside: "Andanada", fire: "¡FUEGO!", broadsideHit: "¡Andanada!", miss: "¡Fallo!",
+      broadsideReady: "¡Andanada lista!", broadsideReadySub: "Tócala para apuntar y luego toca ¡FUEGO!",
+      help_broadside: "Andanada", help_broadside_d: "Dispara el Cañón 3 veces para ganar una. Tócala y luego toca ¡FUEGO! cuando el cañón lateral pase por las filas que quieres destruir",
+      hint_broadside: "Andanada: un cañón sube y baja junto al tablero. Toca ¡FUEGO! para destrozar las 3 filas a las que apunta.",
       clear1: "Estocada", clear2: "Doble estocada", clear3: "Triple parada", clear4: "El saludo del mosquetero", clear5: "El saludo real",
       allForOne: "¡Todos para uno!", royalSalute: "¡El saludo real!",
       crowned: "Fila coronada", interlock: "Guardia entrelazada", riposte: "Respuesta ×{n}", combo: "Combo de descarga ×2",
@@ -631,7 +665,7 @@ body {
       help_armory: "คลังอาวุธ", help_armory_d: "แตะช่องเพื่อเลือกอาวุธชิ้นถัดไป",
       help_cannon: "ปืนใหญ่", help_cannon_d: "เมื่อเกจเต็ม แตะเพื่อยิงลูกปืนใหญ่ใส่ 4 ช่องบนสุดของ 3 คอลัมน์",
       help_kegs: "ถังดินปืน", help_kegs_d: "หันปากกระบอกปืนคาบศิลาเข้าหาถังดินปืนตรงๆ เพื่อระเบิดเป็นรู 3×3",
-      kbd: "แป้นพิมพ์: ← → เลื่อน · ↓ เลื่อนลง · ↑ หรือ X หมุน · Z หมุนกลับ · Space ปล่อย · 1/2 คลังอาวุธ · C ปืนใหญ่ · P หยุด",
+      kbd: "แป้นพิมพ์: ← → เลื่อน · ↓ เลื่อนลง · ↑ หรือ X หมุน · Z หมุนกลับ · Space ปล่อย · 1/2 คลังอาวุธ · C ปืนใหญ่ · B ยิงกราบเรือ · P หยุด",
       paused: "หยุดชั่วคราว", resume: "เล่นต่อ", restart: "เริ่มใหม่", menu: "เมนู", playAgain: "เล่นอีกครั้ง",
       victory: "ชนะ", overrun: "ถูกตีแตก", cleared: "ผ่าน {mode} แล้ว", lost: "แพ้ {mode} กองชิ้นส่วนสูงถึงด้านบน",
       st_version: "เวอร์ชัน", st_difficulty: "ระดับความยาก", st_honor: "เกียรติ", st_best: "เกียรติสูงสุดโหมดไม่รู้จบ",
@@ -654,6 +688,10 @@ body {
       speedUp: "เร็วขึ้น!", guardPresses: "ทหารยามบุกหนักขึ้น",
       blastsOnStage: "เปิดระเบิดดินปืน", blastsOffStage: "ปิดระเบิดดินปืน ดินปืนชื้น",
       cannonball: "ลูกปืนใหญ่!",
+      broadside: "ยิงกราบเรือ", fire: "ยิง!", broadsideHit: "ยิงกราบเรือ!", miss: "พลาด!",
+      broadsideReady: "ยิงกราบเรือพร้อมแล้ว!", broadsideReadySub: "แตะเพื่อเล็ง แล้วแตะ ยิง!",
+      help_broadside: "ยิงกราบเรือ", help_broadside_d: "ยิงปืนใหญ่ 3 ครั้งเพื่อรับหนึ่งครั้ง แตะปุ่ม แล้วแตะ ยิง! เมื่อปืนใหญ่ด้านข้างเลื่อนผ่านแถวที่ต้องการทำลาย",
+      hint_broadside: "ยิงกราบเรือ: ปืนใหญ่เลื่อนขึ้นลงข้างกระดาน แตะ ยิง! เพื่อทำลาย 3 แถวที่เล็งไว้",
       clear1: "แทง", clear2: "แทงคู่", clear3: "ปัดป้องสามชั้น", clear4: "คารวะทหารเสือ", clear5: "คารวะหลวง",
       allForOne: "ทั้งหมดเพื่อหนึ่ง!", royalSalute: "คารวะหลวง!",
       crowned: "แถวมงกุฎ", interlock: "องครักษ์ประสาน", riposte: "สวนกลับ ×{n}", combo: "คอมโบระดมยิง ×2",
@@ -836,6 +874,12 @@ body {
       tn(t + 0.3, midi(81), 0.3, { type: "triangle", gain: 0.08 * g });
       tn(t + 0.4, midi(86), 0.5, { type: "triangle", gain: 0.08 * g });
     }),
+    // Broadside earned: a drum roll and a short horn call.
+    broadsideReady: () => play((t) => {
+      for (let i = 0; i < 6; i++) nz(t + i * 0.05, 0.06, { type: "lowpass", f0: 420, gain: 0.16 });
+      fanfare(t + 0.32, [67, 72, 76], 0.05);
+    }),
+    broadsideFire: () => play((t) => { boom(t, 0.8); nz(t + 0.02, 0.5, { f0: 3000, f1: 600, q: 0.5, gain: 0.14 }); boom(t + 0.22, 0.5); }),
     blast: () => play((t) => { boom(t, 0.7); nz(t + 0.08, 0.7, { f0: 2600, f1: 380, q: 0.5, gain: 0.16 }); }),
     scatter: () => play((t) => [74, 78, 81, 86].forEach((n, i) => tn(t + i * 0.08, midi(n), 0.3, { type: "triangle", gain: 0.07 }))),
     restore: () => play((t) => [81, 78, 74].forEach((n, i) => tn(t + i * 0.09, midi(n), 0.3, { type: "triangle", gain: 0.06 }))),
@@ -1105,7 +1149,7 @@ body {
   }
 
   // ---------- hints: each shows once, the first time it matters ----------
-  const HINTS = { move: 1, drop: 1, armory: 1, volley: 1, keg: 1, hat: 1, blade: 1, danger: 1, combo: 1 }; // text: I18N hint_*
+  const HINTS = { move: 1, drop: 1, armory: 1, volley: 1, keg: 1, hat: 1, blade: 1, danger: 1, combo: 1, broadside: 1 }; // text: I18N hint_*
   let hintsOn = true, hintSeen = {}, hintQ = [], hintTimer = 0, blastsOn = true;
   // Powder Blasts: each story stage sets its own; Endless follows the player's switch. Old test builds force one value.
   const endlessBlasts = () => (VARIANT && typeof VARIANT.blasts === "boolean" ? VARIANT.blasts : blastsOn);
@@ -1200,7 +1244,8 @@ body {
       level: mode.speed, piece: null, armory: [], choice: 0,
       queue: [], hist: [], fall: 0, lockT: 0, resets: 0,
       state: "play", paused: false, clearRows: null, clearT: 0, pendingGauge: 0,
-      inst: 1, softKey: false, time: 0, blasts: 0, fx: null, refuse: 0, tablesTotal: 0
+      inst: 1, softKey: false, time: 0, blasts: 0, fx: null, refuse: 0, tablesTotal: 0,
+      cannonShots: 0, broadsides: 0, bs: null
     };
     for (const c of G.walls) for (let y = 0; y < TOT; y++) G.grid[y][c] = { t: "wall" };
     (mode.tables || []).forEach(([x, y], i) => {
@@ -1460,9 +1505,143 @@ body {
     }
     G.gauge = 0;
     G.readyT = 0;
+    G.cannonShots = (G.cannonShots || 0) + 1;
+    if (G.cannonShots % 3 === 0) {
+      G.broadsides = (G.broadsides || 0) + 1;
+      setTimeout(() => { if (G && G.state !== "over") { popup(t("broadsideReady"), t("broadsideReadySub")); SFX.broadsideReady(); hint("broadside"); } }, 1300);
+    }
     G.cannon = { c0, iy, t: 0, impacted: false, fired: false };
     G.state = "firing";
     SFX.cannonFire();
+  }
+
+  // ---------- Broadside: earned by firing the Cannon 3 times on a board ----------
+  // First tap freezes the falling piece and a 3-row cannon sweeps up and down the side of the board.
+  // Second tap (or 5 seconds) fires: every piece square in those 3 rows is destroyed, objects stay,
+  // and what is above drops down column by column, as after a Powder Blast. It scores like the Cannon
+  // and never counts as clearing rows.
+  const BS_SPEED = { aspirant: 5, cadet: 8, musketeer: 11, captain: 15 }; // rows per second
+  const BS_AIM = 5, BS_BALL = reduced ? 0.15 : 0.32, BS_END = reduced ? 0.3 : 0.6;
+  function stackTop() {
+    for (let y = ROWS - 1; y >= 0; y--) for (let x = 0; x < COLS; x++) { const c = G.grid[y][x]; if (c && c.t !== "wall") return y; }
+    return -1;
+  }
+  function startBroadside() {
+    if (!canAct() || !(G.broadsides > 0)) return;
+    G.broadsides--;
+    const top = stackTop();
+    const maxR = Math.max(0, Math.min(ROWS - 3, top - 1));
+    const speed = (G.diff ? BS_SPEED[G.diff] : 9) * (reduced ? 0.6 : 1);
+    G.bs = { t: 0, pos: 0, dir: 1, maxR, speed, row: 0, fireT: 0, done: false, col: 0, holes: [], kegs: [], cells: 0 };
+    G.state = "aiming";
+    SFX.ready(false);
+  }
+  function fireBroadside() {
+    if (!G || G.state !== "aiming") return;
+    G.bs.row = Math.round(G.bs.pos);
+    G.state = "broadside";
+    SFX.broadsideFire();
+    const cy = (ROWS - 1 - (G.bs.row + 1)) * cs + cs / 2;
+    burst(cs * 1.9, cy, 10, "smoke", { speed: 60, vx: 80, life: 1.2, size: cs * 0.5 });
+    FX.shake = Math.max(FX.shake, 0.6);
+  }
+  function broadsideTap() {
+    if (!G || G.paused) return;
+    if (G.state === "aiming") fireBroadside();
+    else startBroadside();
+  }
+  function broadsideTick(dt) {
+    const b = G.bs;
+    if (G.state === "aiming") {
+      b.t += dt;
+      if (b.maxR > 0) {
+        b.pos += b.dir * b.speed * dt;
+        if (b.pos >= b.maxR) { b.pos = b.maxR; b.dir = -1; }
+        if (b.pos <= 0) { b.pos = 0; b.dir = 1; }
+      }
+      if (b.t >= BS_AIM) fireBroadside();
+      return;
+    }
+    // The ball crosses the board; each column is smashed as it passes.
+    b.fireT += dt;
+    const reach = Math.min(COLS, Math.floor((b.fireT / BS_BALL) * COLS));
+    while (b.col < reach) {
+      const x = b.col++;
+      if (G.walls.has(x)) continue;
+      for (let y = b.row; y < b.row + 3 && y < TOT; y++) {
+        const c = G.grid[y][x];
+        if (!c || c.t !== "piece") continue; // tables, walls and other objects are untouched
+        if (blastsActive() && isKeg(c)) { b.kegs.push([x, y]); continue; }
+        G.grid[y][x] = null; b.cells++; b.holes.push([x, y]);
+        const px = x * cs + cs / 2, py = (ROWS - 1 - y) * cs + cs / 2;
+        burst(px, py, 3, "splinter", { speed: 160, vx: 120, life: 0.6, size: 2.5 });
+      }
+    }
+    if (!b.done && b.fireT >= BS_BALL) {
+      b.done = true;
+      collapse(b.holes);
+      const pts = 50 * b.cells;
+      G.score += pts;
+      if (b.cells) popup(t("broadsideHit"), t("cellsPts", { n: b.cells, pts: fmt(pts) }));
+      else popup(t("miss"), "");
+      SFX.cannonHit();
+      if (b.kegs.length) detonate(b.kegs);
+      if (checkWin()) { gameOver(true); return; }
+    }
+    if (b.fireT >= BS_END) { G.state = "play"; G.bs = null; }
+  }
+  function drawBroadside() {
+    const b = G.bs;
+    if (!b) return;
+    const W = COLS * cs;
+    const row = G.state === "aiming" ? b.pos : b.row;
+    const yTop = (ROWS - 1 - (row + 2)) * cs, h = 3 * cs, cy = yTop + h / 2;
+    // Target band across the board.
+    ctx.fillStyle = G.state === "aiming" ? "rgba(243, 211, 111, 0.16)" : "rgba(255, 170, 60, 0.22)";
+    ctx.fillRect(0, yTop, W, h);
+    ctx.strokeStyle = "rgba(243, 211, 111, 0.85)"; ctx.lineWidth = 1.5; ctx.setLineDash([5, 4]);
+    ctx.beginPath(); ctx.moveTo(0, yTop + 0.5); ctx.lineTo(W, yTop + 0.5); ctx.moveTo(0, yTop + h - 0.5); ctx.lineTo(W, yTop + h - 0.5); ctx.stroke();
+    ctx.setLineDash([]);
+    // The cannon on the left edge, pointing across the board.
+    const recoil = G.state === "broadside" && b.fireT < 0.15 ? (1 - b.fireT / 0.15) * cs * 0.4 : 0;
+    const x0 = cs * 0.05 - recoil, len = cs * 1.9, r0 = cs * 0.62, r1 = cs * 0.46;
+    ctx.save();
+    ctx.fillStyle = "#3a2214"; ctx.strokeStyle = "#160c06"; ctx.lineWidth = Math.max(1, cs * 0.06);
+    ctx.beginPath(); ctx.rect(x0, cy + cs * 0.2, cs * 1.3, cs * 0.75); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x0 + cs * 0.45, cy + cs * 1.05, cs * 0.38, 0, Math.PI * 2); ctx.fillStyle = "#5a3820"; ctx.fill(); ctx.stroke();
+    const g = ctx.createLinearGradient(0, cy - r0, 0, cy + r0);
+    g.addColorStop(0, "#f1d27a"); g.addColorStop(0.45, "#c4943c"); g.addColorStop(1, "#5a3d16");
+    ctx.fillStyle = g; ctx.strokeStyle = "#2a1a08";
+    ctx.beginPath(); ctx.moveTo(x0, cy - r0); ctx.lineTo(x0 + len, cy - r1); ctx.lineTo(x0 + len, cy + r1); ctx.lineTo(x0, cy + r0); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "#3a2508";
+    for (const f of [0.18, 0.55]) ctx.fillRect(x0 + len * f, cy - r0 + (r0 - r1) * f - 1, cs * 0.14, (r0 - (r0 - r1) * f) * 2 + 2);
+    ctx.fillStyle = "#c4943c"; ctx.fillRect(x0 + len - cs * 0.12, cy - r1 - cs * 0.08, cs * 0.16, (r1 + cs * 0.08) * 2);
+    ctx.beginPath(); ctx.ellipse(x0 + len + cs * 0.04, cy, cs * 0.1, r1 * 0.75, 0, 0, Math.PI * 2); ctx.fillStyle = "#140c04"; ctx.fill();
+    ctx.restore();
+    if (G.state === "aiming") {
+      const left = Math.max(0, Math.ceil(BS_AIM - b.t));
+      ctx.font = "600 " + Math.round(cs * 0.9) + 'px "IM Fell English SC", "Noto Serif Thai", Georgia, serif';
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.lineWidth = 4; ctx.strokeStyle = "rgba(20, 10, 6, 0.85)"; ctx.fillStyle = "#f3d36f";
+      ctx.strokeText(String(left), W - cs * 1.2, cy); ctx.fillText(String(left), W - cs * 1.2, cy);
+      return;
+    }
+    // Muzzle flash, then the ball flying across with a smoke trail.
+    const mx = x0 + len + cs * 0.1;
+    if (b.fireT < 0.12) {
+      const f = 1 - b.fireT / 0.12;
+      ctx.fillStyle = "rgba(255, 214, 120, " + f.toFixed(2) + ")";
+      ctx.beginPath(); ctx.arc(mx + cs * 0.4, cy, cs * (0.7 + 0.8 * (1 - f)), 0, Math.PI * 2); ctx.fill();
+    }
+    if (b.fireT < BS_BALL) {
+      const bx = mx + (W - mx) * (b.fireT / BS_BALL);
+      const tr = ctx.createLinearGradient(bx - cs * 3, 0, bx, 0);
+      tr.addColorStop(0, "rgba(70, 60, 50, 0)"); tr.addColorStop(1, "rgba(70, 60, 50, 0.5)");
+      ctx.fillStyle = tr; ctx.fillRect(bx - cs * 3, cy - cs * 0.35, cs * 3, cs * 0.7);
+      const bg = ctx.createRadialGradient(bx - cs * 0.15, cy - cs * 0.15, cs * 0.05, bx, cy, cs * 0.5);
+      bg.addColorStop(0, "#8a8f96"); bg.addColorStop(0.5, "#2e3237"); bg.addColorStop(1, "#0d0f12");
+      ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(bx, cy, cs * 0.48, 0, Math.PI * 2); ctx.fill();
+    }
   }
   // Where the ball lands, in board pixels: the top of the highest stack in its 3 columns, or the floor.
   function cannonImpactY() {
@@ -1598,6 +1777,7 @@ body {
     if (G.gauge >= 100) { G.readyT = (G.readyT || 0) + dt; if (G.readyT >= 15) { G.readyT = 0; volleyReady(true); } }
     if (G.state === "clearing") { G.clearT -= dt; clearFxTick(); if (G.clearT <= 0) finishClear(); return; }
     if (G.state === "settling") { G.settle.t += dt; if (G.settle.t >= G.settle.dur) finishSettle(); return; }
+    if (G.state === "aiming" || G.state === "broadside") { broadsideTick(dt); return; }
     if (G.state === "firing") {
       const k = G.cannon;
       k.t += dt;
@@ -2033,7 +2213,7 @@ body {
     }
 
     const p = G.piece;
-    if (p && (G.state === "play" || G.state === "firing")) {
+    if (p && (G.state === "play" || G.state === "firing" || G.state === "aiming" || G.state === "broadside")) {
       // Lantern Light: glow on the surface of each column the piece covers.
       const covered = new Map();
       for (const k of cellsOf(p.m, p.x, p.y)) covered.set(k.gx, Math.min(covered.has(k.gx) ? covered.get(k.gx) : 99, k.gy));
@@ -2072,6 +2252,7 @@ body {
       for (const c of G.fx.cols) ctx.fillRect(c * cs, 0, cs, H);
     }
     if (G.state === "firing" && G.cannon) drawCannon();
+    if ((G.state === "aiming" || G.state === "broadside") && G.bs) drawBroadside();
     drawFx(W, H);
     // Danger line: top 3 rows tint when the stack is high.
     let top = -1;
@@ -2097,6 +2278,14 @@ body {
     setText("volleyNum", G.gauge >= 100 ? t("ready") : G.gauge + " / 100");
     $("volleyFill").style.height = G.gauge + "%";
     $("volley").classList.toggle("ready", G.gauge >= 100);
+    const aiming = G.state === "aiming", bsOn = G.state !== "over" && G.state !== "broadside" && (aiming || G.broadsides > 0);
+    const bsb = $("broadside");
+    if (bsb.hidden === bsOn) bsb.hidden = !bsOn;
+    bsb.classList.toggle("fire", aiming);
+    setText("bsLabel", aiming ? t("fire") : t("broadside"));
+    const cnt = bsb.querySelector(".bscount"), many = !aiming && G.broadsides > 1;
+    if (cnt.hidden === many) cnt.hidden = !many;
+    if (many) cnt.textContent = "×" + G.broadsides;
     if (G.gauge >= 100 && G.state !== "over") hint("volley");
     $("boardWrap").classList.toggle("loose", looseOn());
   }
@@ -2192,6 +2381,7 @@ body {
   $("slot0").addEventListener("click", () => choose(0));
   $("slot1").addEventListener("click", () => choose(1));
   $("volley").addEventListener("click", fireVolley);
+  $("broadside").addEventListener("click", broadsideTap);
   $("pauseBtn").addEventListener("click", () => setPaused(true));
   $("resumeBtn").addEventListener("click", () => setPaused(false));
   $("restartBtn").addEventListener("click", () => newGame(lastMode));
@@ -2214,6 +2404,7 @@ body {
     else if (k === "1") choose(0);
     else if (k === "2") choose(1);
     else if (k === "c" || k === "C" || k === "v" || k === "V") fireVolley();
+    else if (k === "b" || k === "B") broadsideTap();
     else return;
     e.preventDefault();
   });
