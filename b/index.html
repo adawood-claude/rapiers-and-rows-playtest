@@ -771,7 +771,7 @@ body {
       tables: [[0, 0], [4, 0], [8, 0], [12, 0], [2, 2], [6, 2], [10, 2], [13, 2], [0, 4], [4, 4], [8, 4], [12, 4]]
     },
     s12r3: {
-      base: "s12", round: 3, next: "s13", speed: 4, goal: { type: "tables" }, blasts: true, lockLimit: 60,
+      base: "s12", round: 3, next: "s13", speed: 4, goal: { type: "tables" }, blasts: true, lockLimit: 80,
       tables: [[0, 0], [4, 0], [8, 0], [12, 0], [2, 2], [6, 2], [10, 2], [13, 2], [0, 4], [4, 4], [8, 4], [12, 4]]
     },
     s13: { title: "1.3 The Wine Cellar Barricade", base: "s13", round: 1, next: "s13r2", speed: 3, goal: { type: "honor", value: 8000 }, walls: [0, 1, 2, 12, 13, 14], blasts: false },
@@ -1517,9 +1517,12 @@ body {
 
   function finishClear() {
     const rows = G.clearRows;
-    const tids = new Set();
+    const tids = new Set(), tableHoles = [];
     for (const y of rows) for (const c of G.grid[y]) if (c && c.t === "table") tids.add(c.tid);
-    if (tids.size) for (let y = 0; y < TOT; y++) for (let x = 0; x < COLS; x++) { const c = G.grid[y][x]; if (c && c.t === "table" && tids.has(c.tid)) G.grid[y][x] = null; }
+    if (tids.size) for (let y = 0; y < TOT; y++) for (let x = 0; x < COLS; x++) {
+      const c = G.grid[y][x];
+      if (c && c.t === "table" && tids.has(c.tid)) { G.grid[y][x] = null; if (!rows.includes(y)) tableHoles.push([x, y]); }
+    }
     for (const r of rows.slice().sort((a, b) => b - a)) {
       for (let x = 0; x < COLS; x++) {
         if (G.walls.has(x)) continue;
@@ -1527,6 +1530,8 @@ body {
         G.grid[TOT - 1][x] = null;
       }
     }
+    // Table halves outside the cleared rows have moved down with the rows; close those holes too.
+    if (tableHoles.length) collapse(tableHoles.map(([x, y]) => [x, y - rows.filter((r) => r < y).length]));
     G.clearRows = null;
     G.state = "play";
     finishTurn();
