@@ -570,7 +570,7 @@ body {
       sub_s11: "Open board · reach 5,000 Honor · speed 1 · blasts off · 3 rounds",
       sub_s12: "Break all 8 tables · speed 2 · blasts on · 3 rounds",
       sub_s12v2: "Break all 4 tables · speed 2 · blasts on",
-      sub_s13: "9-column lane · reach 8,000 Honor · speed 3 · blasts off · 3 rounds",
+      sub_s13: "9-column lane · reach 11,000 Honor · speed 3 · blasts on · 3 rounds",
       bestLine: "Speed rises every 10 rows · blasts {state}", bestPart: " · best {n}",
       on: "on", off: "off",
       storyDifficulty: "Story difficulty", artStyle: "Art style", settings: "Settings",
@@ -653,7 +653,7 @@ body {
       sub_s11: "Tablero abierto · llega a 5.000 de Honor · velocidad 1 · sin explosiones · 3 rondas",
       sub_s12: "Rompe las 8 mesas · velocidad 2 · con explosiones · 3 rondas",
       sub_s12v2: "Rompe las 4 mesas · velocidad 2 · con explosiones",
-      sub_s13: "Pasillo de 9 columnas · llega a 8.000 de Honor · velocidad 3 · sin explosiones · 3 rondas",
+      sub_s13: "Pasillo de 9 columnas · llega a 11.000 de Honor · velocidad 3 · con explosiones · 3 rondas",
       bestLine: "La velocidad sube cada 10 filas · explosiones: {state}", bestPart: " · récord {n}",
       on: "sí", off: "no",
       storyDifficulty: "Dificultad de la historia", artStyle: "Estilo artístico", settings: "Ajustes",
@@ -736,7 +736,7 @@ body {
       sub_s11: "กระดานโล่ง · ทำเกียรติให้ถึง 5,000 · ความเร็ว 1 · ปิดระเบิด · 3 รอบ",
       sub_s12: "ทำลายโต๊ะทั้ง 8 ตัว · ความเร็ว 2 · เปิดระเบิด · 3 รอบ",
       sub_s12v2: "ทำลายโต๊ะทั้ง 4 ตัว · ความเร็ว 2 · เปิดระเบิด",
-      sub_s13: "ช่องทาง 9 คอลัมน์ · ทำเกียรติให้ถึง 8,000 · ความเร็ว 3 · ปิดระเบิด · 3 รอบ",
+      sub_s13: "ช่องทาง 9 คอลัมน์ · ทำเกียรติให้ถึง 11,000 · ความเร็ว 3 · เปิดระเบิด · 3 รอบ",
       bestLine: "ความเร็วเพิ่มทุก 10 แถว · ระเบิด: {state}", bestPart: " · สถิติ {n}",
       on: "เปิด", off: "ปิด",
       storyDifficulty: "ระดับความยากของเนื้อเรื่อง", artStyle: "สไตล์ภาพ", settings: "การตั้งค่า",
@@ -867,9 +867,10 @@ body {
       base: "s12", round: 3, ver: 2, next: "s13", speed: 4, goal: { type: "tables" }, blasts: true, lockLimit: 80, gaugeMin: 50,
       tables: [[0, 0], [4, 0], [8, 0], [12, 0], [2, 2], [6, 2], [10, 2], [13, 2], [0, 4], [12, 4]]
     },
-    s13: { title: "1.3 The Wine Cellar Barricade", base: "s13", round: 1, next: "s13r2", speed: 3, goal: { type: "honor", value: 8000 }, walls: [0, 1, 2, 12, 13, 14], blasts: false },
-    s13r2: { base: "s13", round: 2, next: "s13r3", speed: 4, goal: { type: "honor", value: 10000 }, walls: [0, 1, 2, 3, 11, 12, 13, 14], blasts: false },
-    s13r3: { base: "s13", round: 3, next: null, speed: 5, goal: { type: "honor", value: 14000 }, walls: [0, 1, 2, 12, 13, 14], tables: [[3, 0], [6, 0], [9, 0]], blasts: false }
+    // 1.3 playtest retune: Powder Blasts on (kegs, Guards Scatter), faster starts, the pace climbs every 90 s, and more Honor to pass.
+    s13: { title: "1.3 The Wine Cellar Barricade", base: "s13", round: 1, next: "s13r2", speed: 3, timeClimb: 90, goal: { type: "honor", value: 11000 }, walls: [0, 1, 2, 12, 13, 14], blasts: true },
+    s13r2: { base: "s13", round: 2, next: "s13r3", speed: 5, timeClimb: 90, goal: { type: "honor", value: 13500 }, walls: [0, 1, 2, 3, 11, 12, 13, 14], blasts: true },
+    s13r3: { base: "s13", round: 3, next: null, speed: 7, timeClimb: 90, goal: { type: "honor", value: 19000 }, walls: [0, 1, 2, 12, 13, 14], tables: [[3, 0], [6, 0], [9, 0]], blasts: true }
   };
   // Stage 1.2 redesign trial: 4 tables, all in the bottom 2 rows, with gaps 2-3 squares wide.
   if (VARIANT && VARIANT.stage12 === "v2") MODES.s12.tables = [[0, 0], [4, 0], [9, 0], [13, 0]];
@@ -971,7 +972,7 @@ body {
   // synthesized sounds if a file is missing or audio can't be decoded, so the game never goes silent.
   const AUDIO_BASE = window.RR_AUDIO_BASE || "audio/";
   const SND_N = {"A01": 4, "A02": 4, "A03": 2, "A05": 2, "A06": 3, "A07": 3, "A08": 3, "A10": 2, "B01": 2, "B02": 1, "B03": 1, "B04": 1, "B05": 1, "B06": 1, "B07": 1, "B08": 1, "B09": 1, "B10": 2, "C01": 2, "C02": 1, "C03": 1, "C04": 1, "C05": 1, "C06": 2, "C07": 1, "C08": 1, "C09": 1, "C10": 1, "C11": 1, "D01": 2, "D02": 1, "D03": 2, "D05": 2, "E01": 1, "E02": 1, "E04": 1, "G01": 2, "G02": 1, "G04": 1, "G05": 1, "G06": 1, "G07": 1, "G09": 1};
-  const MUS_INFO = {"menu": {"dur": 76.8, "loop": true}, "endless-calm": {"dur": 139.636354, "loop": true}, "endless-danger": {"dur": 139.636354, "loop": true}, "endless-tense": {"dur": 139.636354, "loop": true}, "march-calm": {"dur": 73.846146, "loop": true}, "march-danger": {"dur": 73.846146, "loop": true}, "march-tense": {"dur": 73.846146, "loop": true}, "powder": {"dur": 4.0, "loop": true}, "powder-hit": {"dur": 1.4, "loop": false}, "charge": {"dur": 20.869563, "loop": true}, "scramble": {"dur": 30.0, "loop": false}};
+  const MUS_INFO = {"salt-calm": {"dur": 71.111104, "loop": true}, "salt-tense": {"dur": 71.111104, "loop": true}, "salt-danger": {"dur": 71.111104, "loop": true}, "siege-calm": {"dur": 80, "loop": true}, "siege-tense": {"dur": 80, "loop": true}, "siege-danger": {"dur": 80, "loop": true}, "menu": {"dur": 76.8, "loop": true}, "endless-calm": {"dur": 139.636354, "loop": true}, "endless-danger": {"dur": 139.636354, "loop": true}, "endless-tense": {"dur": 139.636354, "loop": true}, "march-calm": {"dur": 73.846146, "loop": true}, "march-danger": {"dur": 73.846146, "loop": true}, "march-tense": {"dur": 73.846146, "loop": true}, "powder": {"dur": 4.0, "loop": true}, "powder-hit": {"dur": 1.4, "loop": false}, "charge": {"dur": 20.869563, "loop": true}, "scramble": {"dur": 30.0, "loop": false}};
   const AUD = { bufs: new Map(), loading: new Map(), used: new Map(), musicReal: true };
   const SFX_MAJOR = new Set(["B04", "B05", "C04", "C06", "C09", "D01", "D02", "G06", "G07"]);
   function loadBuf(path) {
@@ -1154,6 +1155,7 @@ body {
   // event tracks start from bar 1 with a 0.33 s fade. Falls back to the synthesized music if loading fails.
   const RM = { file: null, src: null, gain: null, t0: 0, dur: 0, pending: null, amb: null, ambGain: null };
   function musicTier() { const top = G && G.top != null ? G.top : 0; return top >= 18 ? "danger" : top >= 10 ? "tense" : "calm"; }
+  const BOARD_THEME = { s11: "march", s12: "salt", s13: "siege" };
   function wantedMusic() {
     if (!AU.ctx || !AU.musicOn) return null;
     if (!$("menu").hidden) return "menu";
@@ -1162,7 +1164,8 @@ body {
     if (w === "broadside") return "powder";
     if (w === "scatter") return "scramble";
     if (w === "charge") return "charge";
-    return (G.mode && G.mode.endless ? "endless" : "march") + "-" + musicTier();
+    // Each demo board gets its own layered theme (Salt and Steel and The Siege are borrowed from Chapters 2 and 3).
+    return (G.mode && G.mode.endless ? "endless" : BOARD_THEME[G.mode && G.mode.base] || "march") + "-" + musicTier();
   }
   const family = (n) => (n ? n.split("-")[0] : "");
   function rmStop(fade) {
