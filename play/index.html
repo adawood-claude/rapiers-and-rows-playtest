@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>html{color-scheme:dark}body{margin:0}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box}</style>
-<script>window.RR_VARIANT = {"id": "play", "label": "Latest", "short": "Latest version", "note": "Powder Blasts are set per story stage, and you can switch them on or off for Endless in Settings."};</script>
+<script>window.RR_VARIANT = {"id": "play", "label": "Latest", "short": "Latest version", "note": "Powder Blasts are set per story stage, and you can switch them on or off for Endless in Settings."}; window.RR_AUDIO_BASE = "../audio/";</script>
 <title>Rapiers &amp; Rows Latest</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -923,7 +923,8 @@ body {
       if (AU.ctx) { if (AU.ctx.state === "suspended") AU.ctx.resume(); return; }
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return;
-      const c = new AC();
+      let c;
+      try { c = new AC({ sampleRate: 32000 }); } catch (e) { c = new AC(); }
       AU.ctx = c;
       const master = c.createGain(); master.gain.value = 0.9; master.connect(c.destination);
       AU.sfx = c.createGain(); AU.sfx.gain.value = AU.on ? 0.8 : 0; AU.sfx.connect(master);
@@ -931,6 +932,7 @@ body {
       const buf = c.createBuffer(1, c.sampleRate, c.sampleRate), d = buf.getChannelData(0);
       for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
       AU.noise = buf;
+      preloadSound();
     } catch (e) { AU.ctx = null; }
   }
   ["pointerdown", "keydown"].forEach((ev) => window.addEventListener(ev, audioInit, { passive: true }));
@@ -963,6 +965,57 @@ body {
   function boom(t, gain) { nz(t, 0.9, { type: "lowpass", f0: 900, f1: 90, gain }); tn(t, 110, 0.6, { f1: 36, gain: gain * 0.8 }); }
   const midi = (n) => 440 * Math.pow(2, (n - 69) / 12);
   function fanfare(t, notes, gain) { notes.forEach((n, i) => tn(t + i * 0.06, midi(n), 0.9, { type: "sawtooth", lp: 1800, gain, a: 0.03 })); }
+
+  // ---------- recorded sound pack ----------
+  // Effects and music from Ali's sound pack, loaded after the first tap. Every call falls back to the
+  // synthesized sounds if a file is missing or audio can't be decoded, so the game never goes silent.
+  const AUDIO_BASE = window.RR_AUDIO_BASE || "audio/";
+  const SND_N = {"A01": 4, "A02": 4, "A03": 2, "A05": 2, "A06": 3, "A07": 3, "A08": 3, "A10": 2, "B01": 2, "B02": 1, "B03": 1, "B04": 1, "B05": 1, "B06": 1, "B07": 1, "B08": 1, "B09": 1, "B10": 2, "C01": 2, "C02": 1, "C03": 1, "C04": 1, "C05": 1, "C06": 2, "C07": 1, "C08": 1, "C09": 1, "C10": 1, "C11": 1, "D01": 2, "D02": 1, "D03": 2, "D05": 2, "E01": 1, "E02": 1, "E04": 1, "G01": 2, "G02": 1, "G04": 1, "G05": 1, "G06": 1, "G07": 1, "G09": 1};
+  const MUS_INFO = {"menu": {"dur": 76.8, "loop": true}, "endless-calm": {"dur": 139.636354, "loop": true}, "endless-danger": {"dur": 139.636354, "loop": true}, "endless-tense": {"dur": 139.636354, "loop": true}, "march-calm": {"dur": 73.846146, "loop": true}, "march-danger": {"dur": 73.846146, "loop": true}, "march-tense": {"dur": 73.846146, "loop": true}, "powder": {"dur": 4.0, "loop": true}, "powder-hit": {"dur": 1.4, "loop": false}, "charge": {"dur": 20.869563, "loop": true}, "scramble": {"dur": 30.0, "loop": false}};
+  const AUD = { bufs: new Map(), loading: new Map(), used: new Map(), musicReal: true };
+  const SFX_MAJOR = new Set(["B04", "B05", "C04", "C06", "C09", "D01", "D02", "G06", "G07"]);
+  function loadBuf(path) {
+    if (AUD.bufs.has(path)) { AUD.used.set(path, performance.now()); return Promise.resolve(AUD.bufs.get(path)); }
+    if (AUD.loading.has(path)) return AUD.loading.get(path);
+    const p = fetch(AUDIO_BASE + path)
+      .then((r) => { if (!r.ok) throw new Error("missing"); return r.arrayBuffer(); })
+      .then((ab) => new Promise((res, rej) => AU.ctx.decodeAudioData(ab, res, rej)))
+      .then((b) => { AUD.bufs.set(path, b); AUD.used.set(path, performance.now()); AUD.loading.delete(path); trimMusicCache(); return b; })
+      .catch(() => { AUD.loading.delete(path); return null; });
+    AUD.loading.set(path, p);
+    return p;
+  }
+  // Long music files take a lot of memory once decoded; keep the total under about 120 MB.
+  function trimMusicCache() {
+    const keep = new Set([RM.file && "music/" + RM.file + ".m4a", RM.pending && "music/" + RM.pending + ".m4a"]);
+    const music = [...AUD.bufs.keys()].filter((k) => k.startsWith("music/"));
+    const size = (k) => { const b = AUD.bufs.get(k); return b.length * b.numberOfChannels * 4; };
+    let total = music.reduce((a, k) => a + size(k), 0);
+    music.sort((a, b) => (AUD.used.get(a) || 0) - (AUD.used.get(b) || 0));
+    for (const k of music) { if (total <= 120e6) break; if (keep.has(k)) continue; total -= size(k); AUD.bufs.delete(k); }
+  }
+  function preloadSound() {
+    for (const id of Object.keys(SND_N)) for (let v = 1; v <= SND_N[id]; v++) loadBuf("sfx/" + id + "-" + v + ".wav");
+    ["powder", "powder-hit", "charge", "scramble"].forEach((k) => loadBuf("music/" + k + ".m4a"));
+  }
+  // Play one effect. Returns true if it was handled (played, or sound is off), false to use the synth.
+  function sfx(id, o) {
+    o = o || {};
+    if (!AU.ctx || !AU.on) return true;
+    const n = SND_N[id];
+    if (!n) return false;
+    const b = AUD.bufs.get("sfx/" + id + "-" + (1 + Math.floor(Math.random() * n)) + ".wav") || AUD.bufs.get("sfx/" + id + "-1.wav");
+    if (!b) return false;
+    try {
+      const c = AU.ctx, src = c.createBufferSource(), g = c.createGain();
+      src.buffer = b;
+      if (o.rate) src.playbackRate.value = o.rate;
+      g.gain.value = o.gain != null ? o.gain : id[0] === "A" ? 0.1 : SFX_MAJOR.has(id) ? 0.45 : 0.28;
+      src.connect(g); g.connect(AU.sfx);
+      src.start(c.currentTime + (o.delay || 0));
+    } catch (e) { return false; }
+    return true;
+  }
   const play = (fn) => { if (!AU.ctx || !AU.on) return; try { fn(AU.ctx.currentTime + 0.01); } catch (e) { /* audio unavailable */ } };
   const SFX = {
     move: () => play((t) => nz(t, 0.07, { f0: 2400, f1: 900, q: 0.8, gain: 0.04 })),
@@ -1008,6 +1061,31 @@ body {
       else [69, 65, 62, 57].forEach((n, i) => tn(t + i * 0.22, midi(n), 0.5, { type: "triangle", gain: 0.09 }));
     })
   };
+
+
+  const SYN = Object.assign({}, SFX);
+  const SAMPLE_OF = {
+    move: () => sfx("A01"), rotate: () => sfx("A02"), refuse: () => sfx("A03"),
+    lock: (mat) => sfx(mat === "C" ? "A08" : mat === "F" ? "A07" : "A06"),
+    clear: (n) => sfx("B0" + Math.min(Math.max(n, 1), 5)),
+    interlock: () => sfx("B07"),
+    cannonFire: () => { if (!sfx("C04")) return false; sfx("C05", { delay: 0.15 }); return true; },
+    cannonHit: () => sfx("C06"),
+    ready: () => sfx("C02"),
+    broadsideReady: () => sfx("C07"),
+    broadsideFire: () => { if (!sfx("C09")) return false; sfx("C10", { delay: 0.05 }); return true; },
+    blast: () => sfx("D01"),
+    scatter: () => sfx("E02"),
+    restore: () => sfx("E04"),
+    end: (won) => sfx(won ? "G06" : "G07")
+  };
+  for (const k of Object.keys(SYN)) {
+    SFX[k] = (...a) => {
+      let ok = false;
+      try { ok = SAMPLE_OF[k] ? SAMPLE_OF[k](...a) : false; } catch (e) { ok = false; }
+      if (!ok) SYN[k](...(k === "lock" ? [a[0] === "C"] : a));
+    };
+  }
 
   // Music: four separate tracks, each with its own fixed tempo, instead of speeding one tune up.
   //  main      "The Musketeer's March": D minor, 104 bpm. Layers thicken as the stack rises (no tempo change).
@@ -1070,7 +1148,90 @@ body {
     const bus = c.createGain(); bus.gain.value = 0; bus.connect(AU.mus); bus.gain.setTargetAtTime(1, now, 0.08);
     MUS.bus = bus; MUS.track = name; MUS.step = 0; MUS.next = now + 0.06;
   }
+
+  // Recorded music: one track at a time, fading between them. Theme layers (calm, tense, danger) share
+  // the same length and note grid, so a layer change continues from the same point with a 1.5 s crossfade;
+  // event tracks start from bar 1 with a 0.33 s fade. Falls back to the synthesized music if loading fails.
+  const RM = { file: null, src: null, gain: null, t0: 0, dur: 0, pending: null, amb: null, ambGain: null };
+  function musicTier() { const top = G && G.top != null ? G.top : 0; return top >= 18 ? "danger" : top >= 10 ? "tense" : "calm"; }
+  function wantedMusic() {
+    if (!AU.ctx || !AU.musicOn) return null;
+    if (!$("menu").hidden) return "menu";
+    if (!G || G.paused || G.state === "over") return null;
+    const w = wantedTrack();
+    if (w === "broadside") return "powder";
+    if (w === "scatter") return "scramble";
+    if (w === "charge") return "charge";
+    return (G.mode && G.mode.endless ? "endless" : "march") + "-" + musicTier();
+  }
+  const family = (n) => (n ? n.split("-")[0] : "");
+  function rmStop(fade) {
+    if (!RM.src) { RM.file = null; return; }
+    const c = AU.ctx, now = c.currentTime, s = RM.src, g = RM.gain;
+    try { g.gain.cancelScheduledValues(now); g.gain.setValueAtTime(g.gain.value, now); g.gain.linearRampToValueAtTime(0, now + fade); s.stop(now + fade + 0.05); } catch (e) { /* already stopped */ }
+    RM.src = null; RM.gain = null; RM.file = null;
+  }
+  function rmStart(name, buf, offset, fade) {
+    const c = AU.ctx, now = c.currentTime, info = MUS_INFO[name] || {};
+    rmStop(fade);
+    const src = c.createBufferSource(), g = c.createGain();
+    src.buffer = buf;
+    const dur = Math.min(info.dur || buf.duration, buf.duration);
+    src.loop = true; src.loopStart = 0; src.loopEnd = dur;
+    g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(1, now + fade);
+    src.connect(g); g.connect(AU.mus);
+    src.start(now, offset % dur);
+    RM.file = name; RM.src = src; RM.gain = g; RM.t0 = now - offset; RM.dur = dur;
+  }
+  function realMusicTick() {
+    const want = wantedMusic();
+    if (!want) { RM.pending = null; if (RM.src) rmStop(0.3); return; }
+    if (want === RM.file) { RM.pending = null; return; }
+    if (want === RM.pending) return;
+    RM.pending = want;
+    loadBuf("music/" + want + ".m4a").then((buf) => {
+      if (RM.pending !== want) return;
+      RM.pending = null;
+      if (!buf) { AUD.musicReal = false; rmStop(0.2); return; }
+      const sync = RM.src && family(want) === family(RM.file) && family(want) !== "menu";
+      const offset = sync ? (AU.ctx.currentTime - RM.t0) % RM.dur : 0;
+      rmStart(want, buf, offset, sync ? 1.5 : 0.33);
+    });
+  }
+  // The Powder and Fuse end hit, played on the music bus when the Broadside fires.
+  function musicHit() {
+    if (!AU.ctx || !AU.musicOn || !AUD.musicReal) return;
+    const b = AUD.bufs.get("music/powder-hit.m4a");
+    if (!b) return;
+    const s = AU.ctx.createBufferSource(); s.buffer = b; s.connect(AU.mus); s.start();
+  }
+  // Quiet tavern ambience under the Chapter 1 boards.
+  function ambienceTick() {
+    const want = !!(AU.ctx && AU.on && G && G.mode && G.mode.base && !G.paused && G.state !== "over");
+    if (want && !RM.amb && !RM.ambLoading) {
+      RM.ambLoading = true;
+      loadBuf("sfx/H01.m4a").then((b) => {
+        RM.ambLoading = false;
+        if (!b || RM.amb) return;
+        const c = AU.ctx, src = c.createBufferSource(), g = c.createGain();
+        src.buffer = b; src.loop = true;
+        g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.035, c.currentTime + 2);
+        src.connect(g); g.connect(AU.sfx); src.start();
+        RM.amb = src; RM.ambGain = g;
+      });
+    } else if (!want && RM.amb) {
+      const c = AU.ctx, now = c.currentTime;
+      try { RM.ambGain.gain.cancelScheduledValues(now); RM.ambGain.gain.setValueAtTime(RM.ambGain.gain.value, now); RM.ambGain.gain.linearRampToValueAtTime(0, now + 0.5); RM.amb.stop(now + 0.6); } catch (e) { /* stopped */ }
+      RM.amb = null;
+    }
+  }
   function musicTick() {
+    if (AU.ctx) ambienceTick();
+    if (AUD.musicReal && AU.ctx) {
+      if (MUS.timer) { clearInterval(MUS.timer); MUS.timer = 0; if (MUS.bus) { try { MUS.bus.disconnect(); } catch (e) { /* gone */ } MUS.bus = null; } }
+      realMusicTick();
+      return;
+    }
     const want = !!(AU.ctx && AU.musicOn && G && !G.paused && G.state !== "over");
     if (want && !MUS.timer) {
       MUS.track = null;
@@ -1284,6 +1445,7 @@ body {
     }
     FX.shake = Math.max(FX.shake, 0.45);
     SFX.blast();
+    if (kegs > 1) sfx("D02", { delay: 0.12 });
     popup(kegs > 1 ? t("blastN", { n: kegs }) : t("blast"), t("cellsPts", { n: cells, pts: fmt(pts) }) + (G.level > before ? t("speedUpPart") : ""));
     return cells;
   }
@@ -1295,6 +1457,7 @@ body {
       const c = G.grid[y][x];
       if (c && c.t === "table" && tids.has(c.tid)) { G.grid[y][x] = null; n++; if (holes) holes.push([x, y]); }
     }
+    if (n) sfx("D03", { delay: 0.1 });
     return n;
   }
   // After a blast, everything above each blasted cell drops down to fill the hole, column by column.
@@ -1315,7 +1478,7 @@ body {
   function setLevel() {
     const before = G.level;
     G.level = Math.min(15, G.mode.speed + (G.mode.endless ? Math.floor(G.rows / 10) + (G.blasts || 0) : (G.rushLevels || 0) + rowSteps() + (G.mode.timeClimb ? Math.floor((G.time || 0) / G.mode.timeClimb) : 0)));
-    if (before && G.level > before) G.chargeT = 20;
+    if (before && G.level > before) { G.chargeT = 20; if (G.state !== "over") sfx("E01"); }
   }
 
   // ---------- hints: each shows once, the first time it matters ----------
@@ -1438,6 +1601,7 @@ body {
     FX.parts = []; FX.rings = []; FX.banner = null; FX.shake = 0;
     setTimeout(() => hint("move"), 700);
     hideAll();
+    if (!mode.endless) sfx("G04", { delay: 0.15 });
     if (!mode.endless) setTimeout(() => { if (G && G.mode === mode) popup(modeName(G.modeId), diffName(G.diff) + " · " + (blastsActive() ? t("blastsOnStage") : t("blastsOffStage"))); }, 250);
     if (mode.bonusStart) setTimeout(() => { popup(t("scatterTitle"), t("scatterSub")); SFX.scatter(); }, 300);
     if (carry) { G.cannonShots = carry.cannonShots || 0; G.broadsides = carry.broadsides || 0; }
@@ -1509,6 +1673,7 @@ body {
     if (!canAct()) return;
     const p = G.piece;
     while (!collides(p.m, p.x, p.y - 1)) p.y--;
+    sfx("A05");
     lock();
   }
   const canAct = () => G && G.state === "play" && !G.paused && G.piece;
@@ -1525,7 +1690,7 @@ body {
     const single = PIECES[p.id].single;
     G.piece = null;
     G.locks++;
-    SFX.lock(cells.every((k) => k.m === "C"));
+    SFX.lock(cells[0] && cells[0].m);
     if (G.locks === 2) hint("drop");
     if (G.locks === 4) hint("armory");
     if (G.locks === 12) hint("combo");
@@ -1599,6 +1764,9 @@ body {
     if (n > 0) popup(t("clear" + Math.min(n, 5)) + "!", "+" + fmt(total) + (extras.length ? " · " + extras.join(" · ") : ""));
     else if (inter) popup(t("interlock") + "!", "+250");
     if (inter) SFX.interlock();
+    if (n > 0 && crowned) sfx("B06", { delay: 0.25 });
+    if (n > 0 && combo) sfx("B09", { delay: 0.15 });
+    if (riposte) sfx("B08", { rate: Math.min(1.6, 1 + 0.06 * (G.streak - 2)), delay: 0.1 });
 
     G.pendingGauge = 10 * n + (combo ? 50 : 0);
     if (n > 0) {
@@ -1629,6 +1797,8 @@ body {
     }
     // Table halves outside the cleared rows have moved down with the rows; close those holes too.
     if (tableHoles.length) collapse(tableHoles.map(([x, y]) => [x, y - rows.filter((r) => r < y).length]));
+    if (tids.size) sfx("D03");
+    sfx("B10", { delay: 0.05 });
     G.clearRows = null;
     G.state = "play";
     finishTurn();
@@ -1638,6 +1808,7 @@ body {
     const wasReady = G.gauge >= 100;
     G.gauge = Math.min(100, G.gauge + G.pendingGauge);
     if (!wasReady && G.gauge >= 100) { G.readyT = 0; volleyReady(false); }
+    else if (G.pendingGauge > 0 && G.gauge < 100) sfx("C01", { delay: 0.3 });
     G.pendingGauge = 0;
     setLevel();
     if (G.diff) {
@@ -1731,13 +1902,14 @@ body {
     const speed = (G.diff ? BS_SPEED[G.diff] : 13.5) * (reduced ? 0.6 : 1);
     G.bs = { t: 0, pos: 0, dir: 1, maxR, speed, row: 0, fireT: 0, done: false, col: 0, holes: [], kegs: [], cells: 0 };
     G.state = "aiming";
-    SFX.ready(false);
+    if (!sfx("C08")) SFX.ready(false);
   }
   function fireBroadside() {
     if (!G || G.state !== "aiming") return;
     G.bs.row = Math.round(G.bs.pos);
     G.state = "broadside";
     SFX.broadsideFire();
+    musicHit();
     const cy = (ROWS - 1 - (G.bs.row + 1)) * cs + cs / 2;
     burst(cs * 1.9, cy, 10, "smoke", { speed: 60, vx: 80, life: 1.2, size: cs * 0.5 });
     FX.shake = Math.max(FX.shake, 0.6);
@@ -1781,7 +1953,7 @@ body {
       G.score += pts;
       if (b.cells) popup(t("broadsideHit"), t("cellsPts", { n: b.cells, pts: fmt(pts) }));
       else popup(t("miss"), "");
-      SFX.cannonHit();
+      if (b.cells || !sfx("C11")) SFX.cannonHit();
       if (b.kegs.length) detonate(b.kegs);
       if (checkWin()) { gameOver(true); return; }
     }
@@ -2022,6 +2194,7 @@ body {
     if (!rank) return;
     box.dataset.rank = rank;
     $("hsLine").textContent = t("newHigh", { n: rank });
+    if (rank === 1) sfx("G09", { delay: 1.6 });
     $("hsName").value = store.get("rr-name") || "";
     $("hsName").placeholder = t("yourName");
     $("hsSave").textContent = t("save");
@@ -2668,7 +2841,7 @@ body {
       el.setAttribute("aria-label", t("armorySlotPiece", { n: i + 1, piece: pieceName(id) }) + (G.choice === i ? t("deploysNext") : ""));
     }
   }
-  function choose(i) { if (!G || G.state === "over") return; G.choice = i; renderArmory(); }
+  function choose(i) { if (!G || G.state === "over") return; if (G.choice !== i) sfx("A10"); G.choice = i; renderArmory(); }
 
   let popTimer = 0;
   function popup(big, small) {
@@ -2774,6 +2947,7 @@ body {
     if (!G || G.state === "over") return;
     G.paused = on;
     G.softKey = false;
+    if (on) sfx("G05");
     $("pause").hidden = !on;
   }
   function hideAll() { $("menu").hidden = true; $("pause").hidden = true; $("end").hidden = true; $("boards").hidden = true; }
@@ -2823,6 +2997,10 @@ body {
     if (!$("boards").hidden) lbRender();
   }
   document.querySelectorAll("[data-lang]").forEach((b) => b.addEventListener("click", () => setLang(b.dataset.lang)));
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest && e.target.closest(".overlay button");
+    if (b) sfx(b.dataset.toggle ? "G02" : "G01");
+  });
 
   layout();
   $("cannonIcon").src = TILE_SRC.cnIdle; $("bsIcon").src = TILE_SRC.bsIdle;
