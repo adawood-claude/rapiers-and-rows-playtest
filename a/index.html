@@ -1373,7 +1373,9 @@ body {
   }));
 
   // ---------- game setup ----------
-  function newGame(modeId) {
+  // carry: Cannon progress brought along when the player presses Continue, so a run through the rounds
+  // builds toward a Broadside. Starting a round from the menu or Play again begins from zero.
+  function newGame(modeId, carry) {
     setScene(modeId);
     lastMode = modeId;
     const mode = MODES[modeId];
@@ -1409,6 +1411,7 @@ body {
     hideAll();
     if (!mode.endless) setTimeout(() => { if (G && G.mode === mode) popup(modeName(G.modeId), diffName(G.diff) + " · " + (blastsActive() ? t("blastsOnStage") : t("blastsOffStage"))); }, 250);
     if (mode.bonusStart) setTimeout(() => { popup(t("scatterTitle"), t("scatterSub")); SFX.scatter(); }, 300);
+    if (carry) { G.cannonShots = carry.cannonShots || 0; G.broadsides = carry.broadsides || 0; }
     spawn();
     renderArmory();
   }
@@ -2686,7 +2689,10 @@ body {
   $("restartBtn").addEventListener("click", () => newGame(lastMode));
   $("menuBtn").addEventListener("click", showMenu);
   $("againBtn").addEventListener("click", () => newGame(lastMode));
-  $("continueBtn").addEventListener("click", () => { const m = MODES[lastMode]; if (m && m.next) newGame(m.next); });
+  $("continueBtn").addEventListener("click", () => {
+    const m = MODES[lastMode];
+    if (m && m.next) newGame(m.next, G ? { cannonShots: G.cannonShots, broadsides: G.broadsides } : null);
+  });
   $("endMenuBtn").addEventListener("click", showMenu);
   document.querySelectorAll(".modebtn, .roundbtn").forEach((b) => b.addEventListener("click", () => newGame(b.dataset.mode)));
 
