@@ -987,7 +987,7 @@ body {
   }
   // Long music files take a lot of memory once decoded; keep the total under about 120 MB.
   function trimMusicCache() {
-    const keep = new Set([RM.file && "music/" + RM.file + ".m4a", RM.pending && "music/" + RM.pending + ".m4a"]);
+    const keep = new Set([RM.file && "music/" + RM.file + ".mp4", RM.pending && "music/" + RM.pending + ".mp4"]);
     const music = [...AUD.bufs.keys()].filter((k) => k.startsWith("music/"));
     const size = (k) => { const b = AUD.bufs.get(k); return b.length * b.numberOfChannels * 4; };
     let total = music.reduce((a, k) => a + size(k), 0);
@@ -996,7 +996,7 @@ body {
   }
   function preloadSound() {
     for (const id of Object.keys(SND_N)) for (let v = 1; v <= SND_N[id]; v++) loadBuf("sfx/" + id + "-" + v + ".wav");
-    ["powder", "powder-hit", "charge", "scramble"].forEach((k) => loadBuf("music/" + k + ".m4a"));
+    ["powder", "powder-hit", "charge", "scramble"].forEach((k) => loadBuf("music/" + k + ".mp4"));
   }
   // Play one effect. Returns true if it was handled (played, or sound is off), false to use the synth.
   function sfx(id, o) {
@@ -1189,7 +1189,7 @@ body {
     if (want === RM.file) { RM.pending = null; return; }
     if (want === RM.pending) return;
     RM.pending = want;
-    loadBuf("music/" + want + ".m4a").then((buf) => {
+    loadBuf("music/" + want + ".mp4").then((buf) => {
       if (RM.pending !== want) return;
       RM.pending = null;
       if (!buf) { AUD.musicReal = false; rmStop(0.2); return; }
@@ -1201,7 +1201,7 @@ body {
   // The Powder and Fuse end hit, played on the music bus when the Broadside fires.
   function musicHit() {
     if (!AU.ctx || !AU.musicOn || !AUD.musicReal) return;
-    const b = AUD.bufs.get("music/powder-hit.m4a");
+    const b = AUD.bufs.get("music/powder-hit.mp4");
     if (!b) return;
     const s = AU.ctx.createBufferSource(); s.buffer = b; s.connect(AU.mus); s.start();
   }
@@ -1210,7 +1210,7 @@ body {
     const want = !!(AU.ctx && AU.on && G && G.mode && G.mode.base && !G.paused && G.state !== "over");
     if (want && !RM.amb && !RM.ambLoading) {
       RM.ambLoading = true;
-      loadBuf("sfx/H01.m4a").then((b) => {
+      loadBuf("sfx/H01.mp4").then((b) => {
         RM.ambLoading = false;
         if (!b || RM.amb) return;
         const c = AU.ctx, src = c.createBufferSource(), g = c.createGain();
