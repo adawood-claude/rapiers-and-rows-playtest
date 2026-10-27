@@ -298,6 +298,10 @@ body {
 }
 .modebtn .tag { font-family: var(--display); color: var(--brass); font-size: 17px; }
 .modebtn .sub { grid-column: 2; font-size: 13px; color: var(--ink-dim); }
+.roundpick { display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin: -2px 2px 4px; font-size: 13px; color: var(--ink-dim); }
+.roundpick span { margin-right: 4px; }
+.roundbtn { min-width: 46px; height: 34px; border-radius: 6px; border: 1px solid var(--wood-3); background: var(--wood); color: var(--ink); font: 400 15px var(--display); cursor: pointer; }
+.roundbtn:hover, .roundbtn:focus-visible { border-color: var(--brass); color: var(--brass); }
 .btn { display: block; text-align: center; font-weight: 600; }
 .btn.primary { background: var(--brass); color: #2a160c; border-color: var(--brass); }
 .row { display: flex; gap: 8px; }
@@ -409,8 +413,11 @@ body {
       <button class="modebtn" data-mode="endless"><span class="tag">∞</span><span data-i18n="mode_endless">Endless</span><span class="sub" id="bestLine">Speed rises every 10 rows · bonus every 30</span></button>
       <button class="modebtn" data-mode="loose"><span class="tag">∞</span><span data-i18n="mode_loose">Bonus trial</span><span class="sub" data-i18n="sub_loose">Endless, opening with the 30-second Guards Scatter bonus</span></button>
       <button class="modebtn" data-mode="s11"><span class="tag">1.1</span><span data-i18n="mode_s11">The Courtyard Ambush</span><span class="sub" data-i18n="sub_s11">Open board · reach 5,000 Honor · speed 1 · blasts off</span></button>
+      <div class="roundpick"><span data-i18n="startRound">Start at round</span><button class="roundbtn" data-mode="s11">I</button><button class="roundbtn" data-mode="s11r2">II</button><button class="roundbtn" data-mode="s11r3">III</button></div>
       <button class="modebtn" data-mode="s12"><span class="tag">1.2</span><span data-i18n="mode_s12">Overturned Tables</span><span class="sub" id="sub12" data-i18n="sub_s12">Break all 8 tables · speed 2 · blasts on</span></button>
+      <div class="roundpick"><span data-i18n="startRound">Start at round</span><button class="roundbtn" data-mode="s12">I</button><button class="roundbtn" data-mode="s12r2">II</button><button class="roundbtn" data-mode="s12r3">III</button></div>
       <button class="modebtn" data-mode="s13"><span class="tag">1.3</span><span data-i18n="mode_s13">The Wine Cellar Barricade</span><span class="sub" data-i18n="sub_s13">9-column lane · reach 8,000 Honor · speed 3 · blasts off</span></button>
+      <div class="roundpick"><span data-i18n="startRound">Start at round</span><button class="roundbtn" data-mode="s13">I</button><button class="roundbtn" data-mode="s13r2">II</button><button class="roundbtn" data-mode="s13r3">III</button></div>
     </div>
     <div class="styles">
       <span class="label" data-i18n="storyDifficulty">Story difficulty</span>
@@ -525,7 +532,7 @@ body {
       help_kegs: "Kegs", help_kegs_d: "Point a musket's muzzle straight at a powder keg to blow a 3×3 hole",
       kbd: "Keyboard: ← → move · ↓ ease down · ↑ or X rotate · Z rotate back · Space drop · 1/2 Armory · C cannon · B Broadside · P pause",
       paused: "Paused", resume: "Resume", restart: "Restart", menu: "Menu", playAgain: "Play again",
-      roundN: "Round {n}", continue: "Continue", demoDone: "You've cleared every board in this demo. Well fought!",
+      roundN: "Round {n}", startRound: "Start at round", continue: "Continue", demoDone: "You've cleared every board in this demo. Well fought!",
       lostLocks: "{mode} lost. You ran out of pieces.", piecesLeft: " · {n} pieces left", paceQuickens: "Every minute, the pace quickens",
       victory: "Victory", overrun: "Overrun", cleared: "{mode} cleared.", lost: "{mode} lost. The stack reached the top.",
       st_version: "Version", st_difficulty: "Difficulty", st_honor: "Honor", st_best: "Best Endless Honor",
@@ -601,7 +608,7 @@ body {
       help_kegs: "Barriles", help_kegs_d: "Apunta la boca de un mosquete directo a un barril de pólvora para abrir un hueco de 3×3",
       kbd: "Teclado: ← → mover · ↓ bajar · ↑ o X girar · Z girar atrás · Espacio soltar · 1/2 Armería · C cañón · B Andanada · P pausa",
       paused: "En pausa", resume: "Continuar", restart: "Reiniciar", menu: "Menú", playAgain: "Jugar otra vez",
-      roundN: "Ronda {n}", continue: "Continuar", demoDone: "Has superado todos los tableros de esta demo. ¡Bien luchado!",
+      roundN: "Ronda {n}", startRound: "Empezar en la ronda", continue: "Continuar", demoDone: "Has superado todos los tableros de esta demo. ¡Bien luchado!",
       lostLocks: "{mode}: perdido. Te quedaste sin piezas.", piecesLeft: " · quedan {n} piezas", paceQuickens: "Cada minuto, el ritmo se acelera",
       victory: "Victoria", overrun: "Arrollado", cleared: "{mode}: superado.", lost: "{mode}: perdido. La pila llegó arriba.",
       st_version: "Versión", st_difficulty: "Dificultad", st_honor: "Honor", st_best: "Mejor Honor en Sin fin",
@@ -677,7 +684,7 @@ body {
       help_kegs: "ถังดินปืน", help_kegs_d: "หันปากกระบอกปืนคาบศิลาเข้าหาถังดินปืนตรงๆ เพื่อระเบิดเป็นรู 3×3",
       kbd: "แป้นพิมพ์: ← → เลื่อน · ↓ เลื่อนลง · ↑ หรือ X หมุน · Z หมุนกลับ · Space ปล่อย · 1/2 คลังอาวุธ · C ปืนใหญ่ · B ยิงกราบเรือ · P หยุด",
       paused: "หยุดชั่วคราว", resume: "เล่นต่อ", restart: "เริ่มใหม่", menu: "เมนู", playAgain: "เล่นอีกครั้ง",
-      roundN: "รอบที่ {n}", continue: "ไปต่อ", demoDone: "คุณผ่านทุกกระดานในเดโมนี้แล้ว สู้ได้ยอดเยี่ยม!",
+      roundN: "รอบที่ {n}", startRound: "เริ่มที่รอบ", continue: "ไปต่อ", demoDone: "คุณผ่านทุกกระดานในเดโมนี้แล้ว สู้ได้ยอดเยี่ยม!",
       lostLocks: "แพ้ {mode} ชิ้นส่วนหมดแล้ว", piecesLeft: " · เหลือ {n} ชิ้น", paceQuickens: "ทุกนาที จังหวะจะเร็วขึ้น",
       victory: "ชนะ", overrun: "ถูกตีแตก", cleared: "ผ่าน {mode} แล้ว", lost: "แพ้ {mode} กองชิ้นส่วนสูงถึงด้านบน",
       st_version: "เวอร์ชัน", st_difficulty: "ระดับความยาก", st_honor: "เกียรติ", st_best: "เกียรติสูงสุดโหมดไม่รู้จบ",
@@ -2522,7 +2529,7 @@ body {
   $("againBtn").addEventListener("click", () => newGame(lastMode));
   $("continueBtn").addEventListener("click", () => { const m = MODES[lastMode]; if (m && m.next) newGame(m.next); });
   $("endMenuBtn").addEventListener("click", showMenu);
-  document.querySelectorAll(".modebtn").forEach((b) => b.addEventListener("click", () => newGame(b.dataset.mode)));
+  document.querySelectorAll(".modebtn, .roundbtn").forEach((b) => b.addEventListener("click", () => newGame(b.dataset.mode)));
 
   window.addEventListener("keydown", (e) => {
     if (!G || G.state === "over") return;
@@ -2584,6 +2591,7 @@ body {
     document.querySelectorAll("[data-i18n-aria]").forEach((el) => { el.setAttribute("aria-label", t(el.dataset.i18nAria)); });
     document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === l)));
     $("hint").dataset.tip = t("tip");
+    document.querySelectorAll(".roundbtn").forEach((b) => b.setAttribute("aria-label", t("roundN", { n: b.textContent })));
     if (curHint && !$("hint").hidden) $("hint").textContent = t("hint_" + curHint);
     document.querySelectorAll(".slot").forEach((el) => { el.dataset.next = t("next"); });
     if (VARIANT) $("menuNote").textContent = t("vlabel_" + VARIANT.id) + ". " + t("vnote_" + VARIANT.id);
