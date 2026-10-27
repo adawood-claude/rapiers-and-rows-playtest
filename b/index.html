@@ -113,10 +113,14 @@ body {
   box-shadow: inset 0 0 0 1px #7a5232, 0 0 0 1px #160c08;
 }
 #board { display: block; border-radius: 2px; }
+#boardWrap.glass {
+  background: transparent;
+  box-shadow: inset 0 0 0 5px rgba(58, 34, 22, 0.92), inset 0 0 0 6px #7a5232, 0 0 0 1px #160c08;
+}
 #boardWrap.loose { animation: goldflash 0.9s ease-in-out infinite; }
 @keyframes goldflash {
-  0%, 100% { box-shadow: inset 0 0 0 1px #7a5232, 0 0 0 2px var(--brass), 0 0 10px rgba(207, 165, 76, 0.3); }
-  50% { box-shadow: inset 0 0 0 1px #7a5232, 0 0 0 4px #f3d36f, 0 0 26px rgba(243, 211, 111, 0.75); }
+  0%, 100% { box-shadow: inset 0 0 0 5px rgba(58, 34, 22, 0.92), inset 0 0 0 6px #7a5232, 0 0 0 2px var(--brass), 0 0 10px rgba(207, 165, 76, 0.3); }
+  50% { box-shadow: inset 0 0 0 5px rgba(58, 34, 22, 0.92), inset 0 0 0 6px #7a5232, 0 0 0 4px #f3d36f, 0 0 26px rgba(243, 211, 111, 0.75); }
 }
 #strip {
   height: 42px;
@@ -141,6 +145,8 @@ body {
   text-shadow: 0 1px 0 rgba(255, 245, 220, 0.8);
 }
 #popup .small { font-size: 15px; font-weight: 600; color: #4a2a12; margin-top: 2px; }
+#boardWrap.glass #popup .big { color: #fbeed2; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95), 0 0 2px #000; }
+#boardWrap.glass #popup .small { color: #f3d36f; text-shadow: 0 1px 6px rgba(0, 0, 0, 0.95), 0 0 2px #000; }
 #popup.show { animation: pop 1.3s ease-out forwards; }
 @keyframes pop {
   0% { opacity: 0; transform: translateY(8px) scale(0.96); }
@@ -324,7 +330,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   #popup.show { animation-duration: 0.9s; }
   #volley.ready, #volley.ready.nudge { animation: none; box-shadow: 0 0 0 4px rgba(243, 211, 111, 0.5); }
-  #boardWrap.loose { animation: none; box-shadow: inset 0 0 0 1px #7a5232, 0 0 0 3px #f3d36f; }
+  #boardWrap.loose { animation: none; box-shadow: inset 0 0 0 5px rgba(58, 34, 22, 0.92), inset 0 0 0 6px #7a5232, 0 0 0 3px #f3d36f; }
 }
 </style>
 
@@ -978,6 +984,15 @@ body {
       burst(W / 2, (ROWS - 1 - G.clearRowsSorted[1]) * cs + cs / 2, 24, "spark", { speed: 260, life: 0.5 });
     }
   }
+  function eraseRect(x, y, w, h, a) {
+    ctx.save();
+    ctx.globalAlpha = a === undefined ? 1 : a;
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.fillStyle = "#000"; ctx.fillRect(x, y, w, h);
+    ctx.globalCompositeOperation = "source-over";
+    if (bgCache) ctx.drawImage(bgCache.img, x * dpr, y * dpr, w * dpr, h * dpr, x, y, w, h);
+    ctx.restore();
+  }
   function drawClearFx(W, H, bd) {
     const n = G.clearN, k = 1 - G.clearT / G.clearDur;
     G.clearRowsSorted.forEach((y, i) => {
@@ -985,12 +1000,11 @@ body {
       const py = (ROWS - 1 - y) * cs;
       if (n >= 4 || reduced) {
         ctx.fillStyle = "rgba(255, 215, 120, " + (0.7 * (1 - k)).toFixed(3) + ")"; ctx.fillRect(0, py, W, cs);
-        ctx.globalAlpha = Math.min(1, k * 1.3); ctx.fillStyle = bd.bg; ctx.fillRect(0, py, W, cs); ctx.globalAlpha = 1;
+        eraseRect(0, py, W, cs, Math.min(1, k * 1.3));
         return;
       }
       const sw = sweepX(i, n, k, W);
-      ctx.fillStyle = bd.bg;
-      if (sw.dir > 0) ctx.fillRect(0, py, sw.x, cs); else ctx.fillRect(sw.x, py, W - sw.x, cs);
+      if (sw.dir > 0) eraseRect(0, py, sw.x, cs); else eraseRect(sw.x, py, W - sw.x, cs);
       if (sw.local > 0 && sw.local < 1) {
         const tail = cs * 2.6, cy = py + cs / 2;
         const g = ctx.createLinearGradient(sw.x - sw.dir * tail, cy, sw.x, cy);
@@ -1683,7 +1697,8 @@ body {
   let artStyle = "engraved";
   const ART = {
     illustrated: {
-      board: { bg: "#eadcbf", grid: "rgba(90, 60, 30, 0.10)", lane: "rgba(90, 60, 30, 0.28)" },
+      // See-through board: the stage painting shows through a light dark veil.
+      board: { bg: "rgba(24, 14, 9, 0.40)", grid: "rgba(255, 236, 200, 0.12)", lane: "rgba(255, 220, 150, 0.32)", glass: true },
       tile: { S: "#dde3e4", F: "#ecd8b0", C: "#f0d2cf" }, tileEdge: "rgba(60, 38, 22, 0.55)",
       fill: {}, stroke: "#2a1d15", lw: 0.04, pix: true
     },
@@ -1908,6 +1923,7 @@ body {
     if (k !== "plain" && !ART[k]) k = "illustrated";
     artStyle = k;
     clearCaches();
+    $("boardWrap").classList.toggle("glass", !!(ART[k] && ART[k].board.glass));
     store.set("rr-style2", k);
     document.querySelectorAll("[data-style]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.style === k)));
     if (G) renderArmory();
@@ -1941,6 +1957,8 @@ body {
     if (cell.t === "table" && cell.tx !== undefined && tileOk("table")) {
       c.save();
       c.beginPath(); c.rect(px, py, s, s); c.clip();
+      // On the see-through board, a pale plate behind the table keeps it from melting into the painting.
+      if (ART[artStyle] && ART[artStyle].board.glass) { c.fillStyle = "rgba(234, 220, 191, 0.5)"; c.fillRect(px, py, s, s); }
       c.drawImage(TILE.table, px - cell.tx * s, py - (1 - cell.ty) * s, 2 * s, 2 * s);
       c.restore();
       return;
@@ -2001,6 +2019,7 @@ body {
       b.beginPath(); b.moveTo(5 * cs + 0.5, 0); b.lineTo(5 * cs + 0.5, H); b.moveTo(10 * cs + 0.5, 0); b.lineTo(10 * cs + 0.5, H); b.stroke();
       bgCache = { key: bgKey, img };
     }
+    ctx.clearRect(0, 0, W, H);
     ctx.drawImage(bgCache.img, 0, 0, W, H);
     if (!G) return;
 
