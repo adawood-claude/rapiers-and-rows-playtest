@@ -220,6 +220,17 @@ body {
   animation: bsglow 1.4s ease-in-out infinite;
   z-index: 5;
 }
+.nudgebubble {
+  position: absolute; right: 4px; bottom: calc(100% + 12px); z-index: 6;
+  max-width: 230px; padding: 9px 14px; border-radius: 12px;
+  background: #f3d36f; color: #2a160c; font: 600 15px var(--body); text-align: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55); pointer-events: none;
+}
+.nudgebubble::after { content: ""; position: absolute; right: 38px; top: 100%; border: 9px solid transparent; border-top-color: #f3d36f; }
+.rack.bs-on .nudgebubble { bottom: calc(100% + 66px); }
+.nudgebubble.pop { animation: nudgepop 0.35s ease-out; }
+@keyframes nudgepop { 0% { transform: translateY(8px) scale(0.9); opacity: 0; } 100% { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .nudgebubble.pop { animation: none; } }
 #broadside .bscount {
   position: absolute; top: -8px; right: -6px;
   min-width: 20px; height: 20px; border-radius: 10px;
@@ -409,6 +420,7 @@ body {
   </main>
 
   <footer class="rack" aria-label="Armory" data-i18n-aria="armory">
+    <div id="cannonNudge" class="nudgebubble" role="status" hidden></div>
     <button id="broadside" hidden aria-label="Broadside" data-i18n-aria="broadside"><img class="bsicon" id="bsIcon" alt="" aria-hidden="true"><span class="bslabel" id="bsLabel">Broadside</span><span class="bscount" hidden></span></button>
     <button class="slot" id="slot0" aria-label="Armory slot 1"><canvas width="10" height="10"></canvas><span class="name"></span></button>
     <button class="slot" id="slot1" aria-label="Armory slot 2"><canvas width="10" height="10"></canvas><span class="name"></span></button>
@@ -432,7 +444,7 @@ body {
       <button class="modebtn" data-mode="s11"><span class="tag">1.1</span><span data-i18n="mode_s11">The Courtyard Ambush</span><span class="sub" data-i18n="sub_s11">Open board · reach 5,000 Honor · speed 1 · blasts off</span></button>
       <div class="roundpick"><span data-i18n="startRound">Start at round</span><button class="roundbtn" data-mode="s11">I</button><button class="roundbtn" data-mode="s11r2">II</button><button class="roundbtn" data-mode="s11r3">III</button></div>
       <button class="modebtn" data-mode="s12"><span class="tag">1.2</span><span data-i18n="mode_s12">Overturned Tables</span><span class="sub" id="sub12" data-i18n="sub_s12">Break all 8 tables · speed 2 · blasts on</span></button>
-      <div class="roundpick"><span data-i18n="startRound">Start at round</span><button class="roundbtn" data-mode="s12">I</button><button class="roundbtn" data-mode="s12r2">II</button><button class="roundbtn" data-mode="s12r3">III</button></div>
+      <div class="roundpick"><span data-i18n="startRound">Start at round</span><button class="roundbtn" data-mode="s12">I</button><button class="roundbtn" data-mode="s12r2">II</button><button class="roundbtn" data-mode="s12r3a">III·1</button><button class="roundbtn" data-mode="s12r3b">III·2</button></div>
       <button class="modebtn" data-mode="s13"><span class="tag">1.3</span><span data-i18n="mode_s13">The Wine Cellar Barricade</span><span class="sub" data-i18n="sub_s13">9-column lane · reach 8,000 Honor · speed 3 · blasts off</span></button>
       <div class="roundpick"><span data-i18n="startRound">Start at round</span><button class="roundbtn" data-mode="s13">I</button><button class="roundbtn" data-mode="s13r2">II</button><button class="roundbtn" data-mode="s13r3">III</button></div>
     </div>
@@ -505,6 +517,7 @@ body {
     <div id="lbStory" class="lbctl">
       <div class="seg seg3" role="group" aria-label="Board"><button data-lbboard="s11">1.1</button><button data-lbboard="s12">1.2</button><button data-lbboard="s13">1.3</button></div>
       <div class="seg seg3" role="group" aria-label="Round"><button data-lbround="1">I</button><button data-lbround="2">II</button><button data-lbround="3">III</button></div>
+      <div class="seg seg2" id="lbVerSeg" role="group" aria-label="Version" hidden><button data-lbver="a" data-i18n="version1">Version 1</button><button data-lbver="b" data-i18n="version2">Version 2</button></div>
       <div class="seg" role="group" aria-label="Difficulty"><button data-lbdiff="aspirant" data-i18n="diff_aspirant">Aspirant</button><button data-lbdiff="cadet" data-i18n="diff_cadet">Cadet</button><button data-lbdiff="musketeer" data-i18n="diff_musketeer">Musketeer</button><button data-lbdiff="captain" data-i18n="diff_captain">Captain</button></div>
     </div>
     <div id="lbEndless" class="lbctl" hidden>
@@ -529,6 +542,7 @@ body {
       <div class="hsrow"><input id="hsName" maxlength="14" autocomplete="nickname" aria-label="Your name" data-i18n-aria="yourName"><button class="btn" id="hsSave" data-i18n="save">Save</button></div>
     </div>
     <button class="btn primary contbtn" id="continueBtn" hidden><span id="contLabel">Continue</span><small id="contNext"></small></button>
+    <button class="btn primary contbtn" id="continueBtn2" hidden><span id="contLabel2">Continue</span><small id="contNext2"></small></button>
     <div class="row"><button class="btn primary" id="againBtn" data-i18n="playAgain">Play again</button><button class="btn" id="endMenuBtn" data-i18n="menu">Menu</button></div>
     <button class="linkbtn" id="endBoards" data-i18n="viewLeaderboard">View leaderboard</button>
   </div>
@@ -581,6 +595,9 @@ body {
       lbEmpty: "No scores yet. Be the first!", lbDevice: "Scores are saved on this device only.", back: "Back",
       newHigh: "New high score! Rank {n}", yourName: "Your name", save: "Save", saved: "Saved", defaultName: "Musketeer",
       viewLeaderboard: "View leaderboard",
+      versionN: "Version {n}", version1: "Version 1", version2: "Version 2", continueVer: "Continue: Version {n}",
+      verNote1: "All 12 tables · 100 pieces", verNote2: "10 tables, open shafts · 80 pieces",
+      cannonNudge: "The Cannon is loaded. Fire it!",
       roundN: "Round {n}", startRound: "Start at round", continue: "Continue", demoDone: "You've cleared every board in this demo. Well fought!",
       lostLocks: "{mode} lost. You ran out of pieces.", piecesLeft: " · {n} pieces left", paceQuickens: "Every minute, the pace quickens",
       victory: "Victory", overrun: "Overrun", cleared: "{mode} cleared.", lost: "{mode} lost. The stack reached the top.",
@@ -661,6 +678,9 @@ body {
       lbEmpty: "Aún no hay puntuaciones. ¡Sé el primero!", lbDevice: "Las puntuaciones se guardan solo en este dispositivo.", back: "Volver",
       newHigh: "¡Nueva mejor puntuación! Puesto {n}", yourName: "Tu nombre", save: "Guardar", saved: "Guardado", defaultName: "Mosquetero",
       viewLeaderboard: "Ver clasificación",
+      versionN: "Versión {n}", version1: "Versión 1", version2: "Versión 2", continueVer: "Continuar: Versión {n}",
+      verNote1: "Las 12 mesas · 100 piezas", verNote2: "10 mesas, pozos abiertos · 80 piezas",
+      cannonNudge: "El Cañón está cargado. ¡Dispara!",
       roundN: "Ronda {n}", startRound: "Empezar en la ronda", continue: "Continuar", demoDone: "Has superado todos los tableros de esta demo. ¡Bien luchado!",
       lostLocks: "{mode}: perdido. Te quedaste sin piezas.", piecesLeft: " · quedan {n} piezas", paceQuickens: "Cada minuto, el ritmo se acelera",
       victory: "Victoria", overrun: "Arrollado", cleared: "{mode}: superado.", lost: "{mode}: perdido. La pila llegó arriba.",
@@ -741,6 +761,9 @@ body {
       lbEmpty: "ยังไม่มีคะแนน มาเป็นคนแรกกัน!", lbDevice: "คะแนนจะบันทึกไว้ในอุปกรณ์นี้เท่านั้น", back: "กลับ",
       newHigh: "คะแนนสูงใหม่! อันดับ {n}", yourName: "ชื่อของคุณ", save: "บันทึก", saved: "บันทึกแล้ว", defaultName: "ทหารเสือ",
       viewLeaderboard: "ดูกระดานผู้นำ",
+      versionN: "เวอร์ชัน {n}", version1: "เวอร์ชัน 1", version2: "เวอร์ชัน 2", continueVer: "ไปต่อ: เวอร์ชัน {n}",
+      verNote1: "โต๊ะครบ 12 ตัว · 100 ชิ้น", verNote2: "โต๊ะ 10 ตัว เปิดช่องลง · 80 ชิ้น",
+      cannonNudge: "ปืนใหญ่พร้อมแล้ว ยิงเลย!",
       roundN: "รอบที่ {n}", startRound: "เริ่มที่รอบ", continue: "ไปต่อ", demoDone: "คุณผ่านทุกกระดานในเดโมนี้แล้ว สู้ได้ยอดเยี่ยม!",
       lostLocks: "แพ้ {mode} ชิ้นส่วนหมดแล้ว", piecesLeft: " · เหลือ {n} ชิ้น", paceQuickens: "ทุกนาที จังหวะจะเร็วขึ้น",
       victory: "ชนะ", overrun: "ถูกตีแตก", cleared: "ผ่าน {mode} แล้ว", lost: "แพ้ {mode} กองชิ้นส่วนสูงถึงด้านบน",
@@ -792,7 +815,7 @@ body {
   }
   const pieceName = (id) => t("p" + id);
   const ROMAN = ["", "I", "II", "III"];
-  const modeName = (id) => { const m = MODES[id]; return m && m.base ? t("mode_" + m.base) + " · " + t("roundN", { n: ROMAN[m.round] }) : t("mode_" + id); };
+  const modeName = (id) => { const m = MODES[id]; return m && m.base ? t("mode_" + m.base) + " · " + t("roundN", { n: ROMAN[m.round] }) + (m.ver ? " · " + t("versionN", { n: m.ver }) : "") : t("mode_" + id); };
   const COLS = 15, ROWS = 25, TOT = 28;
   const SPEEDS = [1.0, 1.3, 1.6, 2.0, 2.5, 3.1, 3.9, 4.9, 6.1, 7.6, 9.5, 12, 15, 19, 24];
   const DIAL = [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3]; // index into the translated dial names
@@ -831,12 +854,18 @@ body {
       tables: [[0, 0], [4, 0], [8, 0], [12, 0], [2, 2], [6, 2], [10, 2], [13, 2]]
     },
     s12r2: {
-      base: "s12", round: 2, next: "s12r3", speed: 3, goal: { type: "tables" }, blasts: true,
+      base: "s12", round: 2, next: ["s12r3a", "s12r3b"], speed: 3, goal: { type: "tables" }, blasts: true,
       tables: [[0, 0], [4, 0], [8, 0], [12, 0], [2, 2], [6, 2], [10, 2], [13, 2], [0, 4], [4, 4], [8, 4], [12, 4]]
     },
-    s12r3: {
-      base: "s12", round: 3, next: "s13", speed: 4, goal: { type: "tables" }, blasts: true, lockLimit: 80,
+    // Round III playtest split. Version 1: all 12 tables, 100 pieces. Version 2: two top-band tables
+    // removed to open shafts to the middle band, 80 pieces. Both start with the Cannon at least half full.
+    s12r3a: {
+      base: "s12", round: 3, ver: 1, next: "s13", speed: 4, goal: { type: "tables" }, blasts: true, lockLimit: 100, gaugeMin: 50,
       tables: [[0, 0], [4, 0], [8, 0], [12, 0], [2, 2], [6, 2], [10, 2], [13, 2], [0, 4], [4, 4], [8, 4], [12, 4]]
+    },
+    s12r3b: {
+      base: "s12", round: 3, ver: 2, next: "s13", speed: 4, goal: { type: "tables" }, blasts: true, lockLimit: 80, gaugeMin: 50,
+      tables: [[0, 0], [4, 0], [8, 0], [12, 0], [2, 2], [6, 2], [10, 2], [13, 2], [0, 4], [12, 4]]
     },
     s13: { title: "1.3 The Wine Cellar Barricade", base: "s13", round: 1, next: "s13r2", speed: 3, goal: { type: "honor", value: 8000 }, walls: [0, 1, 2, 12, 13, 14], blasts: false },
     s13r2: { base: "s13", round: 2, next: "s13r3", speed: 4, goal: { type: "honor", value: 10000 }, walls: [0, 1, 2, 3, 11, 12, 13, 14], blasts: false },
@@ -1412,6 +1441,7 @@ body {
     if (!mode.endless) setTimeout(() => { if (G && G.mode === mode) popup(modeName(G.modeId), diffName(G.diff) + " · " + (blastsActive() ? t("blastsOnStage") : t("blastsOffStage"))); }, 250);
     if (mode.bonusStart) setTimeout(() => { popup(t("scatterTitle"), t("scatterSub")); SFX.scatter(); }, 300);
     if (carry) { G.cannonShots = carry.cannonShots || 0; G.broadsides = carry.broadsides || 0; }
+    if (mode.gaugeMin) G.gauge = Math.max(carry && carry.gauge ? carry.gauge : 0, mode.gaugeMin);
     spawn();
     renderArmory();
   }
@@ -1642,8 +1672,18 @@ body {
     return tablesLeft() === 0;
   }
 
+  let nudgeTimer = 0;
+  function cannonNudge(on) {
+    const el = $("cannonNudge");
+    clearTimeout(nudgeTimer);
+    if (!on) { el.hidden = true; return; }
+    el.textContent = t("cannonNudge");
+    el.hidden = false; el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop");
+    nudgeTimer = setTimeout(() => { el.hidden = true; }, 3500);
+  }
   function volleyReady(reminder) {
-    SFX.ready(reminder);
+    SFX.ready(false);
+    if (reminder) cannonNudge(true);
     const v = $("volley");
     v.classList.remove("nudge"); void v.offsetWidth; v.classList.add("nudge");
     setTimeout(() => v.classList.remove("nudge"), 650);
@@ -1662,6 +1702,7 @@ body {
     }
     G.gauge = 0;
     G.readyT = 0;
+    cannonNudge(false);
     G.cannonShots = (G.cannonShots || 0) + 1;
     if (G.cannonShots % 3 === 0) {
       G.broadsides = (G.broadsides || 0) + 1;
@@ -1894,6 +1935,7 @@ body {
 
   function gameOver(won) {
     G.state = "over";
+    cannonNudge(false);
     SFX.end(won);
     let best = null;
     if (G.modeId === "endless") {
@@ -1914,10 +1956,17 @@ body {
     $("endTitle").textContent = won ? t("victory") : t("overrun");
     $("endSub").textContent = won ? (mode.base && !mode.next ? t("demoDone") : t("cleared", { mode: name })) : (mode.endless ? "" : (G.lostReason === "locks" ? t("lostLocks", { mode: name }) : t("lost", { mode: name })));
     showHighScore(lastEnd.rank);
-    const cont = won && mode.next ? mode.next : null;
-    $("continueBtn").hidden = !cont;
-    $("againBtn").classList.toggle("primary", !cont);
-    if (cont) { $("contLabel").textContent = t("continue"); $("contNext").textContent = modeName(cont); }
+    const nexts = won && mode.next ? [].concat(mode.next) : [];
+    $("againBtn").classList.toggle("primary", !nexts.length);
+    ["", "2"].forEach((sfx, i) => {
+      const id = nexts[i], btn = $("continueBtn" + sfx);
+      btn.hidden = !id;
+      if (!id) return;
+      btn.dataset.next = id;
+      const v = MODES[id].ver;
+      $("contLabel" + sfx).textContent = v ? t("continueVer", { n: v }) : t("continue");
+      $("contNext" + sfx).textContent = v ? t("verNote" + v) : modeName(id);
+    });
     const secs = Math.floor(G.time), mm = Math.floor(secs / 60), ss = String(secs % 60).padStart(2, "0");
     const per = G.rows > 0 ? (G.locks / G.rows).toFixed(1) : t("noneYet");
     const best = lastEnd.best !== null ? "<dt>" + t("st_best") + "</dt><dd>" + fmt(lastEnd.best) + "</dd>" : "";
@@ -1981,18 +2030,21 @@ body {
   $("hsName").addEventListener("keydown", (e) => { e.stopPropagation(); if (e.key === "Enter") { lbRename($("hsName").value); $("hsSave").textContent = t("saved"); $("hsName").blur(); } });
   $("hsName").addEventListener("change", () => lbRename($("hsName").value));
 
-  const LBV = { tab: "story", board: "s11", round: 1, diff: "cadet", blasts: "on" };
+  const LBV = { tab: "story", board: "s11", round: 1, diff: "cadet", blasts: "on", ver: "a" };
   function lbRender() {
     document.querySelectorAll("[data-lbtab]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lbtab === LBV.tab)));
     document.querySelectorAll("[data-lbboard]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lbboard === LBV.board)));
     document.querySelectorAll("[data-lbround]").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.lbround === LBV.round)));
     document.querySelectorAll("[data-lbdiff]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lbdiff === LBV.diff)));
     document.querySelectorAll("[data-lbblasts]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lbblasts === LBV.blasts)));
+    document.querySelectorAll("[data-lbver]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lbver === LBV.ver)));
     $("lbStory").hidden = LBV.tab !== "story";
     $("lbEndless").hidden = LBV.tab !== "endless";
     let key, title;
     if (LBV.tab === "story") {
-      const id = LBV.round === 1 ? LBV.board : LBV.board + "r" + LBV.round;
+      const split = LBV.board === "s12" && LBV.round === 3;
+      $("lbVerSeg").hidden = !split;
+      const id = LBV.round === 1 ? LBV.board : LBV.board + "r" + LBV.round + (split ? LBV.ver : "");
       key = lbKey("story", id, LBV.diff);
       title = modeName(id) + " · " + diffName(LBV.diff);
       $("lbCol3").textContent = t("st_time");
@@ -2016,7 +2068,7 @@ body {
   function openBoards(fromGame) {
     if (fromGame && G && G.mode) {
       if (G.mode.endless) { LBV.tab = "endless"; LBV.blasts = endlessBlasts() ? "on" : "off"; }
-      else if (G.mode.base) { LBV.tab = "story"; LBV.board = G.mode.base; LBV.round = G.mode.round; LBV.diff = G.diff || "cadet"; }
+      else if (G.mode.base) { LBV.tab = "story"; LBV.board = G.mode.base; LBV.round = G.mode.round; LBV.diff = G.diff || "cadet"; if (G.mode.ver) LBV.ver = G.mode.ver === 2 ? "b" : "a"; }
     } else { LBV.diff = difficulty; }
     LBV.returnTo = fromGame ? "end" : "menu";
     $("menu").hidden = true; $("end").hidden = true;
@@ -2028,6 +2080,7 @@ body {
   document.querySelectorAll("[data-lbround]").forEach((b) => b.addEventListener("click", () => { LBV.round = +b.dataset.lbround; lbRender(); }));
   document.querySelectorAll("[data-lbdiff]").forEach((b) => b.addEventListener("click", () => { LBV.diff = b.dataset.lbdiff; lbRender(); }));
   document.querySelectorAll("[data-lbblasts]").forEach((b) => b.addEventListener("click", () => { LBV.blasts = b.dataset.lbblasts; lbRender(); }));
+  document.querySelectorAll("[data-lbver]").forEach((b) => b.addEventListener("click", () => { LBV.ver = b.dataset.lbver; lbRender(); }));
   $("lbOpen").addEventListener("click", () => openBoards(false));
   $("endBoards").addEventListener("click", () => openBoards(true));
   $("lbBack").addEventListener("click", () => { $("boards").hidden = true; if (LBV.returnTo === "end") $("end").hidden = false; else $("menu").hidden = false; });
@@ -2063,7 +2116,7 @@ body {
       if (k > (G.climbSteps || 0)) { G.climbSteps = k; setLevel(); popup(t("speedUp"), t("paceQuickens")); }
     }
     // A full Volley that goes unused chimes again every 15 seconds.
-    if (G.gauge >= 100) { G.readyT = (G.readyT || 0) + dt; if (G.readyT >= 15) { G.readyT = 0; volleyReady(true); } }
+    if (G.gauge >= 100) { G.readyT = (G.readyT || 0) + dt; if (G.readyT >= 30) { G.readyT = 0; volleyReady(true); } }
     if (G.state === "clearing") { G.clearT -= dt; clearFxTick(); if (G.clearT <= 0) finishClear(); return; }
     if (G.state === "settling") { G.settle.t += dt; if (G.settle.t >= G.settle.dur) finishSettle(); return; }
     if (G.state === "aiming" || G.state === "broadside") { broadsideTick(dt); return; }
@@ -2578,6 +2631,7 @@ body {
     $("volley").classList.toggle("ready", G.gauge >= 100);
     const aiming = G.state === "aiming", bsOn = G.state !== "over" && G.state !== "broadside" && (aiming || G.broadsides > 0);
     const bsb = $("broadside");
+    bsb.parentElement.classList.toggle("bs-on", bsOn);
     if (bsb.hidden === bsOn) bsb.hidden = !bsOn;
     bsb.classList.toggle("fire", aiming);
     const bsi = aiming ? "bsFire" : "bsIdle", cni = G.gauge >= 100 ? "cnReady" : "cnIdle";
@@ -2688,10 +2742,10 @@ body {
   $("restartBtn").addEventListener("click", () => newGame(lastMode));
   $("menuBtn").addEventListener("click", showMenu);
   $("againBtn").addEventListener("click", () => newGame(lastMode));
-  $("continueBtn").addEventListener("click", () => {
-    const m = MODES[lastMode];
-    if (m && m.next) newGame(m.next, G ? { cannonShots: G.cannonShots, broadsides: G.broadsides } : null);
-  });
+  ["continueBtn", "continueBtn2"].forEach((bid) => $(bid).addEventListener("click", () => {
+    const next = $(bid).dataset.next;
+    if (next && MODES[next]) newGame(next, G ? { cannonShots: G.cannonShots, broadsides: G.broadsides, gauge: G.gauge } : null);
+  }));
   $("endMenuBtn").addEventListener("click", showMenu);
   document.querySelectorAll(".modebtn, .roundbtn").forEach((b) => b.addEventListener("click", () => newGame(b.dataset.mode)));
 
