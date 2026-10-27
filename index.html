@@ -6,13 +6,13 @@
 <title>Rapiers &amp; Rows Playtest</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=EB+Garamond:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=EB+Garamond:wght@400;500;600&family=Noto+Serif+Thai:wght@400;600&display=swap">
 <style>
 :root {
   --wood: #23140f; --wood-2: #351f16; --wood-3: #4a2c1f;
   --ink: #f2e6cd; --ink-dim: #c9b59a; --brass: #cfa54c;
-  --display: "IM Fell English SC", Georgia, serif;
-  --body: "EB Garamond", Georgia, serif;
+  --display: "IM Fell English SC", "Noto Serif Thai", Georgia, serif;
+  --body: "EB Garamond", "Noto Serif Thai", Georgia, serif;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -33,56 +33,172 @@ a.test {
   padding: 14px 16px; border-radius: 10px; text-decoration: none; color: var(--ink);
   background: var(--wood-2); border: 1px solid var(--wood-3);
 }
-a.test:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+a.test:focus-visible, .seg button:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
 .test .tag { grid-row: span 2; font-family: var(--display); font-size: 34px; color: var(--brass); text-align: center; }
 .test b { font-weight: 600; }
 .test span { color: var(--ink-dim); font-size: 16px; }
 ol, ul { margin: 0; padding-left: 22px; }
 li { margin: 4px 0; }
 .note { color: var(--ink-dim); font-size: 15px; text-align: center; margin: 0; }
+.seg {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 3px;
+  background: #1a0f0b; border: 1px solid var(--wood-3); border-radius: 8px;
+}
+.seg button {
+  border: 0; background: transparent; color: var(--ink-dim);
+  font: 500 16px var(--body); padding: 8px 2px; border-radius: 6px; cursor: pointer;
+}
+.seg button[aria-pressed="true"] { background: var(--brass); color: #2a160c; font-weight: 600; }
 </style>
 </head>
 <body>
 <main>
   <h1>Rapiers &amp; Rows</h1>
-  <p class="lead">A musketeer puzzle game in early playtesting. Thank you for helping.</p>
+  <div class="seg" role="group" aria-label="Language" data-i18n-aria="language">
+    <button data-lang="en" lang="en">English</button><button data-lang="es" lang="es">Español</button><button data-lang="th" lang="th">ไทย</button>
+  </div>
+  <p class="lead" data-i18n="lead">A musketeer puzzle game in early playtesting. Thank you for helping.</p>
 
-  <h2>Play the latest version</h2>
+  <h2 data-i18n="latestH">Play the latest version</h2>
   <div class="tests">
-    <a class="test" href="play/"><span class="tag">&#9876;</span><b>Rapiers &amp; Rows</b><span>New: illustrated piece art, and the game in English, Español or ไทย (pick on the menu). Four story difficulties.</span></a>
+    <a class="test" data-game href="play/"><span class="tag">&#9876;</span><b>Rapiers &amp; Rows</b><span data-i18n="latestSub">New: illustrated piece art, and the game in English, Español or ไทย. Four story difficulties.</span></a>
   </div>
 
-  <h2>Earlier test versions</h2>
-  <p class="note" style="text-align:left">Only if you were given one of these. They now include the Cannon too.</p>
+  <h2 data-i18n="earlierH">Earlier test versions</h2>
+  <p class="note" style="text-align:left" data-i18n="earlierNote">Only if you were given one of these. They now include the Cannon too.</p>
   <div class="tests">
-    <a class="test" href="a/"><span class="tag">A</span><b>Test A</b><span>Powder Blasts always on</span></a>
-    <a class="test" href="b/"><span class="tag">B</span><b>Test B</b><span>Powder Blasts always off</span></a>
-    <a class="test" href="c/"><span class="tag">C</span><b>Test C</b><span>Powder Blasts on, redesigned Stage 1.2</span></a>
+    <a class="test" data-game href="a/"><span class="tag">A</span><b data-i18n="testA">Test A</b><span data-i18n="testASub">Powder Blasts always on</span></a>
+    <a class="test" data-game href="b/"><span class="tag">B</span><b data-i18n="testB">Test B</b><span data-i18n="testBSub">Powder Blasts always off</span></a>
+    <a class="test" data-game href="c/"><span class="tag">C</span><b data-i18n="testC">Test C</b><span data-i18n="testCSub">Powder Blasts on, redesigned Stage 1.2</span></a>
   </div>
 
-  <h2>What to do</h2>
+  <h2 data-i18n="whatH">What to do</h2>
   <ol>
-    <li>Pick a <b>Story difficulty</b> on the menu (Cadet is the standard game), then play <b>1.1 The Courtyard Ambush</b> three times and <b>Endless</b> twice. If you have time, try <b>1.2 Overturned Tables</b> too.</li>
-    <li>When a game ends, take a screenshot of the results screen.</li>
-    <li>Send the screenshots to Ali with short answers to the questions below.</li>
+    <li data-i18n-html="what1">Pick a <b>Story difficulty</b> on the menu (Cadet is the standard game), then play <b>1.1 The Courtyard Ambush</b> three times and <b>Endless</b> twice. If you have time, try <b>1.2 Overturned Tables</b> too.</li>
+    <li data-i18n="what2">When a game ends, take a screenshot of the results screen.</li>
+    <li data-i18n="what3">Send the screenshots to Ali with short answers to the questions below.</li>
   </ol>
 
-  <h2>Questions</h2>
+  <h2 data-i18n="questionsH">Questions</h2>
   <ul>
-    <li>Were the controls clear? Did pieces ever move, turn or drop when you didn't mean them to?</li>
-    <li>Could you tell blades, firearms and hats apart at a glance? Which art style did you like best?</li>
-    <li>Did you want to play another round? What made you stop?</li>
-    <li>Which difficulty did you play? Did it feel too easy, right, or too hard?</li>
+    <li data-i18n="q1">Were the controls clear? Did pieces ever move, turn or drop when you didn't mean them to?</li>
+    <li data-i18n="q2">Could you tell blades, firearms and hats apart at a glance? Which art style did you like best?</li>
+    <li data-i18n="q3">Did you want to play another round? What made you stop?</li>
+    <li data-i18n="q4">Which difficulty did you play? Did it feel too easy, right, or too hard?</li>
+    <li data-i18n="q5">If you played in Spanish or Thai, did anything read oddly or feel wrongly translated?</li>
   </ul>
 
-  <h2>Controls</h2>
+  <h2 data-i18n="controlsH">Controls</h2>
   <ul>
-    <li>Drag sideways on the board, or the strip below it, to move.</li>
-    <li>Tap the right half to rotate clockwise, the left half to turn back.</li>
-    <li>Drag down slowly to ease a piece down. Flick down to drop it.</li>
-    <li>Tap an Armory slot to choose your next piece. Tap the Cannon button when it glows to fire a cannonball.</li>
+    <li data-i18n="c1">Drag sideways on the board, or the strip below it, to move.</li>
+    <li data-i18n="c2">Tap the right half to rotate clockwise, the left half to turn back.</li>
+    <li data-i18n="c3">Drag down slowly to ease a piece down. Flick down to drop it.</li>
+    <li data-i18n="c4">Tap an Armory slot to choose your next piece. Tap the Cannon button when it glows to fire a cannonball.</li>
   </ul>
-  <p class="note">Sound starts after your first tap. Best on a phone held upright.</p>
+  <p class="note" data-i18n="footer">Sound starts after your first tap. Best on a phone held upright.</p>
 </main>
+<script>
+(() => {
+  const T = {
+    en: {
+      language: "Language",
+      lead: "A musketeer puzzle game in early playtesting. Thank you for helping.",
+      latestH: "Play the latest version",
+      latestSub: "New: illustrated piece art, and the game in English, Español or ไทย. Four story difficulties.",
+      earlierH: "Earlier test versions",
+      earlierNote: "Only if you were given one of these. They now include the Cannon too.",
+      testA: "Test A", testASub: "Powder Blasts always on",
+      testB: "Test B", testBSub: "Powder Blasts always off",
+      testC: "Test C", testCSub: "Powder Blasts on, redesigned Stage 1.2",
+      whatH: "What to do",
+      what1: "Pick a <b>Story difficulty</b> on the menu (Cadet is the standard game), then play <b>1.1 The Courtyard Ambush</b> three times and <b>Endless</b> twice. If you have time, try <b>1.2 Overturned Tables</b> too.",
+      what2: "When a game ends, take a screenshot of the results screen.",
+      what3: "Send the screenshots to Ali with short answers to the questions below.",
+      questionsH: "Questions",
+      q1: "Were the controls clear? Did pieces ever move, turn or drop when you didn't mean them to?",
+      q2: "Could you tell blades, firearms and hats apart at a glance? Which art style did you like best?",
+      q3: "Did you want to play another round? What made you stop?",
+      q4: "Which difficulty did you play? Did it feel too easy, right, or too hard?",
+      q5: "If you played in Spanish or Thai, did anything read oddly or feel wrongly translated?",
+      controlsH: "Controls",
+      c1: "Drag sideways on the board, or the strip below it, to move.",
+      c2: "Tap the right half to rotate clockwise, the left half to turn back.",
+      c3: "Drag down slowly to ease a piece down. Flick down to drop it.",
+      c4: "Tap an Armory slot to choose your next piece. Tap the Cannon button when it glows to fire a cannonball.",
+      footer: "Sound starts after your first tap. Best on a phone held upright."
+    },
+    es: {
+      language: "Idioma",
+      lead: "Un juego de puzles de mosqueteros en sus primeras pruebas. Gracias por ayudar.",
+      latestH: "Juega la última versión",
+      latestSub: "Novedades: piezas ilustradas y el juego en English, Español o ไทย. Cuatro dificultades de historia.",
+      earlierH: "Versiones de prueba anteriores",
+      earlierNote: "Solo si te dieron una de estas. Ahora también incluyen el Cañón.",
+      testA: "Prueba A", testASub: "Explosiones de pólvora siempre activadas",
+      testB: "Prueba B", testBSub: "Explosiones de pólvora siempre desactivadas",
+      testC: "Prueba C", testCSub: "Con explosiones de pólvora y la Etapa 1.2 rediseñada",
+      whatH: "Qué hacer",
+      what1: "Elige una <b>Dificultad de la historia</b> en el menú (Cadete es el juego estándar) y luego juega <b>1.1 La emboscada del patio</b> tres veces y <b>Sin fin</b> dos veces. Si tienes tiempo, prueba también <b>1.2 Mesas volcadas</b>.",
+      what2: "Cuando termine una partida, haz una captura de la pantalla de resultados.",
+      what3: "Envía las capturas a Ali con respuestas breves a las preguntas de abajo.",
+      questionsH: "Preguntas",
+      q1: "¿Los controles eran claros? ¿Alguna pieza se movió, giró o cayó sin que quisieras?",
+      q2: "¿Podías distinguir de un vistazo las espadas, las armas de fuego y los sombreros? ¿Qué estilo artístico te gustó más?",
+      q3: "¿Querías jugar otra partida? ¿Qué te hizo parar?",
+      q4: "¿Qué dificultad jugaste? ¿Te pareció demasiado fácil, adecuada o demasiado difícil?",
+      q5: "Si jugaste en español o en tailandés, ¿algo sonaba raro o parecía mal traducido?",
+      controlsH: "Controles",
+      c1: "Arrastra de lado en el tablero, o en la franja de abajo, para mover.",
+      c2: "Toca la mitad derecha para girar a la derecha y la izquierda para girar a la izquierda.",
+      c3: "Arrastra hacia abajo despacio para bajar una pieza. Desliza rápido hacia abajo para soltarla.",
+      c4: "Toca una ranura de la Armería para elegir tu siguiente pieza. Toca el botón del Cañón cuando brille para disparar una bala.",
+      footer: "El sonido empieza después de tu primer toque. Mejor en un teléfono en vertical."
+    },
+    th: {
+      language: "ภาษา",
+      lead: "เกมพัซเซิลทหารเสือที่อยู่ในช่วงทดสอบแรก ขอบคุณที่ช่วยทดสอบ",
+      latestH: "เล่นเวอร์ชันล่าสุด",
+      latestSub: "ใหม่: ภาพวาดชิ้นส่วน และเล่นได้เป็น English, Español หรือ ไทย ระดับความยากของเนื้อเรื่อง 4 ระดับ",
+      earlierH: "เวอร์ชันทดสอบก่อนหน้า",
+      earlierNote: "เฉพาะในกรณีที่คุณได้รับลิงก์ของเวอร์ชันเหล่านี้ ตอนนี้มีปืนใหญ่ด้วยแล้ว",
+      testA: "ทดสอบ A", testASub: "เปิดระเบิดดินปืนตลอด",
+      testB: "ทดสอบ B", testBSub: "ปิดระเบิดดินปืนตลอด",
+      testC: "ทดสอบ C", testCSub: "เปิดระเบิดดินปืน พร้อมด่าน 1.2 แบบใหม่",
+      whatH: "สิ่งที่ต้องทำ",
+      what1: "เลือก<b>ระดับความยากของเนื้อเรื่อง</b>ในเมนู (นักเรียนทหารคือเกมมาตรฐาน) แล้วเล่น <b>1.1 ซุ่มโจมตีกลางลาน</b> สามครั้ง และ<b>ไม่รู้จบ</b>สองครั้ง ถ้ามีเวลา ลองเล่น <b>1.2 โต๊ะคว่ำ</b> ด้วย",
+      what2: "เมื่อจบเกม ให้แคปหน้าจอผลลัพธ์",
+      what3: "ส่งภาพหน้าจอให้ Ali พร้อมคำตอบสั้นๆ ของคำถามด้านล่าง",
+      questionsH: "คำถาม",
+      q1: "การควบคุมเข้าใจง่ายไหม มีชิ้นส่วนเลื่อน หมุน หรือตกลงทั้งที่คุณไม่ได้ตั้งใจบ้างไหม",
+      q2: "คุณแยกดาบ อาวุธปืน และหมวกออกจากกันได้ในแวบเดียวไหม ชอบสไตล์ภาพแบบไหนมากที่สุด",
+      q3: "คุณอยากเล่นอีกรอบไหม อะไรทำให้คุณหยุดเล่น",
+      q4: "คุณเล่นระดับความยากไหน รู้สึกง่ายเกินไป พอดี หรือยากเกินไป",
+      q5: "ถ้าคุณเล่นเป็นภาษาสเปนหรือภาษาไทย มีข้อความไหนที่อ่านแล้วแปลกหรือแปลผิดไหม",
+      controlsH: "การควบคุม",
+      c1: "ลากไปด้านข้างบนกระดานหรือแถบด้านล่างเพื่อเลื่อน",
+      c2: "แตะครึ่งขวาเพื่อหมุนตามเข็มนาฬิกา แตะครึ่งซ้ายเพื่อหมุนกลับ",
+      c3: "ลากลงช้าๆ เพื่อเลื่อนชิ้นลงทีละน้อย ปัดลงเร็วๆ เพื่อปล่อย",
+      c4: "แตะช่องคลังอาวุธเพื่อเลือกชิ้นถัดไป แตะปุ่มปืนใหญ่เมื่อเรืองแสงเพื่อยิงลูกปืนใหญ่",
+      footer: "เสียงจะเริ่มหลังจากแตะครั้งแรก เล่นได้ดีที่สุดบนโทรศัพท์ในแนวตั้ง"
+    }
+  };
+  const get = () => { try { return localStorage.getItem("rr-site-lang"); } catch (e) { return null; } };
+  const put = (v) => { try { localStorage.setItem("rr-site-lang", v); } catch (e) {} };
+  function setLang(l) {
+    if (!T[l]) l = "en";
+    put(l);
+    document.documentElement.lang = l;
+    const d = T[l];
+    document.querySelectorAll("[data-i18n]").forEach((el) => { el.textContent = d[el.dataset.i18n]; });
+    document.querySelectorAll("[data-i18n-html]").forEach((el) => { el.innerHTML = d[el.dataset.i18nHtml]; });
+    document.querySelectorAll("[data-i18n-aria]").forEach((el) => { el.setAttribute("aria-label", d[el.dataset.i18nAria]); });
+    document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === l)));
+    // Open each game in the language chosen here.
+    document.querySelectorAll("a[data-game]").forEach((a) => { a.href = a.getAttribute("href").split("?")[0] + "?lang=" + l; });
+  }
+  document.querySelectorAll("[data-lang]").forEach((b) => b.addEventListener("click", () => setLang(b.dataset.lang)));
+  setLang(get() || "en");
+})();
+</script>
 </body>
 </html>

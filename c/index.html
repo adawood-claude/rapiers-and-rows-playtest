@@ -2215,7 +2215,10 @@ body {
   sampleBackdrop();
   setStyle(store.get("rr-style2") || "illustrated");
   initSettings();
-  setLang(store.get("rr-lang") || "en");
+  // A ?lang= link from the playtest landing page wins over the saved choice.
+  let urlLang = null;
+  try { urlLang = new URLSearchParams(location.search).get("lang"); } catch (e) { urlLang = null; }
+  setLang((urlLang && I18N[urlLang]) ? urlLang : (store.get("rr-lang") || "en"));
   renderArmory();
   updateBest();
   requestAnimationFrame(frame);
