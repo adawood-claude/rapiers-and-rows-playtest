@@ -298,6 +298,23 @@ body {
 }
 .modebtn .tag { font-family: var(--display); color: var(--brass); font-size: 17px; }
 .modebtn .sub { grid-column: 2; font-size: 13px; color: var(--ink-dim); }
+.lbbtn { margin-top: 4px; font-family: var(--display); font-weight: 400; font-size: 17px; }
+.lbbtn span[aria-hidden] { color: var(--brass); }
+.seg.seg2 { grid-template-columns: repeat(2, 1fr); }
+.lbctl { display: flex; flex-direction: column; gap: 6px; }
+.lbtitle { margin: 2px 0 0; text-align: center; font-family: var(--display); color: var(--brass); }
+.lb { width: 100%; border-collapse: collapse; font-size: 15px; font-variant-numeric: tabular-nums; }
+.lb th { font: 600 12px var(--body); color: var(--ink-dim); text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--wood-3); }
+.lb td { padding: 6px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+.lb td:first-child { width: 2em; color: var(--brass); font-family: var(--display); }
+.lb th:nth-child(n+3), .lb td:nth-child(n+3) { text-align: right; }
+.lb tr.mine td { background: rgba(207, 165, 76, 0.16); }
+.lb td.nm { max-width: 9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hs { display: flex; flex-direction: column; gap: 6px; padding: 10px; border: 1px solid var(--brass-dim); border-radius: 8px; background: rgba(207, 165, 76, 0.08); }
+.hsline { margin: 0; text-align: center; font-family: var(--display); color: var(--brass); font-size: 17px; }
+.hsrow { display: flex; gap: 8px; }
+.hsrow input { flex: 1; min-width: 0; font: 16px var(--body); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--wood-3); background: var(--wood); color: var(--ink); }
+.hsrow .btn { flex: 0 0 auto; width: auto; padding-inline: 16px; }
 .roundpick { display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin: -2px 2px 4px; font-size: 13px; color: var(--ink-dim); }
 .roundpick span { margin-right: 4px; }
 .roundbtn { min-width: 46px; height: 34px; border-radius: 6px; border: 1px solid var(--wood-3); background: var(--wood); color: var(--ink); font: 400 15px var(--display); cursor: pointer; }
@@ -419,6 +436,7 @@ body {
       <button class="modebtn" data-mode="s13"><span class="tag">1.3</span><span data-i18n="mode_s13">The Wine Cellar Barricade</span><span class="sub" data-i18n="sub_s13">9-column lane · reach 8,000 Honor · speed 3 · blasts off</span></button>
       <div class="roundpick"><span data-i18n="startRound">Start at round</span><button class="roundbtn" data-mode="s13">I</button><button class="roundbtn" data-mode="s13r2">II</button><button class="roundbtn" data-mode="s13r3">III</button></div>
     </div>
+    <button class="btn lbbtn" id="lbOpen"><span aria-hidden="true">&#9819;</span> <span data-i18n="leaderboards">Leaderboards</span></button>
     <div class="styles">
       <span class="label" data-i18n="storyDifficulty">Story difficulty</span>
       <div class="seg" role="group" aria-label="Story difficulty" data-i18n-aria="storyDifficulty">
@@ -478,14 +496,41 @@ body {
   </div>
 </div>
 
+<div class="overlay" id="boards" hidden>
+  <div class="card">
+    <h2 data-i18n="leaderboards">Leaderboards</h2>
+    <div class="seg seg2" role="group" aria-label="Leaderboards" data-i18n-aria="leaderboards">
+      <button data-lbtab="story" data-i18n="story">Story</button><button data-lbtab="endless" data-i18n="mode_endless">Endless</button>
+    </div>
+    <div id="lbStory" class="lbctl">
+      <div class="seg seg3" role="group" aria-label="Board"><button data-lbboard="s11">1.1</button><button data-lbboard="s12">1.2</button><button data-lbboard="s13">1.3</button></div>
+      <div class="seg seg3" role="group" aria-label="Round"><button data-lbround="1">I</button><button data-lbround="2">II</button><button data-lbround="3">III</button></div>
+      <div class="seg" role="group" aria-label="Difficulty"><button data-lbdiff="aspirant" data-i18n="diff_aspirant">Aspirant</button><button data-lbdiff="cadet" data-i18n="diff_cadet">Cadet</button><button data-lbdiff="musketeer" data-i18n="diff_musketeer">Musketeer</button><button data-lbdiff="captain" data-i18n="diff_captain">Captain</button></div>
+    </div>
+    <div id="lbEndless" class="lbctl" hidden>
+      <div class="seg seg2" role="group"><button data-lbblasts="on" data-i18n="lbBlastsOn">Blasts on</button><button data-lbblasts="off" data-i18n="lbBlastsOff">Blasts off</button></div>
+    </div>
+    <p class="lbtitle" id="lbTitle"></p>
+    <table class="lb"><thead><tr><th>#</th><th data-i18n="lbName">Name</th><th data-i18n="honor">Honor</th><th id="lbCol3"></th></tr></thead><tbody id="lbBody"></tbody></table>
+    <p class="note" id="lbEmpty" data-i18n="lbEmpty">No scores yet. Be the first!</p>
+    <p class="note" data-i18n="lbDevice">Scores are saved on this device only.</p>
+    <button class="btn" id="lbBack" data-i18n="back">Back</button>
+  </div>
+</div>
+
 <div class="overlay" id="end" hidden>
   <div class="card">
     <h2 id="endTitle">Overrun</h2>
     <p id="endSub"></p>
     <dl class="stats" id="endStats"></dl>
     <p class="note" data-i18n="endNote">Playtest check: at speed 1, a typical player should need about 6 locks or fewer per row cleared. The best possible is about 4.</p>
+    <div class="hs" id="hsBox" hidden>
+      <p class="hsline" id="hsLine"></p>
+      <div class="hsrow"><input id="hsName" maxlength="14" autocomplete="nickname" aria-label="Your name" data-i18n-aria="yourName"><button class="btn" id="hsSave" data-i18n="save">Save</button></div>
+    </div>
     <button class="btn primary contbtn" id="continueBtn" hidden><span id="contLabel">Continue</span><small id="contNext"></small></button>
     <div class="row"><button class="btn primary" id="againBtn" data-i18n="playAgain">Play again</button><button class="btn" id="endMenuBtn" data-i18n="menu">Menu</button></div>
+    <button class="linkbtn" id="endBoards" data-i18n="viewLeaderboard">View leaderboard</button>
   </div>
 </div>
 
@@ -532,6 +577,10 @@ body {
       help_kegs: "Kegs", help_kegs_d: "Point a musket's muzzle straight at a powder keg to blow a 3×3 hole",
       kbd: "Keyboard: ← → move · ↓ ease down · ↑ or X rotate · Z rotate back · Space drop · 1/2 Armory · C cannon · B Broadside · P pause",
       paused: "Paused", resume: "Resume", restart: "Restart", menu: "Menu", playAgain: "Play again",
+      leaderboards: "Leaderboards", story: "Story", lbBlastsOn: "Blasts on", lbBlastsOff: "Blasts off", lbName: "Name",
+      lbEmpty: "No scores yet. Be the first!", lbDevice: "Scores are saved on this device only.", back: "Back",
+      newHigh: "New high score! Rank {n}", yourName: "Your name", save: "Save", saved: "Saved", defaultName: "Musketeer",
+      viewLeaderboard: "View leaderboard",
       roundN: "Round {n}", startRound: "Start at round", continue: "Continue", demoDone: "You've cleared every board in this demo. Well fought!",
       lostLocks: "{mode} lost. You ran out of pieces.", piecesLeft: " · {n} pieces left", paceQuickens: "Every minute, the pace quickens",
       victory: "Victory", overrun: "Overrun", cleared: "{mode} cleared.", lost: "{mode} lost. The stack reached the top.",
@@ -608,6 +657,10 @@ body {
       help_kegs: "Barriles", help_kegs_d: "Apunta la boca de un mosquete directo a un barril de pólvora para abrir un hueco de 3×3",
       kbd: "Teclado: ← → mover · ↓ bajar · ↑ o X girar · Z girar atrás · Espacio soltar · 1/2 Armería · C cañón · B Andanada · P pausa",
       paused: "En pausa", resume: "Continuar", restart: "Reiniciar", menu: "Menú", playAgain: "Jugar otra vez",
+      leaderboards: "Clasificaciones", story: "Historia", lbBlastsOn: "Con explosiones", lbBlastsOff: "Sin explosiones", lbName: "Nombre",
+      lbEmpty: "Aún no hay puntuaciones. ¡Sé el primero!", lbDevice: "Las puntuaciones se guardan solo en este dispositivo.", back: "Volver",
+      newHigh: "¡Nueva mejor puntuación! Puesto {n}", yourName: "Tu nombre", save: "Guardar", saved: "Guardado", defaultName: "Mosquetero",
+      viewLeaderboard: "Ver clasificación",
       roundN: "Ronda {n}", startRound: "Empezar en la ronda", continue: "Continuar", demoDone: "Has superado todos los tableros de esta demo. ¡Bien luchado!",
       lostLocks: "{mode}: perdido. Te quedaste sin piezas.", piecesLeft: " · quedan {n} piezas", paceQuickens: "Cada minuto, el ritmo se acelera",
       victory: "Victoria", overrun: "Arrollado", cleared: "{mode}: superado.", lost: "{mode}: perdido. La pila llegó arriba.",
@@ -684,6 +737,10 @@ body {
       help_kegs: "ถังดินปืน", help_kegs_d: "หันปากกระบอกปืนคาบศิลาเข้าหาถังดินปืนตรงๆ เพื่อระเบิดเป็นรู 3×3",
       kbd: "แป้นพิมพ์: ← → เลื่อน · ↓ เลื่อนลง · ↑ หรือ X หมุน · Z หมุนกลับ · Space ปล่อย · 1/2 คลังอาวุธ · C ปืนใหญ่ · B ยิงกราบเรือ · P หยุด",
       paused: "หยุดชั่วคราว", resume: "เล่นต่อ", restart: "เริ่มใหม่", menu: "เมนู", playAgain: "เล่นอีกครั้ง",
+      leaderboards: "กระดานผู้นำ", story: "เนื้อเรื่อง", lbBlastsOn: "เปิดระเบิด", lbBlastsOff: "ปิดระเบิด", lbName: "ชื่อ",
+      lbEmpty: "ยังไม่มีคะแนน มาเป็นคนแรกกัน!", lbDevice: "คะแนนจะบันทึกไว้ในอุปกรณ์นี้เท่านั้น", back: "กลับ",
+      newHigh: "คะแนนสูงใหม่! อันดับ {n}", yourName: "ชื่อของคุณ", save: "บันทึก", saved: "บันทึกแล้ว", defaultName: "ทหารเสือ",
+      viewLeaderboard: "ดูกระดานผู้นำ",
       roundN: "รอบที่ {n}", startRound: "เริ่มที่รอบ", continue: "ไปต่อ", demoDone: "คุณผ่านทุกกระดานในเดโมนี้แล้ว สู้ได้ยอดเยี่ยม!",
       lostLocks: "แพ้ {mode} ชิ้นส่วนหมดแล้ว", piecesLeft: " · เหลือ {n} ชิ้น", paceQuickens: "ทุกนาที จังหวะจะเร็วขึ้น",
       victory: "ชนะ", overrun: "ถูกตีแตก", cleared: "ผ่าน {mode} แล้ว", lost: "แพ้ {mode} กองชิ้นส่วนสูงถึงด้านบน",
@@ -1843,6 +1900,7 @@ body {
       best = Math.max(prev, G.score);
     }
     lastEnd = { won, best };
+    lastEnd.rank = lbRecord(won);
     renderEnd();
     $("end").hidden = false;
     updateBest();
@@ -1853,6 +1911,7 @@ body {
     const won = lastEnd.won, mode = G.mode, name = modeName(G.modeId);
     $("endTitle").textContent = won ? t("victory") : t("overrun");
     $("endSub").textContent = won ? (mode.base && !mode.next ? t("demoDone") : t("cleared", { mode: name })) : (mode.endless ? "" : (G.lostReason === "locks" ? t("lostLocks", { mode: name }) : t("lost", { mode: name })));
+    showHighScore(lastEnd.rank);
     const cont = won && mode.next ? mode.next : null;
     $("continueBtn").hidden = !cont;
     $("againBtn").classList.toggle("primary", !cont);
@@ -1870,6 +1929,106 @@ body {
       "<dt>" + t("st_blasts") + "</dt><dd>" + (blastsActive() ? (G.blasts || 0) : t("off")) + "</dd>" +
       "<dt>" + t("st_time") + "</dt><dd>" + mm + ":" + ss + "</dd>";
   }
+
+
+  // ---------- leaderboards (saved on this device) ----------
+  // Story: top 10 per round and difficulty, only for wins. Endless: top 10 per blasts setting.
+  // Entries are { n: name, s: score, t: seconds, r: rows, d: date }. Kept in one place so a shared
+  // online board can replace lbLoad/lbSaveAll later without touching the screens.
+  const LB_MAX = 10;
+  const lbKey = (kind, a, b) => "rr-lb:" + kind + "|" + a + "|" + b;
+  function lbLoad(key) { try { const v = JSON.parse(store.get(key) || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; } }
+  function lbSaveAll(key, list) { store.set(key, JSON.stringify(list.slice(0, LB_MAX))); }
+  const lbSort = (a, b) => b.s - a.s || a.t - b.t;
+  let lbLast = null; // { key, id } of the entry just added, for highlighting and renaming
+  function lbRecord(won) {
+    lbLast = null;
+    if (!G || G.modeId === "loose") return null;
+    let key;
+    if (G.mode.endless) key = lbKey("endless", endlessBlasts() ? "on" : "off", "-");
+    else if (G.mode.base && won) key = lbKey("story", G.modeId, G.diff);
+    else return null;
+    if (G.score <= 0) return null;
+    const list = lbLoad(key);
+    const entry = { n: store.get("rr-name") || t("defaultName"), s: G.score, t: Math.floor(G.time), r: G.rows, d: Date.now(), id: Date.now() + "-" + Math.floor(Math.random() * 1e6) };
+    list.push(entry); list.sort(lbSort);
+    const rank = list.indexOf(entry) + 1;
+    if (rank > LB_MAX) return null;
+    lbSaveAll(key, list);
+    lbLast = { key, id: entry.id };
+    return rank;
+  }
+  function lbRename(name) {
+    if (!lbLast) return;
+    const clean = (name || "").replace(/\s+/g, " ").trim().slice(0, 14) || t("defaultName");
+    store.set("rr-name", clean);
+    const list = lbLoad(lbLast.key), e = list.find((x) => x.id === lbLast.id);
+    if (e) { e.n = clean; lbSaveAll(lbLast.key, list); }
+  }
+  function showHighScore(rank) {
+    const box = $("hsBox");
+    box.hidden = !rank;
+    if (!rank) return;
+    box.dataset.rank = rank;
+    $("hsLine").textContent = t("newHigh", { n: rank });
+    $("hsName").value = store.get("rr-name") || "";
+    $("hsName").placeholder = t("yourName");
+    $("hsSave").textContent = t("save");
+  }
+  $("hsSave").addEventListener("click", () => { lbRename($("hsName").value); $("hsSave").textContent = t("saved"); });
+  $("hsName").addEventListener("keydown", (e) => { e.stopPropagation(); if (e.key === "Enter") { lbRename($("hsName").value); $("hsSave").textContent = t("saved"); $("hsName").blur(); } });
+  $("hsName").addEventListener("change", () => lbRename($("hsName").value));
+
+  const LBV = { tab: "story", board: "s11", round: 1, diff: "cadet", blasts: "on" };
+  function lbRender() {
+    document.querySelectorAll("[data-lbtab]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lbtab === LBV.tab)));
+    document.querySelectorAll("[data-lbboard]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lbboard === LBV.board)));
+    document.querySelectorAll("[data-lbround]").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.lbround === LBV.round)));
+    document.querySelectorAll("[data-lbdiff]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lbdiff === LBV.diff)));
+    document.querySelectorAll("[data-lbblasts]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lbblasts === LBV.blasts)));
+    $("lbStory").hidden = LBV.tab !== "story";
+    $("lbEndless").hidden = LBV.tab !== "endless";
+    let key, title;
+    if (LBV.tab === "story") {
+      const id = LBV.round === 1 ? LBV.board : LBV.board + "r" + LBV.round;
+      key = lbKey("story", id, LBV.diff);
+      title = modeName(id) + " · " + diffName(LBV.diff);
+      $("lbCol3").textContent = t("st_time");
+    } else {
+      key = lbKey("endless", LBV.blasts, "-");
+      title = t("mode_endless") + " · " + (LBV.blasts === "on" ? t("lbBlastsOn") : t("lbBlastsOff"));
+      $("lbCol3").textContent = t("st_rows");
+    }
+    $("lbTitle").textContent = title;
+    const list = lbLoad(key), body = $("lbBody");
+    body.textContent = "";
+    list.forEach((e, i) => {
+      const tr = document.createElement("tr");
+      if (lbLast && lbLast.key === key && lbLast.id === e.id) tr.className = "mine";
+      const third = LBV.tab === "story" ? Math.floor(e.t / 60) + ":" + String(e.t % 60).padStart(2, "0") : String(e.r);
+      [String(i + 1), e.n, fmt(e.s), third].forEach((v, j) => { const td = document.createElement("td"); td.textContent = v; if (j === 1) td.className = "nm"; tr.appendChild(td); });
+      body.appendChild(tr);
+    });
+    $("lbEmpty").hidden = list.length > 0;
+  }
+  function openBoards(fromGame) {
+    if (fromGame && G && G.mode) {
+      if (G.mode.endless) { LBV.tab = "endless"; LBV.blasts = endlessBlasts() ? "on" : "off"; }
+      else if (G.mode.base) { LBV.tab = "story"; LBV.board = G.mode.base; LBV.round = G.mode.round; LBV.diff = G.diff || "cadet"; }
+    } else { LBV.diff = difficulty; }
+    LBV.returnTo = fromGame ? "end" : "menu";
+    $("menu").hidden = true; $("end").hidden = true;
+    $("boards").hidden = false;
+    lbRender();
+  }
+  document.querySelectorAll("[data-lbtab]").forEach((b) => b.addEventListener("click", () => { LBV.tab = b.dataset.lbtab; lbRender(); }));
+  document.querySelectorAll("[data-lbboard]").forEach((b) => b.addEventListener("click", () => { LBV.board = b.dataset.lbboard; lbRender(); }));
+  document.querySelectorAll("[data-lbround]").forEach((b) => b.addEventListener("click", () => { LBV.round = +b.dataset.lbround; lbRender(); }));
+  document.querySelectorAll("[data-lbdiff]").forEach((b) => b.addEventListener("click", () => { LBV.diff = b.dataset.lbdiff; lbRender(); }));
+  document.querySelectorAll("[data-lbblasts]").forEach((b) => b.addEventListener("click", () => { LBV.blasts = b.dataset.lbblasts; lbRender(); }));
+  $("lbOpen").addEventListener("click", () => openBoards(false));
+  $("endBoards").addEventListener("click", () => openBoards(true));
+  $("lbBack").addEventListener("click", () => { $("boards").hidden = true; if (LBV.returnTo === "end") $("end").hidden = false; else $("menu").hidden = false; });
 
   // ---------- loop ----------
   let last = performance.now();
@@ -2532,7 +2691,7 @@ body {
   document.querySelectorAll(".modebtn, .roundbtn").forEach((b) => b.addEventListener("click", () => newGame(b.dataset.mode)));
 
   window.addEventListener("keydown", (e) => {
-    if (!G || G.state === "over") return;
+    if (!G || G.state === "over" || (e.target && e.target.tagName === "INPUT")) return;
     const k = e.key;
     if (k === "p" || k === "P" || k === "Escape") { setPaused(!G.paused); e.preventDefault(); return; }
     if (G.paused) return;
@@ -2558,7 +2717,7 @@ body {
     G.softKey = false;
     $("pause").hidden = !on;
   }
-  function hideAll() { $("menu").hidden = true; $("pause").hidden = true; $("end").hidden = true; }
+  function hideAll() { $("menu").hidden = true; $("pause").hidden = true; $("end").hidden = true; $("boards").hidden = true; }
   function showMenu() { if (G) { G.paused = true; G.state = "over"; } hideAll(); $("menu").hidden = false; setScene("s11"); updateBest(); }
   function updateBest() {
     const b = parseInt(store.get(bestKey()) || "0", 10) || 0;
@@ -2602,6 +2761,7 @@ body {
     if (G && G.armory) renderArmory();
     if (G && G.mode && G.state !== "over" && G.state !== undefined) updateHUD();
     if (!$("end").hidden) renderEnd();
+    if (!$("boards").hidden) lbRender();
   }
   document.querySelectorAll("[data-lang]").forEach((b) => b.addEventListener("click", () => setLang(b.dataset.lang)));
 
