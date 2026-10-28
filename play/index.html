@@ -972,7 +972,7 @@ body {
   // synthesized sounds if a file is missing or audio can't be decoded, so the game never goes silent.
   const AUDIO_BASE = window.RR_AUDIO_BASE || "audio/";
   const SND_N = {"A01": 4, "A02": 4, "A03": 2, "A05": 2, "A06": 3, "A07": 3, "A08": 3, "A10": 2, "B01": 2, "B02": 1, "B03": 1, "B04": 1, "B05": 1, "B06": 1, "B07": 1, "B08": 1, "B09": 1, "B10": 2, "C01": 2, "C02": 1, "C03": 1, "C04": 1, "C05": 1, "C06": 2, "C07": 1, "C08": 1, "C09": 1, "C10": 1, "C11": 1, "D01": 2, "D02": 1, "D03": 2, "D05": 2, "E01": 1, "E02": 1, "E04": 1, "G01": 2, "G02": 1, "G04": 1, "G05": 1, "G06": 1, "G07": 1, "G09": 1};
-  const MUS_INFO = {"tables-gb1": {"dur": 64, "loop": true, "gain": 1.23, "single": true}, "salt-calm": {"dur": 71.111104, "loop": true}, "salt-tense": {"dur": 71.111104, "loop": true}, "salt-danger": {"dur": 71.111104, "loop": true}, "siege-calm": {"dur": 80, "loop": true}, "siege-tense": {"dur": 80, "loop": true}, "siege-danger": {"dur": 80, "loop": true}, "menu": {"dur": 76.8, "loop": true}, "endless-calm": {"dur": 139.636354, "loop": true}, "endless-danger": {"dur": 139.636354, "loop": true}, "endless-tense": {"dur": 139.636354, "loop": true}, "march-calm": {"dur": 73.846146, "loop": true}, "march-danger": {"dur": 73.846146, "loop": true}, "march-tense": {"dur": 73.846146, "loop": true}, "powder": {"dur": 4.0, "loop": true}, "powder-hit": {"dur": 1.4, "loop": false}, "charge": {"dur": 20.869563, "loop": true}, "scramble": {"dur": 30.0, "loop": false}};
+  const MUS_INFO = {"aliA-1": {"dur": 64, "loop": true, "gain": 1.23}, "aliA-11": {"dur": 64, "loop": true, "gain": 1.17}, "aliA-13": {"dur": 64, "loop": true, "gain": 0.95}, "aliB-d": {"dur": 51.2, "loop": true, "gain": 0.85}, "aliB-b": {"dur": 51.2, "loop": true, "gain": 0.78}, "aliB-c": {"dur": 51.2, "loop": true, "gain": 0.79}, "scramble2": {"dur": 51.2, "loop": true, "gain": 0.79}, "charge2": {"dur": 46.48, "loop": true, "gain": 0.86}, "powder2": {"dur": 2.666667, "loop": true, "gain": 0.9}, "salt-calm": {"dur": 71.111104, "loop": true}, "salt-tense": {"dur": 71.111104, "loop": true}, "salt-danger": {"dur": 71.111104, "loop": true}, "siege-calm": {"dur": 80, "loop": true}, "siege-tense": {"dur": 80, "loop": true}, "siege-danger": {"dur": 80, "loop": true}, "menu": {"dur": 76.8, "loop": true}, "endless-calm": {"dur": 139.636354, "loop": true}, "endless-danger": {"dur": 139.636354, "loop": true}, "endless-tense": {"dur": 139.636354, "loop": true}, "march-calm": {"dur": 73.846146, "loop": true}, "march-danger": {"dur": 73.846146, "loop": true}, "march-tense": {"dur": 73.846146, "loop": true}, "powder": {"dur": 4.0, "loop": true}, "powder-hit": {"dur": 1.4, "loop": false}, "charge": {"dur": 20.869563, "loop": true}, "scramble": {"dur": 30.0, "loop": false}};
   const AUD = { bufs: new Map(), loading: new Map(), used: new Map(), musicReal: true };
   const SFX_MAJOR = new Set(["B04", "B05", "C04", "C06", "C09", "D01", "D02", "G06", "G07"]);
   function loadBuf(path) {
@@ -997,7 +997,7 @@ body {
   }
   function preloadSound() {
     for (const id of Object.keys(SND_N)) for (let v = 1; v <= SND_N[id]; v++) loadBuf("sfx/" + id + "-" + v + ".wav");
-    ["powder", "powder-hit", "charge", "scramble"].forEach((k) => loadBuf("music/" + k + ".mp4"));
+    (ALI_MUSIC ? ["powder2", "powder-hit", "charge2", "scramble2"] : ["powder", "powder-hit", "charge", "scramble"]).forEach((k) => loadBuf("music/" + k + ".mp4"));
   }
   // Play one effect. Returns true if it was handled (played, or sound is off), false to use the synth.
   function sfx(id, o) {
@@ -1155,13 +1155,28 @@ body {
   // event tracks start from bar 1 with a 0.33 s fade. Falls back to the synthesized music if loading fails.
   const RM = { file: null, src: null, gain: null, t0: 0, dur: 0, pending: null, amb: null, ambGain: null };
   function musicTier() { const top = G && G.top != null ? G.top : 0; return top >= 18 ? "danger" : top >= 10 ? "tense" : "calm"; }
-  // Ali's GarageBand test track (one layer, so it plays at every stack height) is on Overturned Tables.
-  const BOARD_THEME = { s11: "march", s12: "tables-gb1", s13: "siege" };
+  // Ali's GarageBand score. Versions 1, 1.1a and 1.3a (120 BPM) line up note for note, so a board swells into the
+  // fuller version as the stack climbs (synced crossfade). Versions 1d, 1b and 1C are the same piece at 150 BPM.
+  // To go back to the sound pack, set ALI_MUSIC = false.
+  const ALI_MUSIC = true;
+  const ALI_LAYERS = {
+    s11: { calm: "aliA-11", tense: "aliA-13", danger: "aliA-13" },
+    s12: { calm: "aliA-1", tense: "aliA-11", danger: "aliA-13" },
+    s13: { calm: "aliA-13", tense: "aliA-13", danger: "aliA-13" },
+    endless: { calm: "aliB-d", tense: "aliB-b", danger: "aliB-c" }
+  };
+  const ALI_EVENTS = { broadside: "powder2", scatter: "scramble2", charge: "charge2" };
+  const BOARD_THEME = { s11: "march", s12: "salt", s13: "siege" };
   function wantedMusic() {
     if (!AU.ctx || !AU.musicOn) return null;
     if (!$("menu").hidden) return "menu";
     if (!G || G.paused || G.state === "over") return null;
     const w = wantedTrack();
+    if (ALI_MUSIC) {
+      if (ALI_EVENTS[w]) return ALI_EVENTS[w];
+      const set = ALI_LAYERS[G.mode && G.mode.endless ? "endless" : G.mode && G.mode.base] || ALI_LAYERS.s12;
+      return set[musicTier()];
+    }
     if (w === "broadside") return "powder";
     if (w === "scatter") return "scramble";
     if (w === "charge") return "charge";
@@ -1186,19 +1201,19 @@ body {
     g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(info.gain || 1, now + fade);
     src.connect(g); g.connect(AU.mus);
     src.start(now, offset % dur);
-    RM.file = name; RM.src = src; RM.gain = g; RM.t0 = now - offset; RM.dur = dur;
+    RM.file = name; RM.src = src; RM.gain = g; RM.t0 = now - offset; RM.dur = dur; RM.game = G;
   }
   function realMusicTick() {
     const want = wantedMusic();
     if (!want) { RM.pending = null; if (RM.src) rmStop(0.3); return; }
-    if (want === RM.file) { RM.pending = null; return; }
+    if (want === RM.file && (RM.game === G || want === "menu")) { RM.pending = null; return; }
     if (want === RM.pending) return;
     RM.pending = want;
     loadBuf("music/" + want + ".mp4").then((buf) => {
       if (RM.pending !== want) return;
       RM.pending = null;
       if (!buf) { AUD.musicReal = false; rmStop(0.2); return; }
-      const sync = RM.src && family(want) === family(RM.file) && family(want) !== "menu";
+      const sync = RM.src && RM.game === G && family(want) === family(RM.file) && family(want) !== "menu";
       const offset = sync ? (AU.ctx.currentTime - RM.t0) % RM.dur : 0;
       rmStart(want, buf, offset, sync ? 1.5 : 0.33);
     });
