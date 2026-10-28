@@ -483,6 +483,7 @@ body {
       <button class="modebtn" data-mode="s35"><span class="tag">3.5</span><span data-i18n="mode_s35"></span><span class="sub" data-i18n="sub_s35"></span></button>
       <div class="roundpick"><span data-i18n="startRound">Start at round</span><button class="roundbtn" data-mode="s35">I</button><button class="roundbtn" data-mode="s35r2">II</button><button class="roundbtn" data-mode="s35r3">III</button></div>
     </div>
+    <p class="note" id="medalLine"></p>
     <button class="btn lbbtn" id="lbOpen"><span aria-hidden="true">&#9819;</span> <span data-i18n="leaderboards">Leaderboards</span></button>
     <div class="styles">
       <span class="label" data-i18n="storyDifficulty">Story difficulty</span>
@@ -512,6 +513,7 @@ body {
       <dt data-i18n="help_cannon">Cannon</dt><dd data-i18n="help_cannon_d">When the gauge is full, tap it to fire a cannonball into the top 4 cells of 3 columns</dd>
       <dt data-i18n="help_kegs">Kegs</dt><dd data-i18n="help_kegs_d">Point a musket's muzzle straight at a powder keg to blow a 3×3 hole</dd>
       <dt data-i18n="help_swing">Ropes</dt><dd data-i18n="help_swing_d">On Rigging and Ropes, flick up on the left or right third to swing a high piece across</dd>
+      <dt data-i18n="help_gambit">Gambits</dt><dd data-i18n="help_gambit_d">Each boss phase has an optional challenge; win it for a Gambit Medal</dd>
       <dt data-i18n="help_broadside">Broadside</dt><dd data-i18n="help_broadside_d">Fire the Cannon 3 times to earn one. Tap it, then tap FIRE! as the side cannon passes the rows you want gone</dd>
     </dl>
     <p class="kbd" data-i18n="kbd">Keyboard: ← → move · ↓ ease down · ↑ or X rotate · Z rotate back · Space drop · 1/2 Armory · C cannon · B Broadside · Q/E swing · P pause</p>
@@ -722,6 +724,18 @@ body {
       lostGate: "{mode} lost. The portcullis came down on the stack.", lostFire: "{mode} lost. The fire spread out of control.",
       help_swing: "Ropes", help_swing_d: "On Rigging and Ropes, flick up on the left or right third to swing a high piece across",
       p13: "Cursed Fragment",
+      st_gambit: "Gambit", gambitWon: "Gambit won!", gambitWonSub: "{name} · Gambit Medal earned", gambitLost: "Gambit missed",
+      gambitWonStat: "won", gambitLostStat: "missed", gambitOpenStat: "not finished", medalLine: "Gambit Medals: {n} of 9",
+      gambitTip: "Gambit · {name}: {desc}", help_gambit: "Gambits", help_gambit_d: "Each boss phase has an optional challenge; win it for a Gambit Medal",
+      gb_buckler: "Break the Buckler", gbd_buckler: "clear the buckler's row before the first smoke.",
+      gb_firstblood: "First Blood", gbd_firstblood: "land the first strike within 10 pieces.",
+      gb_reins: "Cut the Reins", gbd_reins: "clear the reins' row before the gate first lowers.",
+      gb_cutline: "Cut the Line", gbd_cutline: "break a chain within 4 pieces of the first harpoon.",
+      gb_spikegun: "Spike the Gun", gbd_spikegun: "clear the gun carriage's row before the second harpoon.",
+      gb_bowchaser: "Bow Chaser", gbd_bowchaser: "fire the Cannon before the third harpoon.",
+      gb_spikepowder: "Spike the Powder", gbd_spikepowder: "clear the royal powder barrel's row before the first mortar.",
+      gb_douse: "Douse the Stair", gbd_douse: "put out the first fire within 6 pieces of it starting.",
+      gb_rapier: "Reclaim the Blade", gbd_rapier: "clear all four rows of René's pinned family rapier.",
       storyOpening: "Opening", storyEnding: "Ending", storyNext: "Continue", storySkip: "Skip",
       vlabel_play: "Latest", vlabel_a: "Test A", vlabel_b: "Test B", vlabel_c: "Test C",
       vnote_play: "Powder Blasts are set per story stage, and you can switch them on or off for Endless in Settings.",
@@ -850,6 +864,18 @@ body {
       lostGate: "{mode}: perdido. El rastrillo cayó sobre la pila.", lostFire: "{mode}: perdido. El fuego se descontroló.",
       help_swing: "Cuerdas", help_swing_d: "En Jarcias y cuerdas, desliza hacia arriba en el tercio izquierdo o derecho para cruzar una pieza alta",
       p13: "Fragmento maldito",
+      st_gambit: "Gambito", gambitWon: "¡Gambito logrado!", gambitWonSub: "{name} · Medalla de gambito", gambitLost: "Gambito fallido",
+      gambitWonStat: "logrado", gambitLostStat: "fallido", gambitOpenStat: "sin terminar", medalLine: "Medallas de gambito: {n} de 9",
+      gambitTip: "Gambito · {name}: {desc}", help_gambit: "Gambitos", help_gambit_d: "Cada fase de jefe tiene un reto opcional; supéralo para ganar una Medalla de gambito",
+      gb_buckler: "Rompe la rodela", gbd_buckler: "completa la fila de la rodela antes del primer humo.",
+      gb_firstblood: "Primera sangre", gbd_firstblood: "acierta el primer golpe en 10 piezas o menos.",
+      gb_reins: "Corta las riendas", gbd_reins: "completa la fila de las riendas antes de que baje la puerta por primera vez.",
+      gb_cutline: "Corta el cabo", gbd_cutline: "rompe una cadena en las 4 piezas siguientes al primer arpón.",
+      gb_spikegun: "Clava el cañón", gbd_spikegun: "completa la fila de la cureña antes del segundo arpón.",
+      gb_bowchaser: "Cañón de proa", gbd_bowchaser: "dispara el Cañón antes del tercer arpón.",
+      gb_spikepowder: "Moja la pólvora", gbd_spikepowder: "completa la fila del barril real de pólvora antes del primer mortero.",
+      gb_douse: "Apaga la escalera", gbd_douse: "apaga el primer fuego en las 6 piezas siguientes a que empiece.",
+      gb_rapier: "Recupera la espada", gbd_rapier: "completa las cuatro filas del estoque familiar de René, clavado en el muro.",
       storyOpening: "Comienzo", storyEnding: "Final", storyNext: "Continuar", storySkip: "Saltar",
       vlabel_play: "Última versión", vlabel_a: "Prueba A", vlabel_b: "Prueba B", vlabel_c: "Prueba C",
       vnote_play: "Las Explosiones de pólvora dependen de cada etapa de la historia, y en Sin fin puedes activarlas o desactivarlas en Ajustes.",
@@ -978,6 +1004,18 @@ body {
       lostGate: "แพ้ {mode} ประตูเหล็กลงมาถึงกองชิ้นส่วน", lostFire: "แพ้ {mode} ไฟลุกลามจนควบคุมไม่ได้",
       help_swing: "เชือก", help_swing_d: "ในด่านเสากระโดงและเชือก ปัดขึ้นที่ส่วนซ้ายหรือขวาเพื่อเหวี่ยงชิ้นที่อยู่สูงข้ามไป",
       p13: "เศษต้องสาป",
+      st_gambit: "แกมบิต", gambitWon: "ทำแกมบิตสำเร็จ!", gambitWonSub: "{name} · ได้เหรียญแกมบิต", gambitLost: "พลาดแกมบิต",
+      gambitWonStat: "สำเร็จ", gambitLostStat: "พลาด", gambitOpenStat: "ยังไม่จบ", medalLine: "เหรียญแกมบิต: {n} จาก 9",
+      gambitTip: "แกมบิต · {name}: {desc}", help_gambit: "แกมบิต", help_gambit_d: "แต่ละช่วงของบอสมีภารกิจเสริม ทำสำเร็จเพื่อรับเหรียญแกมบิต",
+      gb_buckler: "ทำลายโล่", gbd_buckler: "เคลียร์แถวของโล่ก่อนควันครั้งแรก",
+      gb_firstblood: "เลือดหยดแรก", gbd_firstblood: "โจมตีโดนครั้งแรกภายใน 10 ชิ้น",
+      gb_reins: "ตัดบังเหียน", gbd_reins: "เคลียร์แถวของบังเหียนก่อนประตูเลื่อนลงครั้งแรก",
+      gb_cutline: "ตัดเชือก", gbd_cutline: "ทำลายโซ่ภายใน 4 ชิ้นหลังฉมวกแรก",
+      gb_spikegun: "ตอกปืน", gbd_spikegun: "เคลียร์แถวของแท่นปืนก่อนฉมวกที่สอง",
+      gb_bowchaser: "ปืนหัวเรือ", gbd_bowchaser: "ยิงปืนใหญ่ก่อนฉมวกที่สาม",
+      gb_spikepowder: "ทำลายดินปืน", gbd_spikepowder: "เคลียร์แถวของถังดินปืนหลวงก่อนปืนครกลูกแรก",
+      gb_douse: "ดับไฟที่บันได", gbd_douse: "ดับไฟครั้งแรกภายใน 6 ชิ้นหลังไฟเริ่ม",
+      gb_rapier: "ชิงดาบคืน", gbd_rapier: "เคลียร์ทั้งสี่แถวของดาบประจำตระกูลของเรอเนที่ถูกตรึงไว้",
       storyOpening: "บทเปิด", storyEnding: "บทปิด", storyNext: "ไปต่อ", storySkip: "ข้าม",
       vlabel_play: "เวอร์ชันล่าสุด", vlabel_a: "ทดสอบ A", vlabel_b: "ทดสอบ B", vlabel_c: "ทดสอบ C",
       vnote_play: "ระเบิดดินปืนกำหนดแยกตามแต่ละด่านของเนื้อเรื่อง และเปิดหรือปิดสำหรับโหมดไม่รู้จบได้ในการตั้งค่า",
@@ -1861,7 +1899,7 @@ body {
   const SPAWN_TRY = [0, 1, -1, 2, -2, 3, -3, 4, -4, 5, -5, 6, -6, 7, -7];
   const rnd = (n) => Math.floor(Math.random() * n);
   const openCols = () => { const out = []; for (let x = 0; x < COLS; x++) if (!G.walls.has(x)) out.push(x); return out; };
-  const isFixed = (c) => !!(c && (c.t === "wall" || c.t === "beacon"));
+  const isFixed = (c) => !!(c && (c.t === "wall" || c.t === "beacon" || c.t === "gambit"));
   const gateY = () => ROWS - (G.gate || 0);
   function surfaceY(x) { for (let y = TOT - 1; y >= 0; y--) if (G.grid[y][x]) return y + 1; return 0; }
   const countCells = (pred) => { let n = 0; for (const row of G.grid) for (const c of row) if (c && pred(c)) n++; return n; };
@@ -1905,6 +1943,7 @@ body {
     if (mode.fire) { G.reticles = []; for (let i = 0; i < 3; i++) G.reticles.push(retPick()); G.fireTick = 0; }
     G.boss = null; G.mortar = null;
     if (mode.boss) { G.boss = { hp: mode.boss.hp, max: mode.boss.hp }; G.mortarLeft = mode.boss.mortar; G.mortarShots = 0; }
+    gambitSetup();
   }
   const HZ_HINTS = ["gate", "pennant", "wind", "crates", "tide", "ropes", "harpoon", "earth", "fire", "conveyor", "beacons", "boss"];
   function hzHints(mode) { for (const k of HZ_HINTS) if (mode[k]) hint("hz_" + k); }
@@ -1989,6 +2028,7 @@ body {
       for (const [x, y] of G.retSurf) {
         if (!cells.some((k) => k.gx === x && k.gy === y)) continue;
         ignite(p.inst);
+        if (G.fireStart == null) G.fireStart = G.locks;
         G.reticles[G.reticles.indexOf(x)] = retPick();
         popup(t("fireCaught"), t("fireCaughtSub"));
         sfx("D01", { gain: 0.2, rate: 1.4 });
@@ -2005,6 +2045,7 @@ body {
       if (--G.gateLeft <= 0) {
         G.gateLeft = M.gate;
         G.gate = Math.min(ROWS - 6, G.gate + 1);
+        G.gateDrops++;
         sfx("D05"); FX.shake = Math.max(FX.shake, 0.25);
         popup(t("gateLowers"), t("gateLowersSub"));
       }
@@ -2012,13 +2053,16 @@ body {
     }
     if (M.pennant) {
       if (--G.pen.left <= 0) { G.pen.col = G.pen.next; G.pen.next = penPick(G.pen.col); G.pen.left = M.pennant.every; }
-      if (--G.pen.smokeLeft <= 0) { G.pen.smokeLeft = M.pennant.smoke; G.smokeN = 2; popup(t("smoke"), t("smokeSub")); sfx("D05", { rate: 0.8 }); }
+      if (--G.pen.smokeLeft <= 0) { G.pen.smokeLeft = M.pennant.smoke; G.smokeN = 2; G.smokes++; popup(t("smoke"), t("smokeSub")); sfx("D05", { rate: 0.8 }); }
     }
     if (M.harpoon) {
       G.harpLeft--;
       if (G.harpLeft === 2 && G.chains.size < 3) { const oc = openCols().filter((x) => !G.chains.has(x)); G.harpAim = oc[rnd(oc.length)]; }
       if (G.harpLeft <= 0) {
-        if (G.harpAim != null) { G.chains.add(G.harpAim); popup(t("harpoon"), t("harpoonSub")); sfx("C06"); FX.shake = Math.max(FX.shake, 0.35); }
+        if (G.harpAim != null) {
+          G.chains.add(G.harpAim); G.harpoons++; if (G.firstStrike == null) G.firstStrike = G.locks;
+          popup(t("harpoon"), t("harpoonSub")); sfx("C06"); FX.shake = Math.max(FX.shake, 0.35);
+        }
         G.harpAim = null; G.harpLeft = M.harpoon;
       }
     }
@@ -2032,8 +2076,9 @@ body {
     if (G.boss) {
       G.mortarLeft--;
       if (G.mortarLeft === 3) aimMortar();
-      if (G.mortarLeft <= 0) { strikeMortar(); G.mortarLeft = M.boss.mortar; }
+      if (G.mortarLeft <= 0) { strikeMortar(); G.mortarHits++; G.mortarLeft = M.boss.mortar; }
     }
+    gambitTick();
     return false;
   }
 
@@ -2347,6 +2392,86 @@ body {
     c.beginPath(); c.moveTo(px + s * 0.5, py + s * 0.35); c.lineTo(px + s * 0.5, py + s * 0.62); c.stroke();
   }
 
+
+  // ---------- Gambits: one optional challenge per boss phase (design doc). Winning one earns a Gambit Medal. ----------
+  // Objects (buckler, reins, gun carriage, royal powder barrel, family rapier) are fixed: the Cannon, blasts and the
+  // mortar pass them by, and only clearing their row removes them. They move down with the stack as rows below clear.
+  const GAMBITS = {
+    s15: { id: "buckler", obj: "buckler", at: [7, 0] },
+    s15r2: { id: "firstblood" },
+    s15r3: { id: "reins", obj: "reins", at: [7, 4], rubble: 4 },
+    s25: { id: "cutline" },
+    s25r2: { id: "spikegun", obj: "gun-carriage", at: [7, 7], rubble: 7 },
+    s25r3: { id: "bowchaser" },
+    s35: { id: "spikepowder", obj: "royal-barrel", at: [7, 0], rubble: 2, gaps: 4 },
+    s35r2: { id: "douse" },
+    s35r3: { id: "rapier", obj: "family-rapier", at: [7, 8], tall: 4 }
+  };
+  function gambitSetup() {
+    const d = GAMBITS[G.modeId];
+    G.gambit = d ? { id: d.id, state: "live", obj: d.obj || null } : null;
+    G.harpoons = 0; G.chainBreaks = 0; G.firstStrike = null; G.fireStart = null; G.firedCannon = false; G.mortarHits = 0; G.smokes = 0; G.gateDrops = 0;
+    clearTimeout(noteTimer);
+    if (noteShown) { noteShown = false; $("hint").hidden = true; $("stripText").hidden = false; }
+    if (!d) return;
+    const [ox, oy] = d.at || [0, 0];
+    // A starting stack of rubble under the object (two gaps a row), so its row can be reached in time.
+    if (d.rubble) for (let y = 0; y < d.rubble; y++) {
+      const gaps = new Set(), open = openCols().filter((x) => x !== ox);
+      while (gaps.size < (d.gaps || 2)) gaps.add(open[rnd(open.length)]);
+      for (const x of open) if (!gaps.has(x) && !G.grid[y][x]) G.grid[y][x] = { t: "rubble", v: rnd(3) };
+    }
+    if (d.obj) for (let i = 0; i < (d.tall || 1); i++) G.grid[oy + (d.tall || 1) - 1 - i][ox] = { t: "gambit", g: d.obj, part: i, tall: d.tall || 1 };
+    const g0 = G;
+    setTimeout(() => { if (G === g0 && G.gambit && G.state !== "over") stripNote(t("gambitTip", { name: t("gb_" + G.gambit.id), desc: t("gbd_" + G.gambit.id) }), 9000); }, 2600);
+  }
+  const gambitLeft = () => countCells((c) => c.t === "gambit");
+  function gambitDone(won) {
+    const gb = G.gambit;
+    if (!gb || gb.state !== "live") return;
+    gb.state = won ? "won" : "lost";
+    if (won) {
+      let medals = [];
+      try { medals = JSON.parse(store.get("rr-medals") || "[]"); } catch (e) { medals = []; }
+      if (!medals.includes(gb.id)) { medals.push(gb.id); store.set("rr-medals", JSON.stringify(medals)); }
+      setTimeout(() => { if (G && G.state !== "over") popup(t("gambitWon"), t("gambitWonSub", { name: t("gb_" + gb.id) })); }, 500);
+      sfx("B05", { delay: 0.4 });
+      updateMedals();
+    } else setTimeout(() => { if (G && G.state !== "over") popup(t("gambitLost"), t("gb_" + gb.id)); }, 500);
+  }
+  // Checked after every lock (from hzTurn) and after clears.
+  function gambitTick() {
+    const gb = G.gambit;
+    if (!gb || gb.state !== "live") return;
+    switch (gb.id) {
+      case "buckler": case "reins": case "spikegun": case "spikepowder": case "rapier":
+        if (!gambitLeft()) gambitDone(true);
+        else if ((gb.id === "buckler" && G.smokes > 0) || (gb.id === "reins" && G.gateDrops > 0) || (gb.id === "spikegun" && G.harpoons >= 2) || (gb.id === "spikepowder" && G.mortarHits > 0)) gambitDone(false);
+        break;
+      case "firstblood": if (G.pen.hits > 0) gambitDone(G.locks <= 10); else if (G.locks >= 10) gambitDone(false); break;
+      case "cutline": if (G.firstStrike != null) { if (G.chainBreaks > 0) gambitDone(true); else if (G.locks >= G.firstStrike + 4) gambitDone(false); } break;
+      case "bowchaser": if (G.firedCannon) gambitDone(true); else if (G.harpoons >= 3) gambitDone(false); break;
+      case "douse":
+        if (G.fireStart != null) { if (!countCells((c) => c.fire || c.smoulder)) gambitDone(true); else if (G.locks >= G.fireStart + 6) gambitDone(false); }
+        break;
+    }
+  }
+  function updateMedals() {
+    let medals = [];
+    try { medals = JSON.parse(store.get("rr-medals") || "[]"); } catch (e) { medals = []; }
+    const el = $("medalLine");
+    if (el) el.textContent = t("medalLine", { n: medals.length });
+  }
+  // A longer note in the strip under the board (used for the Gambit description at the start of a phase).
+  let noteTimer = 0, noteShown = false;
+  function stripNote(text, ms) {
+    clearTimeout(noteTimer);
+    noteShown = true;
+    const el = $("hint");
+    el.textContent = text; el.hidden = false; $("stripText").hidden = true;
+    noteTimer = setTimeout(() => { if (el.textContent === text) { el.hidden = true; $("stripText").hidden = false; } }, ms);
+  }
+
   // ---------- game setup ----------
   // carry: Cannon progress brought along when the player presses Continue, so a run through the rounds
   // builds toward a Broadside. Starting a round from the menu or Play again begins from zero.
@@ -2571,7 +2696,7 @@ body {
     if (under) extras.push(t("underwater", { n: under }));
     if (n >= 4) G.bigClears++;
     if (n >= 2) G.multiClears++;
-    if (crowned && n > 0 && G.chains && G.chains.size) { for (const x of G.chains) artFx("chain-break", x, rows[0], 1, 1, 0.9); G.chains.clear(); extras.push(t("chainsBroken")); }
+    if (crowned && n > 0 && G.chains && G.chains.size) { for (const x of G.chains) artFx("chain-break", x, rows[0], 1, 1, 0.9); G.chainBreaks += G.chains.size; G.chains.clear(); extras.push(t("chainsBroken")); }
     if (G.boss && n >= 2) {
       G.boss.hp = Math.max(0, G.boss.hp - total);
       extras.push(t("bossHit", { n: fmt(total) }));
@@ -2607,6 +2732,7 @@ body {
       const c = G.grid[y][x];
       if (!c) continue;
       if (c.t === "beacon") { litNow++; artFx("beacon-lit", x, y + 0.5, 2, 2, 1.8); }
+      if (c.t === "gambit") artFx(c.g === "family-rapier" ? "family-rapier-freed" : c.g + "-break", x, c.g === "family-rapier" ? y + 1.5 : y, 1, c.g === "family-rapier" ? 4 : 1, 1.6);
       if (c.cracked && !c.scar) { c.scar = true; if (!keep.has(y)) keep.set(y, new Set()); keep.get(y).add(x); }
     }
     if (litNow) { G.lit += litNow; setTimeout(() => { if (G && G.state !== "over") popup(t("beaconLit"), t("beaconSub", { a: G.lit, b: G.beaconsTotal })); }, 350); sfx("B06", { delay: 0.2 }); }
@@ -2627,6 +2753,7 @@ body {
     if (tableHoles.length) collapse(tableHoles.map(([x, y]) => [x, y - rows.filter((r) => r < y).length]));
     if (tids.size) sfx("D03");
     sfx("B10", { delay: 0.05 });
+    if (G.gambit) gambitTick();
     G.clearRows = null;
     G.state = "play";
     finishTurn();
@@ -2707,6 +2834,7 @@ body {
     G.readyT = 0;
     cannonNudge(false);
     G.cannonShots = (G.cannonShots || 0) + 1;
+    G.firedCannon = true;
     if (G.cannonShots % 3 === 0) {
       G.broadsides = (G.broadsides || 0) + 1;
       setTimeout(() => { if (G && G.state !== "over") { popup(t("broadsideReady"), t("broadsideReadySub")); SFX.broadsideReady(); hint("broadside"); } }, 1300);
@@ -2871,7 +2999,7 @@ body {
       let k = 0;
       for (let y = TOT - 1; y >= 0 && k < 4; y--) {
         const cell = G.grid[y][c];
-        if (cell && cell.t === "beacon") { k++; continue; }
+        if (cell && (cell.t === "beacon" || cell.t === "gambit")) { k++; continue; }
         if (cell && cell.t !== "wall") {
           if (blastsActive() && isKeg(cell)) kegsHit.push([c, y]);
           else { if (cell.t === "table") tids.add(cell.tid); G.grid[y][c] = null; destroyed++; }
@@ -2881,7 +3009,7 @@ body {
     }
     destroyed += breakTables(tids);
     G.score += 50 * destroyed;
-    if (G.chains && cols.some((c) => G.chains.has(c))) { cols.forEach((c) => { if (G.chains.has(c)) artFx("chain-break", c, Math.max(0, G.cannon.iy), 1, 1, 0.9); G.chains.delete(c); }); setTimeout(() => popup(t("chainsBroken"), ""), 700); }
+    if (G.chains && cols.some((c) => G.chains.has(c))) { cols.forEach((c) => { if (G.chains.has(c)) { artFx("chain-break", c, Math.max(0, G.cannon.iy), 1, 1, 0.9); G.chainBreaks++; } G.chains.delete(c); }); setTimeout(() => popup(t("chainsBroken"), ""), 700); }
     G.fx = { cols, t: 0.35 };
     const ix = c0 * cs + cs / 2, iyPx = cannonImpactY();
     FX.rings.push({ x: ix, y: iyPx, rad: cs * 2.8, t: 0, dur: 0.5 });
@@ -2987,6 +3115,7 @@ body {
       "<dt>" + t("st_pieces") + "</dt><dd>" + G.locks + "</dd>" +
       "<dt>" + t("st_per") + "</dt><dd>" + per + "</dd>" +
       "<dt>" + t("st_blasts") + "</dt><dd>" + (blastsActive() ? (G.blasts || 0) : t("off")) + "</dd>" +
+      (G.gambit ? "<dt>" + t("st_gambit") + "</dt><dd>" + t("gb_" + G.gambit.id) + " · " + t(G.gambit.state === "won" ? "gambitWonStat" : G.gambit.state === "lost" ? "gambitLostStat" : "gambitOpenStat") + "</dd>" : "") +
       "<dt>" + t("st_time") + "</dt><dd>" + mm + ":" + ss + "</dd>";
   }
 
@@ -3472,7 +3601,8 @@ body {
   // Ali's campaign art pack: stage paintings (art/bg), board sprites (art/sp, 128 px per cell) and story panels (art/story).
   const ART_BASE = window.RR_ART_BASE || "art/";
   const SPR = {};
-  ["armory-smoke", "barrel-wall-cap", "barrel-wall-middle", "beacon-lit", "beacon-unlit", "cargo-bale-cracked", "cargo-bale-intact",
+  ["buckler-idle", "buckler-break", "reins-idle", "reins-break", "gun-carriage-idle", "gun-carriage-break", "royal-barrel-idle", "royal-barrel-break",
+    "family-rapier-pinned", "family-rapier-freed", "armory-smoke", "barrel-wall-cap", "barrel-wall-middle", "beacon-lit", "beacon-unlit", "cargo-bale-cracked", "cargo-bale-intact",
     "chain-break", "chain-middle", "conveyor-arrow", "conveyor-middle", "crate-anchor", "crate-fish", "crate-skull", "cursed-fragment",
     "earthwork-earth", "earthwork-gabion", "earthwork-sandbag", "earthwork-top", "fire-counter-icon", "fire-reticle", "fire-smoulder",
     "flames-01", "flames-02", "flames-03", "flames-04", "harpoon-head", "mortar-impact", "mortar-target", "pennant-active", "pennant-next",
@@ -3519,6 +3649,16 @@ body {
       c.drawImage(SPR[["earthwork-earth", "earthwork-sandbag", "earthwork-gabion"][cell.v || 0]], px, py, s, s);
       const up = G && cellAt(col, gy + 1);
       if (!(up && up.t === "earth") && sprOk("earthwork-top")) c.drawImage(SPR["earthwork-top"], px, py - s * 0.35, s, s);
+      return;
+    }
+    if (cell.t === "gambit") {
+      const n = cell.g === "family-rapier" ? "family-rapier-pinned" : cell.g + "-idle";
+      c.fillStyle = "rgba(243, 211, 111, 0.28)"; c.fillRect(px, py, s, s);
+      c.strokeStyle = "rgba(243, 211, 111, 0.9)"; c.lineWidth = Math.max(1.5, s * 0.08); c.strokeRect(px + 1, py + 1, s - 2, s - 2);
+      if (sprOk(n)) {
+        if (cell.g === "family-rapier") { c.save(); c.beginPath(); c.rect(px, py, s, s); c.clip(); c.drawImage(SPR[n], px, py - cell.part * s, s, s * 4); c.restore(); }
+        else c.drawImage(SPR[n], px - s * 0.05, py - s * 0.05, s * 1.1, s * 1.1);
+      }
       return;
     }
     if (cell.t === "beacon" && sprOk("beacon-unlit")) {
@@ -3729,12 +3869,34 @@ body {
       ctx.strokeText(n + "/20", cs * 1.3, y0 + cs * 0.8); ctx.fillText(n + "/20", cs * 1.3, y0 + cs * 0.8);
     }
     if (G.boss && sprOk("rochefort-health-frame")) drawBossBar(W);
+    if (G.gambit) {
+      // Gambit badge, top right: the challenge's object (or a medal), gold when won, greyed when missed.
+      const gb = G.gambit, sz = cs * 1.5, x0 = W - sz - cs * 0.2, y0 = (G.gate || 0) * cs + cs * 0.2 + (G.boss ? Math.min(cs * 1.3, W / 9) + cs * 0.2 : 0);
+      const icon = { buckler: "buckler-idle", reins: "reins-idle", "gun-carriage": "gun-carriage-idle", "royal-barrel": "royal-barrel-idle", "family-rapier": "family-rapier-pinned" }[gb.obj] ||
+        { firstblood: "pennant-active", cutline: "chain-break", bowchaser: "harpoon-head", douse: "fire-smoulder" }[gb.id];
+      ctx.save();
+      ctx.fillStyle = gb.state === "won" ? "rgba(243, 211, 111, 0.9)" : "rgba(30, 18, 10, 0.72)";
+      ctx.beginPath(); ctx.arc(x0 + sz / 2, y0 + sz / 2, sz / 2, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = gb.state === "lost" ? "#777" : "#f3d36f"; ctx.lineWidth = Math.max(1.5, cs * 0.1); ctx.stroke();
+      if (gb.state === "lost") ctx.globalAlpha = 0.35;
+      if (sprOk(icon)) {
+        if (icon === "family-rapier-pinned" || icon === "pennant-active") ctx.drawImage(SPR[icon], x0 + sz * 0.3, y0 + sz * 0.08, sz * 0.4, sz * (icon === "pennant-active" ? 0.8 : 0.84) * (icon === "pennant-active" ? 1 : 1));
+        else ctx.drawImage(SPR[icon], x0 + sz * 0.14, y0 + sz * 0.14, sz * 0.72, sz * 0.72);
+      }
+      ctx.globalAlpha = 1;
+      if (gb.state !== "live") {
+        ctx.fillStyle = gb.state === "won" ? "#2a160c" : "#ddd"; ctx.font = boardFont(0.9); ctx.textAlign = "center";
+        ctx.fillText(gb.state === "won" ? "✓" : "✗", x0 + sz / 2, y0 + sz * 0.68);
+      }
+      ctx.fillStyle = "#f3e7c9"; ctx.font = boardFont(0.42); ctx.textAlign = "center"; ctx.fillText(t("st_gambit"), x0 + sz / 2, y0 + sz + cs * 0.45);
+      ctx.restore();
+    }
     if (G.state === "firing" && G.cannon) drawCannon();
     if ((G.state === "aiming" || G.state === "broadside") && G.bs) drawBroadside();
     drawFx(W, H);
     // Danger line: top 3 rows tint when the stack is high.
     let top = -1;
-    for (let y = TOT - 1; y >= 0 && top < 0; y--) for (let x = 0; x < COLS; x++) { const c = G.grid[y][x]; if (c && c.t !== "wall" && c.t !== "beacon") { top = y; break; } }
+    for (let y = TOT - 1; y >= 0 && top < 0; y--) for (let x = 0; x < COLS; x++) { const c = G.grid[y][x]; if (c && c.t !== "wall" && c.t !== "beacon" && c.t !== "gambit") { top = y; break; } }
     G.top = top;
     if (top >= 16 && G.state === "play") hint("danger");
     if (top >= 18) { ctx.fillStyle = "rgba(155, 42, 71, 0.10)"; ctx.fillRect(0, 0, W, cs * 4); }
@@ -3986,6 +4148,7 @@ body {
     $("diffNote").textContent = t("diffNote_" + difficulty);
     syncToggles();
     updateBest();
+    updateMedals();
     hudCache = {};
     if (G && G.armory) renderArmory();
     if (G && G.mode && G.state !== "over" && G.state !== undefined) updateHUD();
