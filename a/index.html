@@ -972,7 +972,7 @@ body {
   // synthesized sounds if a file is missing or audio can't be decoded, so the game never goes silent.
   const AUDIO_BASE = window.RR_AUDIO_BASE || "audio/";
   const SND_N = {"A01": 4, "A02": 4, "A03": 2, "A05": 2, "A06": 3, "A07": 3, "A08": 3, "A10": 2, "B01": 2, "B02": 1, "B03": 1, "B04": 1, "B05": 1, "B06": 1, "B07": 1, "B08": 1, "B09": 1, "B10": 2, "C01": 2, "C02": 1, "C03": 1, "C04": 1, "C05": 1, "C06": 2, "C07": 1, "C08": 1, "C09": 1, "C10": 1, "C11": 1, "D01": 2, "D02": 1, "D03": 2, "D05": 2, "E01": 1, "E02": 1, "E04": 1, "G01": 2, "G02": 1, "G04": 1, "G05": 1, "G06": 1, "G07": 1, "G09": 1};
-  const MUS_INFO = {"salt-calm": {"dur": 71.111104, "loop": true}, "salt-tense": {"dur": 71.111104, "loop": true}, "salt-danger": {"dur": 71.111104, "loop": true}, "siege-calm": {"dur": 80, "loop": true}, "siege-tense": {"dur": 80, "loop": true}, "siege-danger": {"dur": 80, "loop": true}, "menu": {"dur": 76.8, "loop": true}, "endless-calm": {"dur": 139.636354, "loop": true}, "endless-danger": {"dur": 139.636354, "loop": true}, "endless-tense": {"dur": 139.636354, "loop": true}, "march-calm": {"dur": 73.846146, "loop": true}, "march-danger": {"dur": 73.846146, "loop": true}, "march-tense": {"dur": 73.846146, "loop": true}, "powder": {"dur": 4.0, "loop": true}, "powder-hit": {"dur": 1.4, "loop": false}, "charge": {"dur": 20.869563, "loop": true}, "scramble": {"dur": 30.0, "loop": false}};
+  const MUS_INFO = {"tables-gb1": {"dur": 64, "loop": true, "gain": 1.23, "single": true}, "salt-calm": {"dur": 71.111104, "loop": true}, "salt-tense": {"dur": 71.111104, "loop": true}, "salt-danger": {"dur": 71.111104, "loop": true}, "siege-calm": {"dur": 80, "loop": true}, "siege-tense": {"dur": 80, "loop": true}, "siege-danger": {"dur": 80, "loop": true}, "menu": {"dur": 76.8, "loop": true}, "endless-calm": {"dur": 139.636354, "loop": true}, "endless-danger": {"dur": 139.636354, "loop": true}, "endless-tense": {"dur": 139.636354, "loop": true}, "march-calm": {"dur": 73.846146, "loop": true}, "march-danger": {"dur": 73.846146, "loop": true}, "march-tense": {"dur": 73.846146, "loop": true}, "powder": {"dur": 4.0, "loop": true}, "powder-hit": {"dur": 1.4, "loop": false}, "charge": {"dur": 20.869563, "loop": true}, "scramble": {"dur": 30.0, "loop": false}};
   const AUD = { bufs: new Map(), loading: new Map(), used: new Map(), musicReal: true };
   const SFX_MAJOR = new Set(["B04", "B05", "C04", "C06", "C09", "D01", "D02", "G06", "G07"]);
   function loadBuf(path) {
@@ -1155,7 +1155,8 @@ body {
   // event tracks start from bar 1 with a 0.33 s fade. Falls back to the synthesized music if loading fails.
   const RM = { file: null, src: null, gain: null, t0: 0, dur: 0, pending: null, amb: null, ambGain: null };
   function musicTier() { const top = G && G.top != null ? G.top : 0; return top >= 18 ? "danger" : top >= 10 ? "tense" : "calm"; }
-  const BOARD_THEME = { s11: "march", s12: "salt", s13: "siege" };
+  // Ali's GarageBand test track (one layer, so it plays at every stack height) is on Overturned Tables.
+  const BOARD_THEME = { s11: "march", s12: "tables-gb1", s13: "siege" };
   function wantedMusic() {
     if (!AU.ctx || !AU.musicOn) return null;
     if (!$("menu").hidden) return "menu";
@@ -1165,7 +1166,8 @@ body {
     if (w === "scatter") return "scramble";
     if (w === "charge") return "charge";
     // Each demo board gets its own layered theme (Salt and Steel and The Siege are borrowed from Chapters 2 and 3).
-    return (G.mode && G.mode.endless ? "endless" : BOARD_THEME[G.mode && G.mode.base] || "march") + "-" + musicTier();
+    const theme = G.mode && G.mode.endless ? "endless" : BOARD_THEME[G.mode && G.mode.base] || "march";
+    return MUS_INFO[theme] && MUS_INFO[theme].single ? theme : theme + "-" + musicTier();
   }
   const family = (n) => (n ? n.split("-")[0] : "");
   function rmStop(fade) {
@@ -1181,7 +1183,7 @@ body {
     src.buffer = buf;
     const dur = Math.min(info.dur || buf.duration, buf.duration);
     src.loop = true; src.loopStart = 0; src.loopEnd = dur;
-    g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(1, now + fade);
+    g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(info.gain || 1, now + fade);
     src.connect(g); g.connect(AU.mus);
     src.start(now, offset % dur);
     RM.file = name; RM.src = src; RM.gain = g; RM.t0 = now - offset; RM.dur = dur;
