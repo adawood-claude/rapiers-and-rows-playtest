@@ -564,7 +564,7 @@ body {
     <p class="lbtitle" id="lbTitle"></p>
     <table class="lb"><thead><tr><th>#</th><th data-i18n="lbName">Name</th><th data-i18n="honor">Honor</th><th id="lbCol3"></th></tr></thead><tbody id="lbBody"></tbody></table>
     <p class="note" id="lbEmpty" data-i18n="lbEmpty">No scores yet. Be the first!</p>
-    <p class="note" data-i18n="lbDevice">Scores are saved on this device only.</p>
+    <p class="note" id="lbDevice" data-i18n="lbDevice">Scores are saved on this device only.</p>
     <button class="btn" id="lbBack" data-i18n="back">Back</button>
   </div>
 </div>
@@ -638,7 +638,7 @@ body {
       kbd: "Keyboard: ← → move · ↓ ease down · ↑ or X rotate · Z rotate back · Space drop · 1/2 Armory · C cannon · B Broadside · Q/E swing · P pause",
       paused: "Paused", resume: "Resume", restart: "Restart", menu: "Menu", playAgain: "Play again",
       leaderboards: "Leaderboards", story: "Story", lbBlastsOn: "Blasts on", lbBlastsOff: "Blasts off", lbName: "Name",
-      lbEmpty: "No scores yet. Be the first!", lbDevice: "Scores are saved on this device only.", back: "Back",
+      lbEmpty: "No scores yet. Be the first!", lbDevice: "Scores are saved on this device only.", lbShared: "Scores are shared with all players.", lbLoading: "Loading shared scores…", newHighShared: "New high score! Rank {n} among all players", back: "Back",
       newHigh: "New high score! Rank {n}", yourName: "Your name", save: "Save", saved: "Saved", defaultName: "Musketeer",
       viewLeaderboard: "View leaderboard",
       versionN: "Version {n}", version1: "Version 1", version2: "Version 2", continueVer: "Continue: Version {n}",
@@ -778,7 +778,7 @@ body {
       kbd: "Teclado: ← → mover · ↓ bajar · ↑ o X girar · Z girar atrás · Espacio soltar · 1/2 Armería · C cañón · B Andanada · Q/E cruzar · P pausa",
       paused: "En pausa", resume: "Continuar", restart: "Reiniciar", menu: "Menú", playAgain: "Jugar otra vez",
       leaderboards: "Clasificaciones", story: "Historia", lbBlastsOn: "Con explosiones", lbBlastsOff: "Sin explosiones", lbName: "Nombre",
-      lbEmpty: "Aún no hay puntuaciones. ¡Sé el primero!", lbDevice: "Las puntuaciones se guardan solo en este dispositivo.", back: "Volver",
+      lbEmpty: "Aún no hay puntuaciones. ¡Sé el primero!", lbDevice: "Las puntuaciones se guardan solo en este dispositivo.", lbShared: "Las puntuaciones se comparten con todos los jugadores.", lbLoading: "Cargando puntuaciones compartidas…", newHighShared: "¡Nueva mejor puntuación! Puesto {n} entre todos los jugadores", back: "Volver",
       newHigh: "¡Nueva mejor puntuación! Puesto {n}", yourName: "Tu nombre", save: "Guardar", saved: "Guardado", defaultName: "Mosquetero",
       viewLeaderboard: "Ver clasificación",
       versionN: "Versión {n}", version1: "Versión 1", version2: "Versión 2", continueVer: "Continuar: Versión {n}",
@@ -918,7 +918,7 @@ body {
       kbd: "แป้นพิมพ์: ← → เลื่อน · ↓ เลื่อนลง · ↑ หรือ X หมุน · Z หมุนกลับ · Space ปล่อย · 1/2 คลังอาวุธ · C ปืนใหญ่ · B ยิงกราบเรือ · Q/E เหวี่ยง · P หยุด",
       paused: "หยุดชั่วคราว", resume: "เล่นต่อ", restart: "เริ่มใหม่", menu: "เมนู", playAgain: "เล่นอีกครั้ง",
       leaderboards: "กระดานผู้นำ", story: "เนื้อเรื่อง", lbBlastsOn: "เปิดระเบิด", lbBlastsOff: "ปิดระเบิด", lbName: "ชื่อ",
-      lbEmpty: "ยังไม่มีคะแนน มาเป็นคนแรกกัน!", lbDevice: "คะแนนจะบันทึกไว้ในอุปกรณ์นี้เท่านั้น", back: "กลับ",
+      lbEmpty: "ยังไม่มีคะแนน มาเป็นคนแรกกัน!", lbDevice: "คะแนนจะบันทึกไว้ในอุปกรณ์นี้เท่านั้น", lbShared: "คะแนนนี้แชร์กับผู้เล่นทุกคน", lbLoading: "กำลังโหลดคะแนนรวม…", newHighShared: "คะแนนสูงใหม่! อันดับ {n} จากผู้เล่นทั้งหมด", back: "กลับ",
       newHigh: "คะแนนสูงใหม่! อันดับ {n}", yourName: "ชื่อของคุณ", save: "บันทึก", saved: "บันทึกแล้ว", defaultName: "ทหารเสือ",
       viewLeaderboard: "ดูกระดานผู้นำ",
       versionN: "เวอร์ชัน {n}", version1: "เวอร์ชัน 1", version2: "เวอร์ชัน 2", continueVer: "ไปต่อ: เวอร์ชัน {n}",
@@ -3129,17 +3129,66 @@ body {
   function lbLoad(key) { try { const v = JSON.parse(store.get(key) || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; } }
   function lbSaveAll(key, list) { store.set(key, JSON.stringify(list.slice(0, LB_MAX))); }
   const lbSort = (a, b) => b.s - a.s || a.t - b.t;
+
+  // ---------- shared leaderboard (Supabase project "rapiers-and-rows") ----------
+  // The publishable key is meant to sit in a public page: the database only lets it read scores, add a score
+  // (with sanity checks) and rename a score with the private token kept on this device. Every game still saves
+  // a local copy, so the boards keep working offline or if the shared board can't be reached.
+  const SB_URL = "https://yolftfekwcntkcgexhdm.supabase.co", SB_KEY = "sb_publishable_Rli7-XSQtfZJmTNjqxKIwA_79ysNk8u";
+  const SB_VARIANT = VARIANT ? VARIANT.id : "claude";
+  const sbHeaders = (extra) => Object.assign({ apikey: SB_KEY, "Content-Type": "application/json" }, extra || {});
+  const newToken = () => (window.crypto && crypto.randomUUID ? crypto.randomUUID() :
+    "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (ch) => { const r = (Math.random() * 16) | 0; return (ch === "x" ? r : (r & 3) | 8).toString(16); }));
+  function sbFetch(url, opts) {
+    const ctl = window.AbortController ? new AbortController() : null;
+    const timer = ctl ? setTimeout(() => ctl.abort(), 8000) : 0;
+    return fetch(url, Object.assign({}, opts, ctl ? { signal: ctl.signal } : {})).finally(() => clearTimeout(timer));
+  }
+  async function sbTop(q) {
+    const u = SB_URL + "/rest/v1/scores?select=id,name,score,secs,rows_cleared&variant=eq." + SB_VARIANT + "&kind=eq." + q.kind +
+      "&board=eq." + encodeURIComponent(q.board) + "&diff=eq." + encodeURIComponent(q.diff) + "&order=score.desc,secs.asc&limit=" + LB_MAX;
+    const r = await sbFetch(u, { headers: sbHeaders() });
+    if (!r.ok) throw new Error("status " + r.status);
+    return (await r.json()).map((e) => ({ n: e.name, s: e.score, t: e.secs, r: e.rows_cleared, id: "sb" + e.id }));
+  }
+  async function sbSubmit(q, entry) {
+    const token = newToken();
+    const body = { variant: SB_VARIANT, kind: q.kind, board: q.board, diff: q.diff, name: entry.n, score: entry.s, secs: Math.max(1, entry.t), rows_cleared: entry.r, token };
+    const r = await sbFetch(SB_URL + "/rest/v1/scores?select=id", { method: "POST", headers: sbHeaders({ Prefer: "return=representation" }), body: JSON.stringify(body) });
+    if (!r.ok) throw new Error("status " + r.status);
+    const rows = await r.json();
+    return { id: rows[0].id, token };
+  }
+  function sbRename(remote, name) {
+    return sbFetch(SB_URL + "/rest/v1/rpc/rename_score", { method: "POST", headers: sbHeaders(), body: JSON.stringify({ p_id: remote.id, p_token: remote.token, p_name: name }) }).catch(() => {});
+  }
+  let sbLast = null, lbTicket = 0;
+  // Send the finished game's score to the shared board, then show its rank among all players if it made the top 10.
+  function lbSubmitRemote(q, entry) {
+    const mine = { q, pending: true };
+    sbLast = mine;
+    sbSubmit(q, entry).then(async (rem) => {
+      mine.remote = rem; mine.pending = false;
+      if (mine.renameTo) sbRename(rem, mine.renameTo);
+      const top = await sbTop(q);
+      mine.rank = top.findIndex((e) => e.id === "sb" + rem.id) + 1;
+      if (sbLast === mine && !$("end").hidden) showHighScore(mine.rank || (lbLast ? lastEnd && lastEnd.rank : null), !!mine.rank);
+      if (!$("boards").hidden) lbRender();
+    }).catch(() => { mine.pending = false; mine.failed = true; });
+  }
+
   let lbLast = null; // { key, id } of the entry just added, for highlighting and renaming
   function lbRecord(won) {
     lbLast = null;
     if (!G || G.modeId === "loose") return null;
-    let key;
-    if (G.mode.endless) key = lbKey("endless", endlessBlasts() ? "on" : "off", "-");
-    else if (G.mode.base && won) key = lbKey("story", G.modeId, G.diff);
+    let key, q;
+    if (G.mode.endless) { const b = endlessBlasts() ? "on" : "off"; key = lbKey("endless", b, "-"); q = { kind: "endless", board: b, diff: "-" }; }
+    else if (G.mode.base && won) { key = lbKey("story", G.modeId, G.diff); q = { kind: "story", board: G.modeId, diff: G.diff }; }
     else return null;
     if (G.score <= 0) return null;
     const list = lbLoad(key);
     const entry = { n: store.get("rr-name") || t("defaultName"), s: G.score, t: Math.floor(G.time), r: G.rows, d: Date.now(), id: Date.now() + "-" + Math.floor(Math.random() * 1e6) };
+    lbSubmitRemote(q, entry);
     list.push(entry); list.sort(lbSort);
     const rank = list.indexOf(entry) + 1;
     if (rank > LB_MAX) return null;
@@ -3148,18 +3197,24 @@ body {
     return rank;
   }
   function lbRename(name) {
-    if (!lbLast) return;
+    if (!lbLast) {
+      const clean0 = (name || "").replace(/\s+/g, " ").trim().slice(0, 14) || t("defaultName");
+      store.set("rr-name", clean0);
+      if (sbLast) { if (sbLast.remote) sbRename(sbLast.remote, clean0); else if (sbLast.pending) sbLast.renameTo = clean0; }
+      return;
+    }
     const clean = (name || "").replace(/\s+/g, " ").trim().slice(0, 14) || t("defaultName");
     store.set("rr-name", clean);
     const list = lbLoad(lbLast.key), e = list.find((x) => x.id === lbLast.id);
     if (e) { e.n = clean; lbSaveAll(lbLast.key, list); }
+    if (sbLast) { if (sbLast.remote) sbRename(sbLast.remote, clean); else if (sbLast.pending) sbLast.renameTo = clean; }
   }
-  function showHighScore(rank) {
+  function showHighScore(rank, shared) {
     const box = $("hsBox");
     box.hidden = !rank;
     if (!rank) return;
     box.dataset.rank = rank;
-    $("hsLine").textContent = t("newHigh", { n: rank });
+    $("hsLine").textContent = t(shared ? "newHighShared" : "newHigh", { n: rank });
     if (rank === 1) sfx("G09", { delay: 1.6 });
     $("hsName").value = store.get("rr-name") || "";
     $("hsName").placeholder = t("yourName");
@@ -3193,16 +3248,28 @@ body {
       $("lbCol3").textContent = t("st_rows");
     }
     $("lbTitle").textContent = title;
-    const list = lbLoad(key), body = $("lbBody");
-    body.textContent = "";
-    list.forEach((e, i) => {
-      const tr = document.createElement("tr");
-      if (lbLast && lbLast.key === key && lbLast.id === e.id) tr.className = "mine";
-      const third = LBV.tab === "story" ? Math.floor(e.t / 60) + ":" + String(e.t % 60).padStart(2, "0") : String(e.r);
-      [String(i + 1), e.n, fmt(e.s), third].forEach((v, j) => { const td = document.createElement("td"); td.textContent = v; if (j === 1) td.className = "nm"; tr.appendChild(td); });
-      body.appendChild(tr);
-    });
-    $("lbEmpty").hidden = list.length > 0;
+    const fill = (list, mineId) => {
+      const body = $("lbBody");
+      body.textContent = "";
+      list.forEach((e, i) => {
+        const tr = document.createElement("tr");
+        if (e.id === mineId) tr.className = "mine";
+        const third = LBV.tab === "story" ? Math.floor(e.t / 60) + ":" + String(e.t % 60).padStart(2, "0") : String(e.r);
+        [String(i + 1), e.n, fmt(e.s), third].forEach((v, j) => { const td = document.createElement("td"); td.textContent = v; if (j === 1) td.className = "nm"; tr.appendChild(td); });
+        body.appendChild(tr);
+      });
+      $("lbEmpty").hidden = list.length > 0;
+    };
+    // This device's scores first, then the shared board replaces them when it arrives.
+    fill(lbLoad(key), lbLast && lbLast.key === key ? lbLast.id : null);
+    const q = LBV.tab === "story" ? { kind: "story", board: key.split("|")[1], diff: LBV.diff } : { kind: "endless", board: LBV.blasts, diff: "-" };
+    const ticket = ++lbTicket;
+    $("lbDevice").textContent = t("lbLoading");
+    sbTop(q).then((list) => {
+      if (ticket !== lbTicket) return;
+      fill(list, sbLast && sbLast.remote ? "sb" + sbLast.remote.id : null);
+      $("lbDevice").textContent = t("lbShared");
+    }).catch(() => { if (ticket === lbTicket) $("lbDevice").textContent = t("lbDevice"); });
   }
   function openBoards(fromGame) {
     if (fromGame && G && G.mode) {
