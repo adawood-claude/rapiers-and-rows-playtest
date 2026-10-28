@@ -49,6 +49,21 @@ body {
 #scene.storm::before { content: ""; position: absolute; inset: 0; background: #e4ecff; opacity: 0; animation: lightning 11s infinite; }
 @keyframes lightning { 0%, 91%, 100% { opacity: 0; } 92% { opacity: 0.32; } 93% { opacity: 0.04; } 94% { opacity: 0.22; } 96% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { #scene.storm::before { animation: none; } }
+.toprow .btn { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0; }
+.linkrow { justify-content: center; gap: 18px; }
+.fbcard { gap: 8px; }
+.fbcard .fblabel { font-size: 14px; color: var(--ink-dim); margin-top: 4px; }
+.fbcard select, .fbcard textarea, .fbcard input[type="text"], .fbcard input:not([type]) {
+  width: 100%; box-sizing: border-box; font: 16px var(--body); padding: 8px 10px; border-radius: 6px;
+  border: 1px solid var(--wood-3); background: var(--wood); color: var(--ink);
+}
+.fbcard textarea { resize: vertical; }
+.fbcard input[type="file"] { font: 14px var(--body); color: var(--ink-dim); }
+.fbcheck { display: flex; align-items: center; gap: 8px; font-size: 15px; }
+.fbthumbs { display: flex; gap: 6px; flex-wrap: wrap; }
+.fbthumbs img { height: 64px; border-radius: 4px; border: 1px solid var(--wood-3); }
+.fbcard details summary { cursor: pointer; color: var(--brass); font-family: var(--display); font-size: 16px; padding: 4px 0; }
+.fbcard details[open] { display: flex; flex-direction: column; gap: 4px; }
 .storycard img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: 8px; border: 1px solid var(--wood-3); }
 .storycard .chap { text-align: center; margin: 0; font-size: 18px; }
 .chap { font-family: var(--display); color: var(--brass); font-size: 15px; margin: 8px 2px 0; text-align: left; }
@@ -446,6 +461,11 @@ body {
         <button data-lang="en" lang="en">English</button><button data-lang="es" lang="es">Español</button><button data-lang="th" lang="th">ไทย</button>
       </div>
     </div>
+    <div class="row toprow">
+      <button class="btn lbbtn" id="fbOpen"><span aria-hidden="true">&#9998;</span> <span data-i18n="fbOpen">Feedback</span></button>
+      <button class="btn lbbtn" id="lbOpen"><span aria-hidden="true">&#9819;</span> <span data-i18n="leaderboards">Leaderboards</span></button>
+    </div>
+    <p class="note" id="medalLine"></p>
     <div class="modes">
       <button class="modebtn" data-mode="endless"><span class="tag">∞</span><span data-i18n="mode_endless">Endless</span><span class="sub" id="bestLine">Speed rises every 10 rows · bonus every 30</span></button>
       <button class="modebtn" data-mode="loose"><span class="tag">∞</span><span data-i18n="mode_loose">Bonus trial</span><span class="sub" data-i18n="sub_loose">Endless, opening with the 30-second Guards Scatter bonus</span></button>
@@ -483,8 +503,6 @@ body {
       <button class="modebtn" data-mode="s35"><span class="tag">3.5</span><span data-i18n="mode_s35"></span><span class="sub" data-i18n="sub_s35"></span></button>
       <div class="roundpick"><span data-i18n="startRound">Start at round</span><button class="roundbtn" data-mode="s35">I</button><button class="roundbtn" data-mode="s35r2">II</button><button class="roundbtn" data-mode="s35r3">III</button></div>
     </div>
-    <p class="note" id="medalLine"></p>
-    <button class="btn lbbtn" id="lbOpen"><span aria-hidden="true">&#9819;</span> <span data-i18n="leaderboards">Leaderboards</span></button>
     <div class="styles">
       <span class="label" data-i18n="storyDifficulty">Story difficulty</span>
       <div class="seg" role="group" aria-label="Story difficulty" data-i18n-aria="storyDifficulty">
@@ -543,6 +561,7 @@ body {
       </div>
     </div>
     <div class="row"><button class="btn" id="restartBtn" data-i18n="restart">Restart</button><button class="btn" id="menuBtn" data-i18n="menu">Menu</button></div>
+    <button class="linkbtn" id="pauseFb" data-i18n="sendFeedback">Send feedback</button>
   </div>
 </div>
 
@@ -569,6 +588,45 @@ body {
   </div>
 </div>
 
+<div class="overlay" id="fb" hidden>
+  <div class="card fbcard">
+    <h2 data-i18n="fbTitle">Feedback</h2>
+    <p data-i18n="fbIntro">Tell Ali what you found. Short notes and screenshots help most.</p>
+    <label class="fblabel" for="fbTopic" data-i18n="fbTopic">What is it about?</label>
+    <select id="fbTopic">
+      <option value="bug" data-i18n="fbt_bug">A bug or glitch</option>
+      <option value="impossible" data-i18n="fbt_impossible">A board or round that feels impossible</option>
+      <option value="easy" data-i18n="fbt_easy">A board or round that is too easy</option>
+      <option value="score" data-i18n="fbt_score">My final score</option>
+      <option value="answers" data-i18n="fbt_answers">Answers to the playtest questions</option>
+      <option value="other" data-i18n="fbt_other">Something else</option>
+    </select>
+    <label class="fblabel" for="fbBoard" data-i18n="fbBoard">Board</label>
+    <select id="fbBoard"></select>
+    <label class="fblabel" for="fbMsg" data-i18n="fbMsg">What happened?</label>
+    <textarea id="fbMsg" rows="4" maxlength="4000"></textarea>
+    <label class="fblabel" for="fbFiles" data-i18n="fbShots">Screenshots (up to 3)</label>
+    <input type="file" id="fbFiles" accept="image/*" multiple>
+    <div id="fbThumbs" class="fbthumbs"></div>
+    <label class="fbcheck"><input type="checkbox" id="fbLast" checked> <span data-i18n="fbLast">Attach the results of my last game</span></label>
+    <p class="note" id="fbLastText"></p>
+    <details id="fbQs"><summary data-i18n="fbQsTitle">Playtest questions (optional)</summary>
+      <label class="fblabel" for="fbq1" data-i18n="fbq1"></label><textarea id="fbq1" rows="2" maxlength="1500"></textarea>
+      <label class="fblabel" for="fbq2" data-i18n="fbq2"></label><textarea id="fbq2" rows="2" maxlength="1500"></textarea>
+      <label class="fblabel" for="fbq3" data-i18n="fbq3"></label><textarea id="fbq3" rows="2" maxlength="1500"></textarea>
+      <label class="fblabel" for="fbq4" data-i18n="fbq4"></label><textarea id="fbq4" rows="2" maxlength="1500"></textarea>
+      <label class="fblabel" for="fbq5" data-i18n="fbq5"></label><textarea id="fbq5" rows="2" maxlength="1500"></textarea>
+      <label class="fblabel" for="fbq6" data-i18n="fbq6"></label><textarea id="fbq6" rows="2" maxlength="1500"></textarea>
+      <label class="fblabel" for="fbq7" data-i18n="fbq7"></label><textarea id="fbq7" rows="2" maxlength="1500"></textarea>
+      <label class="fblabel" for="fbq8" data-i18n="fbq8"></label><textarea id="fbq8" rows="2" maxlength="1500"></textarea>
+    </details>
+    <label class="fblabel" for="fbName" data-i18n="fbName">Your name (optional)</label>
+    <input id="fbName" maxlength="40" autocomplete="nickname">
+    <p class="note" id="fbStatus" role="status"></p>
+    <div class="row"><button class="btn" id="fbCancel" data-i18n="cancel">Cancel</button><button class="btn primary" id="fbSend" data-i18n="send">Send</button></div>
+  </div>
+</div>
+
 <div class="overlay" id="story" hidden>
   <div class="card storycard">
     <p class="chap" id="storyTitle"></p>
@@ -590,7 +648,7 @@ body {
     <button class="btn primary contbtn" id="continueBtn" hidden><span id="contLabel">Continue</span><small id="contNext"></small></button>
     <button class="btn primary contbtn" id="continueBtn2" hidden><span id="contLabel2">Continue</span><small id="contNext2"></small></button>
     <div class="row"><button class="btn primary" id="againBtn" data-i18n="playAgain">Play again</button><button class="btn" id="endMenuBtn" data-i18n="menu">Menu</button></div>
-    <button class="linkbtn" id="endBoards" data-i18n="viewLeaderboard">View leaderboard</button>
+    <div class="row linkrow"><button class="linkbtn" id="endBoards" data-i18n="viewLeaderboard">View leaderboard</button><button class="linkbtn" id="endFb" data-i18n="sendFeedback">Send feedback</button></div>
   </div>
 </div>
 
@@ -724,6 +782,42 @@ body {
       lostGate: "{mode} lost. The portcullis came down on the stack.", lostFire: "{mode} lost. The fire spread out of control.",
       help_swing: "Ropes", help_swing_d: "On Rigging and Ropes, flick up on the left or right third to swing a high piece across",
       p13: "Cursed Fragment",
+      fbOpen: "Feedback",
+      sendFeedback: "Send feedback",
+      fbTitle: "Feedback",
+      fbIntro: "Tell Ali what you found. Short notes and screenshots help most.",
+      fbTopic: "What is it about?",
+      fbt_bug: "A bug or glitch",
+      fbt_impossible: "A board or round that feels impossible",
+      fbt_easy: "A board or round that is too easy",
+      fbt_score: "My final score",
+      fbt_answers: "Answers to the playtest questions",
+      fbt_other: "Something else",
+      fbBoard: "Board",
+      fbBoardNone: "Not about one board",
+      fbMsg: "What happened?",
+      fbMsgPh: "Where were you, what happened, and what did you expect?",
+      fbShots: "Screenshots (up to 3)",
+      fbLast: "Attach the results of my last game",
+      fbNoLast: "No game finished yet.",
+      fbQsTitle: "Playtest questions (optional)",
+      fbq1: "Were the controls clear? Did pieces ever move, turn or drop when you didn't mean them to?",
+      fbq2: "Could you tell blades, firearms and hats apart at a glance? Which art style did you like best?",
+      fbq3: "Did you want to play another round? What made you stop?",
+      fbq4: "Which difficulty did you play? Did it feel too easy, right, or too hard?",
+      fbq5: "If you played in Spanish or Thai, did anything read oddly or feel wrongly translated?",
+      fbq6: "Which boards or rounds felt impossible, and which felt too easy?",
+      fbq7: "Did any hazard (gate, wind, tide, fire, chains, mortar and so on) feel unfair or confusing?",
+      fbq8: "Did the music and sounds fit? Was anything too loud or too quiet?",
+      fbName: "Your name (optional)",
+      cancel: "Cancel",
+      send: "Send",
+      fbSending: "Sending…",
+      fbUploading: "Uploading screenshot {a} of {b}…",
+      fbSent: "Thank you! Your feedback was sent.",
+      fbFail: "Couldn't send. Check your connection and try again.",
+      fbEmpty: "Add a note, a screenshot or an answer first.",
+      fbTooMany: "Only the first 3 screenshots will be sent.",
       st_gambit: "Gambit", gambitWon: "Gambit won!", gambitWonSub: "{name} · Gambit Medal earned", gambitLost: "Gambit missed",
       gambitWonStat: "won", gambitLostStat: "missed", gambitOpenStat: "not finished", medalLine: "Gambit Medals: {n} of 9",
       gambitTip: "Gambit · {name}: {desc}", help_gambit: "Gambits", help_gambit_d: "Each boss phase has an optional challenge; win it for a Gambit Medal",
@@ -864,6 +958,42 @@ body {
       lostGate: "{mode}: perdido. El rastrillo cayó sobre la pila.", lostFire: "{mode}: perdido. El fuego se descontroló.",
       help_swing: "Cuerdas", help_swing_d: "En Jarcias y cuerdas, desliza hacia arriba en el tercio izquierdo o derecho para cruzar una pieza alta",
       p13: "Fragmento maldito",
+      fbOpen: "Comentarios",
+      sendFeedback: "Enviar comentarios",
+      fbTitle: "Comentarios",
+      fbIntro: "Cuéntale a Ali lo que encontraste. Las notas breves y las capturas son lo que más ayuda.",
+      fbTopic: "¿De qué se trata?",
+      fbt_bug: "Un error o fallo",
+      fbt_impossible: "Un tablero o ronda que parece imposible",
+      fbt_easy: "Un tablero o ronda demasiado fácil",
+      fbt_score: "Mi puntuación final",
+      fbt_answers: "Respuestas a las preguntas de prueba",
+      fbt_other: "Otra cosa",
+      fbBoard: "Tablero",
+      fbBoardNone: "No es sobre un tablero concreto",
+      fbMsg: "¿Qué pasó?",
+      fbMsgPh: "¿Dónde estabas, qué pasó y qué esperabas?",
+      fbShots: "Capturas (hasta 3)",
+      fbLast: "Adjuntar los resultados de mi última partida",
+      fbNoLast: "Aún no has terminado ninguna partida.",
+      fbQsTitle: "Preguntas de prueba (opcional)",
+      fbq1: "¿Los controles eran claros? ¿Alguna pieza se movió, giró o cayó sin que quisieras?",
+      fbq2: "¿Podías distinguir de un vistazo las espadas, las armas de fuego y los sombreros? ¿Qué estilo artístico te gustó más?",
+      fbq3: "¿Querías jugar otra partida? ¿Qué te hizo parar?",
+      fbq4: "¿Qué dificultad jugaste? ¿Te pareció demasiado fácil, adecuada o demasiado difícil?",
+      fbq5: "Si jugaste en español o en tailandés, ¿algo sonaba raro o parecía mal traducido?",
+      fbq6: "¿Qué tableros o rondas te parecieron imposibles y cuáles demasiado fáciles?",
+      fbq7: "¿Algún peligro (rastrillo, viento, marea, fuego, cadenas, mortero, etc.) te pareció injusto o confuso?",
+      fbq8: "¿La música y los sonidos encajaban? ¿Algo sonaba demasiado alto o demasiado bajo?",
+      fbName: "Tu nombre (opcional)",
+      cancel: "Cancelar",
+      send: "Enviar",
+      fbSending: "Enviando…",
+      fbUploading: "Subiendo captura {a} de {b}…",
+      fbSent: "¡Gracias! Tus comentarios se han enviado.",
+      fbFail: "No se pudo enviar. Revisa tu conexión e inténtalo de nuevo.",
+      fbEmpty: "Añade primero una nota, una captura o una respuesta.",
+      fbTooMany: "Solo se enviarán las 3 primeras capturas.",
       st_gambit: "Gambito", gambitWon: "¡Gambito logrado!", gambitWonSub: "{name} · Medalla de gambito", gambitLost: "Gambito fallido",
       gambitWonStat: "logrado", gambitLostStat: "fallido", gambitOpenStat: "sin terminar", medalLine: "Medallas de gambito: {n} de 9",
       gambitTip: "Gambito · {name}: {desc}", help_gambit: "Gambitos", help_gambit_d: "Cada fase de jefe tiene un reto opcional; supéralo para ganar una Medalla de gambito",
@@ -1004,6 +1134,42 @@ body {
       lostGate: "แพ้ {mode} ประตูเหล็กลงมาถึงกองชิ้นส่วน", lostFire: "แพ้ {mode} ไฟลุกลามจนควบคุมไม่ได้",
       help_swing: "เชือก", help_swing_d: "ในด่านเสากระโดงและเชือก ปัดขึ้นที่ส่วนซ้ายหรือขวาเพื่อเหวี่ยงชิ้นที่อยู่สูงข้ามไป",
       p13: "เศษต้องสาป",
+      fbOpen: "ความคิดเห็น",
+      sendFeedback: "ส่งความคิดเห็น",
+      fbTitle: "ความคิดเห็น",
+      fbIntro: "บอก Ali ว่าคุณเจออะไรบ้าง โน้ตสั้นๆ และภาพหน้าจอช่วยได้มากที่สุด",
+      fbTopic: "เรื่องเกี่ยวกับอะไร",
+      fbt_bug: "บั๊กหรือข้อผิดพลาด",
+      fbt_impossible: "กระดานหรือรอบที่ดูเหมือนผ่านไม่ได้",
+      fbt_easy: "กระดานหรือรอบที่ง่ายเกินไป",
+      fbt_score: "คะแนนสุดท้ายของฉัน",
+      fbt_answers: "คำตอบของคำถามทดสอบ",
+      fbt_other: "เรื่องอื่น",
+      fbBoard: "กระดาน",
+      fbBoardNone: "ไม่ได้เกี่ยวกับกระดานใดกระดานหนึ่ง",
+      fbMsg: "เกิดอะไรขึ้น",
+      fbMsgPh: "คุณอยู่ตรงไหน เกิดอะไรขึ้น และคุณคาดว่าจะเกิดอะไร",
+      fbShots: "ภาพหน้าจอ (สูงสุด 3 ภาพ)",
+      fbLast: "แนบผลของเกมล่าสุดของฉัน",
+      fbNoLast: "ยังไม่มีเกมที่เล่นจบ",
+      fbQsTitle: "คำถามทดสอบ (ไม่บังคับ)",
+      fbq1: "การควบคุมเข้าใจง่ายไหม มีชิ้นส่วนเลื่อน หมุน หรือตกลงทั้งที่คุณไม่ได้ตั้งใจบ้างไหม",
+      fbq2: "คุณแยกดาบ อาวุธปืน และหมวกออกจากกันได้ในแวบเดียวไหม ชอบสไตล์ภาพแบบไหนมากที่สุด",
+      fbq3: "คุณอยากเล่นอีกรอบไหม อะไรทำให้คุณหยุดเล่น",
+      fbq4: "คุณเล่นระดับความยากไหน รู้สึกง่ายเกินไป พอดี หรือยากเกินไป",
+      fbq5: "ถ้าคุณเล่นเป็นภาษาสเปนหรือภาษาไทย มีข้อความไหนที่อ่านแล้วแปลกหรือแปลผิดไหม",
+      fbq6: "กระดานหรือรอบไหนที่ดูเหมือนผ่านไม่ได้ และอันไหนง่ายเกินไป",
+      fbq7: "มีอุปสรรคใด (ประตู ลม น้ำขึ้นน้ำลง ไฟ โซ่ ปืนครก ฯลฯ) ที่รู้สึกไม่ยุติธรรมหรือสับสนไหม",
+      fbq8: "ดนตรีและเสียงเข้ากันไหม มีอะไรดังหรือเบาเกินไปไหม",
+      fbName: "ชื่อของคุณ (ไม่บังคับ)",
+      cancel: "ยกเลิก",
+      send: "ส่ง",
+      fbSending: "กำลังส่ง…",
+      fbUploading: "กำลังอัปโหลดภาพที่ {a} จาก {b}…",
+      fbSent: "ขอบคุณ! ส่งความคิดเห็นของคุณแล้ว",
+      fbFail: "ส่งไม่สำเร็จ ตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
+      fbEmpty: "เพิ่มโน้ต ภาพหน้าจอ หรือคำตอบก่อน",
+      fbTooMany: "จะส่งเฉพาะภาพหน้าจอ 3 ภาพแรก",
       st_gambit: "แกมบิต", gambitWon: "ทำแกมบิตสำเร็จ!", gambitWonSub: "{name} · ได้เหรียญแกมบิต", gambitLost: "พลาดแกมบิต",
       gambitWonStat: "สำเร็จ", gambitLostStat: "พลาด", gambitOpenStat: "ยังไม่จบ", medalLine: "เหรียญแกมบิต: {n} จาก 9",
       gambitTip: "แกมบิต · {name}: {desc}", help_gambit: "แกมบิต", help_gambit_d: "แต่ละช่วงของบอสมีภารกิจเสริม ทำสำเร็จเพื่อรับเหรียญแกมบิต",
@@ -3071,6 +3237,8 @@ body {
   function gameOver(won) {
     G.state = "over";
     cannonNudge(false);
+    lastResult = { board: G.mode.endless ? "endless" : G.modeId, diff: G.diff || null, won: !!won, score: G.score, rows: G.rows, pieces: G.locks,
+      secs: Math.floor(G.time || 0), gambit: G.gambit ? G.gambit.state : null, blasts: blastsActive(), version: SB_VARIANT };
     SFX.end(won);
     let best = null;
     if (G.modeId === "endless") {
@@ -3290,6 +3458,110 @@ body {
   $("lbOpen").addEventListener("click", () => openBoards(false));
   $("endBoards").addEventListener("click", () => openBoards(true));
   $("lbBack").addEventListener("click", () => { $("boards").hidden = true; if (LBV.returnTo === "end") $("end").hidden = false; else $("menu").hidden = false; });
+
+
+  // ---------- in-game Feedback form: saved to the Supabase project (table "feedback", screenshots in the private "feedback" bucket) ----------
+  let lastResult = null, fbReturn = "menu", fbShots = [];
+  function fbBoards() {
+    const sel = $("fbBoard"), keep = sel.value;
+    sel.textContent = "";
+    const add = (v, label) => { const o = document.createElement("option"); o.value = v; o.textContent = label; sel.appendChild(o); };
+    add("", t("fbBoardNone"));
+    add("endless", t("mode_endless"));
+    for (const id of Object.keys(MODES)) if (MODES[id].base) add(id, MODES[id].base.slice(1, 2) + "." + MODES[id].base.slice(2) + " " + modeName(id));
+    sel.value = keep || "";
+  }
+  function fbResultText(r) {
+    if (!r) return t("fbNoLast");
+    const m = Math.floor(r.secs / 60), sec = String(r.secs % 60).padStart(2, "0");
+    return [r.board === "endless" ? t("mode_endless") : modeName(r.board), r.diff ? diffName(r.diff) : null, r.won ? t("victory") : t("overrun"),
+      fmt(r.score) + " " + t("honor"), r.rows + " " + t("st_rows").toLowerCase(), m + ":" + sec,
+      r.gambit ? t("st_gambit") + " " + t(r.gambit === "won" ? "gambitWonStat" : r.gambit === "lost" ? "gambitLostStat" : "gambitOpenStat") : null].filter(Boolean).join(" · ");
+  }
+  function openFeedback(from) {
+    fbReturn = from;
+    fbBoards();
+    if (lastResult) { $("fbBoard").value = lastResult.board; if ($("fbTopic").value === "bug" && from === "end") $("fbTopic").value = "score"; }
+    $("fbLastText").textContent = fbResultText(lastResult);
+    $("fbLast").checked = !!lastResult; $("fbLast").disabled = !lastResult;
+    $("fbMsg").placeholder = t("fbMsgPh");
+    $("fbName").value = $("fbName").value || store.get("rr-name") || "";
+    $("fbStatus").textContent = "";
+    $("fbSend").disabled = false;
+    $("menu").hidden = true; $("pause").hidden = true; $("end").hidden = true;
+    $("fb").hidden = false;
+  }
+  function closeFeedback() {
+    $("fb").hidden = true;
+    if (fbReturn === "end") $("end").hidden = false;
+    else if (fbReturn === "pause") $("pause").hidden = false;
+    else $("menu").hidden = false;
+  }
+  function fbReset() {
+    $("fbMsg").value = ""; fbShots = []; $("fbFiles").value = ""; $("fbThumbs").textContent = "";
+    for (let i = 1; i <= 8; i++) $("fbq" + i).value = "";
+    $("fbTopic").value = "bug"; $("fbQs").open = false;
+  }
+  // Screenshots are shrunk to at most 1600 pixels and sent as JPEG, so uploads stay small on a phone.
+  async function shrinkImage(file) {
+    const url = URL.createObjectURL(file);
+    try {
+      const img = await new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = url; });
+      const k = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+      const cv = document.createElement("canvas");
+      cv.width = Math.round(img.naturalWidth * k); cv.height = Math.round(img.naturalHeight * k);
+      cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+      return await new Promise((res) => cv.toBlob(res, "image/jpeg", 0.82));
+    } finally { URL.revokeObjectURL(url); }
+  }
+  $("fbFiles").addEventListener("change", () => {
+    const files = [...$("fbFiles").files].filter((f) => f.type.startsWith("image/"));
+    fbShots = files.slice(0, 3);
+    $("fbStatus").textContent = files.length > 3 ? t("fbTooMany") : "";
+    $("fbThumbs").textContent = "";
+    for (const f of fbShots) { const im = document.createElement("img"); im.alt = ""; im.src = URL.createObjectURL(f); $("fbThumbs").appendChild(im); }
+  });
+  $("fbTopic").addEventListener("change", () => { if ($("fbTopic").value === "answers") $("fbQs").open = true; });
+  async function sendFeedback() {
+    const answers = {};
+    for (let i = 1; i <= 8; i++) { const v = $("fbq" + i).value.trim(); if (v) answers["q" + i] = v; }
+    const msg = $("fbMsg").value.trim(), withLast = $("fbLast").checked && lastResult;
+    if (!msg && !fbShots.length && !Object.keys(answers).length && !withLast) { $("fbStatus").textContent = t("fbEmpty"); return; }
+    $("fbSend").disabled = true;
+    try {
+      const paths = [];
+      for (let i = 0; i < fbShots.length; i++) {
+        $("fbStatus").textContent = t("fbUploading", { a: i + 1, b: fbShots.length });
+        const blob = await shrinkImage(fbShots[i]);
+        const path = "shots/" + new Date().toISOString().slice(0, 10) + "-" + newToken() + ".jpg";
+        const r = await sbFetch(SB_URL + "/storage/v1/object/feedback/" + path, { method: "POST", headers: { apikey: SB_KEY, "Content-Type": "image/jpeg", "x-upsert": "false" }, body: blob });
+        if (!r.ok) throw new Error("upload " + r.status);
+        paths.push(path);
+      }
+      $("fbStatus").textContent = t("fbSending");
+      const board = $("fbBoard").value || null;
+      const body = {
+        variant: SB_VARIANT, lang, topic: $("fbTopic").value, board,
+        difficulty: board && board !== "endless" ? (withLast && lastResult.board === board && lastResult.diff ? lastResult.diff : difficulty) : null,
+        message: msg || null, answers: Object.keys(answers).length ? answers : null, last_game: withLast ? lastResult : null,
+        screenshots: paths, name: $("fbName").value.trim().slice(0, 40) || null,
+        device: (navigator.userAgent || "").slice(0, 220) + " · " + screen.width + "x" + screen.height
+      };
+      const r = await sbFetch(SB_URL + "/rest/v1/feedback", { method: "POST", headers: sbHeaders({ Prefer: "return=minimal" }), body: JSON.stringify(body) });
+      if (!r.ok) throw new Error("send " + r.status);
+      if (body.name) store.set("rr-name", body.name.slice(0, 14));
+      fbReset();
+      $("fbStatus").textContent = t("fbSent");
+      setTimeout(() => { if (!$("fb").hidden && $("fbStatus").textContent === t("fbSent")) closeFeedback(); }, 1800);
+    } catch (e) {
+      $("fbStatus").textContent = t("fbFail");
+    } finally { $("fbSend").disabled = false; }
+  }
+  $("fbOpen").addEventListener("click", () => openFeedback("menu"));
+  $("endFb").addEventListener("click", () => openFeedback("end"));
+  $("pauseFb").addEventListener("click", () => openFeedback("pause"));
+  $("fbCancel").addEventListener("click", closeFeedback);
+  $("fbSend").addEventListener("click", sendFeedback);
 
   // ---------- loop ----------
   let last = performance.now();
@@ -4122,7 +4394,7 @@ body {
   document.querySelectorAll(".modebtn, .roundbtn").forEach((b) => b.addEventListener("click", () => newGame(b.dataset.mode)));
 
   window.addEventListener("keydown", (e) => {
-    if (!G || G.state === "over" || (e.target && e.target.tagName === "INPUT")) return;
+    if (!G || G.state === "over" || (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))) return;
     const k = e.key;
     if (k === "p" || k === "P" || k === "Escape") { setPaused(!G.paused); e.preventDefault(); return; }
     if (G.paused) return;
@@ -4175,7 +4447,7 @@ body {
   }
   $("storyNext").addEventListener("click", () => storyStep(false));
   $("storySkip").addEventListener("click", () => storyStep(true));
-  function hideAll() { $("story").hidden = true; storyQ = null; $("menu").hidden = true; $("pause").hidden = true; $("end").hidden = true; $("boards").hidden = true; }
+  function hideAll() { $("fb").hidden = true; $("story").hidden = true; storyQ = null; $("menu").hidden = true; $("pause").hidden = true; $("end").hidden = true; $("boards").hidden = true; }
   function showMenu() { if (G) { G.paused = true; G.state = "over"; } hideAll(); $("menu").hidden = false; setScene("s11"); updateBest(); }
   function updateBest() {
     const b = parseInt(store.get(bestKey()) || "0", 10) || 0;
@@ -4221,6 +4493,7 @@ body {
     if (G && G.mode && G.state !== "over" && G.state !== undefined) updateHUD();
     if (!$("end").hidden) renderEnd();
     if (!$("boards").hidden) lbRender();
+    if (!$("fb").hidden) { fbBoards(); $("fbLastText").textContent = fbResultText(lastResult); $("fbMsg").placeholder = t("fbMsgPh"); }
   }
   document.querySelectorAll("[data-lang]").forEach((b) => b.addEventListener("click", () => setLang(b.dataset.lang)));
   document.addEventListener("click", (e) => {
