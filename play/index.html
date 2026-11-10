@@ -1440,7 +1440,7 @@ body {
   // synthesized sounds if a file is missing or audio can't be decoded, so the game never goes silent.
   const AUDIO_BASE = window.RR_AUDIO_BASE || "audio/";
   const SND_N = {"A01": 4, "A02": 4, "A03": 2, "A05": 2, "A06": 3, "A07": 3, "A08": 3, "A10": 2, "B01": 2, "B02": 1, "B03": 1, "B04": 1, "B05": 1, "B06": 1, "B07": 1, "B08": 1, "B09": 1, "B10": 2, "C01": 2, "C02": 1, "C03": 1, "C04": 1, "C05": 1, "C06": 2, "C07": 1, "C08": 1, "C09": 1, "C10": 1, "C11": 1, "D01": 2, "D02": 1, "D03": 2, "D05": 2, "E01": 1, "E02": 1, "E04": 1, "G01": 2, "G02": 1, "G04": 1, "G05": 1, "G06": 1, "G07": 1, "G09": 1};
-  const MUS_INFO = {"aliC-b": {"dur": 46.545454, "loop": true, "gain": 1.22}, "aliC-d": {"dur": 46.545454, "loop": true, "gain": 1.32}, "aliC-c": {"dur": 46.545454, "loop": true, "gain": 1.23}, "march2-calm": {"dur": 61.538455, "loop": true, "gain": 1.07}, "march2-tense": {"dur": 61.538455, "loop": true, "gain": 1.09}, "march2-danger": {"dur": 61.538455, "loop": true, "gain": 1.09}, "salt2-calm": {"dur": 59.259253, "loop": true, "gain": 1.08}, "salt2-tense": {"dur": 59.259253, "loop": true, "gain": 1.12}, "salt2-danger": {"dur": 59.259253, "loop": true, "gain": 1.12}, "siege2-calm": {"dur": 66.666667, "loop": true, "gain": 1.08}, "siege2-tense": {"dur": 66.666667, "loop": true, "gain": 1.1}, "siege2-danger": {"dur": 66.666667, "loop": true, "gain": 1.1}, "aliA-1": {"dur": 64, "loop": true, "gain": 1.23}, "aliA-11": {"dur": 64, "loop": true, "gain": 1.17}, "aliA-13": {"dur": 64, "loop": true, "gain": 0.95}, "aliB-d": {"dur": 51.2, "loop": true, "gain": 1.21}, "aliB-b": {"dur": 51.2, "loop": true, "gain": 1.11}, "aliB-c": {"dur": 51.2, "loop": true, "gain": 1.12}, "scramble2": {"dur": 51.2, "loop": true, "gain": 1.12}, "charge2": {"dur": 46.48, "loop": true, "gain": 1.22}, "powder2": {"dur": 2.666667, "loop": true, "gain": 0.9}, "salt-calm": {"dur": 71.111104, "loop": true}, "salt-tense": {"dur": 71.111104, "loop": true}, "salt-danger": {"dur": 71.111104, "loop": true}, "siege-calm": {"dur": 80, "loop": true}, "siege-tense": {"dur": 80, "loop": true}, "siege-danger": {"dur": 80, "loop": true}, "menu": {"dur": 76.8, "loop": true}, "endless-calm": {"dur": 139.636354, "loop": true}, "endless-danger": {"dur": 139.636354, "loop": true}, "endless-tense": {"dur": 139.636354, "loop": true}, "march-calm": {"dur": 73.846146, "loop": true}, "march-danger": {"dur": 73.846146, "loop": true}, "march-tense": {"dur": 73.846146, "loop": true}, "powder": {"dur": 4.0, "loop": true}, "powder-hit": {"dur": 1.4, "loop": false}, "charge": {"dur": 20.869563, "loop": true}, "scramble": {"dur": 30.0, "loop": false}};
+  const MUS_INFO = {"aliA-4": {"dur": 64, "loop": true, "gain": 1.07}, "aliA-5": {"dur": 64, "loop": true, "gain": 1.08}, "aliB-4": {"dur": 51.2, "loop": true, "gain": 1.26}, "aliB-5": {"dur": 51.2, "loop": true, "gain": 1.17}, "p1B-1": {"dur": 64, "loop": true, "gain": 1.08}, "p1Bf-1": {"dur": 51.2, "loop": true, "gain": 1.33}, "p1B-2": {"dur": 64, "loop": true, "gain": 1.12}, "p1Bf-2": {"dur": 51.2, "loop": true, "gain": 1.35}, "p1B-3": {"dur": 64, "loop": true, "gain": 1.05}, "p1Bf-3": {"dur": 51.2, "loop": true, "gain": 1.38}, "p1B-4": {"dur": 64, "loop": true, "gain": 1.0}, "p1Bf-4": {"dur": 51.2, "loop": true, "gain": 1.36}, "p1Ca-1": {"dur": 64, "loop": true, "gain": 1.02}, "p1Caf-1": {"dur": 51.2, "loop": true, "gain": 1.45}, "p1Cb-1": {"dur": 64, "loop": true, "gain": 1.06}, "p1Cbf-1": {"dur": 49.548387, "loop": true, "gain": 1.57}, "menu2": {"dur": 68.571429, "loop": true, "gain": 0.95}, "aliC-b": {"dur": 46.545454, "loop": true, "gain": 1.22}, "aliC-d": {"dur": 46.545454, "loop": true, "gain": 1.32}, "aliC-c": {"dur": 46.545454, "loop": true, "gain": 1.23}, "march2-calm": {"dur": 61.538455, "loop": true, "gain": 1.07}, "march2-tense": {"dur": 61.538455, "loop": true, "gain": 1.09}, "march2-danger": {"dur": 61.538455, "loop": true, "gain": 1.09}, "salt2-calm": {"dur": 59.259253, "loop": true, "gain": 1.08}, "salt2-tense": {"dur": 59.259253, "loop": true, "gain": 1.12}, "salt2-danger": {"dur": 59.259253, "loop": true, "gain": 1.12}, "siege2-calm": {"dur": 66.666667, "loop": true, "gain": 1.08}, "siege2-tense": {"dur": 66.666667, "loop": true, "gain": 1.1}, "siege2-danger": {"dur": 66.666667, "loop": true, "gain": 1.1}, "aliA-1": {"dur": 64, "loop": true, "gain": 1.23}, "aliA-11": {"dur": 64, "loop": true, "gain": 1.17}, "aliA-13": {"dur": 64, "loop": true, "gain": 0.95}, "aliB-d": {"dur": 51.2, "loop": true, "gain": 1.21}, "aliB-b": {"dur": 51.2, "loop": true, "gain": 1.11}, "aliB-c": {"dur": 51.2, "loop": true, "gain": 1.12}, "scramble2": {"dur": 51.2, "loop": true, "gain": 1.12}, "charge2": {"dur": 46.48, "loop": true, "gain": 1.22}, "powder2": {"dur": 2.666667, "loop": true, "gain": 0.9}, "salt-calm": {"dur": 71.111104, "loop": true}, "salt-tense": {"dur": 71.111104, "loop": true}, "salt-danger": {"dur": 71.111104, "loop": true}, "siege-calm": {"dur": 80, "loop": true}, "siege-tense": {"dur": 80, "loop": true}, "siege-danger": {"dur": 80, "loop": true}, "menu": {"dur": 76.8, "loop": true}, "endless-calm": {"dur": 139.636354, "loop": true}, "endless-danger": {"dur": 139.636354, "loop": true}, "endless-tense": {"dur": 139.636354, "loop": true}, "march-calm": {"dur": 73.846146, "loop": true}, "march-danger": {"dur": 73.846146, "loop": true}, "march-tense": {"dur": 73.846146, "loop": true}, "powder": {"dur": 4.0, "loop": true}, "powder-hit": {"dur": 1.4, "loop": false}, "charge": {"dur": 20.869563, "loop": true}, "scramble": {"dur": 30.0, "loop": false}};
   const AUD = { bufs: new Map(), loading: new Map(), used: new Map(), musicReal: true };
   const SFX_MAJOR = new Set(["B04", "B05", "C04", "C06", "C09", "D01", "D02", "G06", "G07"]);
   function loadBuf(path) {
@@ -1634,7 +1634,21 @@ body {
     s13: { calm: "aliA-13", tense: "aliA-13", danger: "aliA-13" },
     endless: { calm: "aliB-b", tense: "aliB-d", danger: "aliB-c" }
   };
-  const ALI_FAST = { "aliA-1": "aliB-b", "aliA-11": "aliB-d", "aliA-13": "aliB-c" };
+  const ALI_FAST = { "aliA-1": "aliB-b", "aliA-11": "aliB-d", "aliA-13": "aliB-c", "aliA-4": "aliB-4", "aliA-5": "aliB-5",
+    "p1B-1": "p1Bf-1", "p1B-2": "p1Bf-2", "p1B-3": "p1Bf-3", "p1B-4": "p1Bf-4", "p1Ca-1": "p1Caf-1", "p1Cb-1": "p1Cbf-1" };
+  // Ali's Chapter 1 pieces (Projects 1A to 1C), one per Chapter 1 board. Listed calm to full; the stack height picks one
+  // (3 layers: rows 10 and 18; 4 layers: rows 7, 12 and 18). A mode id entry wins over its stage (1.3 Round III).
+  const BOARD_LAYERS = {
+    s11: ["aliA-5", "aliA-4", "aliA-13"],
+    s12: ["p1B-1", "p1B-2", "p1B-3", "p1B-4"],
+    s13: ["p1Ca-1"], s13r3: ["p1Cb-1"]
+  };
+  function layerIndex(n) {
+    const top = G && G.top != null ? G.top : 0, cuts = n >= 4 ? [7, 12, 18] : [10, 18];
+    let i = 0;
+    while (i < cuts.length && top >= cuts[i]) i++;
+    return Math.min(i, n - 1);
+  }
   // Stages 1.4 to 3.5 reuse Ali's arrangements in rotation: each stage has a home arrangement and swells into the
   // fuller ones as the stack climbs. Boss stages use one arrangement per phase, building to the fast fullest one.
   const ALI_ORDER = ["aliA-1", "aliA-11", "aliA-13"];
@@ -1643,13 +1657,15 @@ body {
   const BOSS_STAGES = new Set(["s15", "s25", "s35"]);
   function storyLayer(mode, tier) {
     if (BOSS_STAGES.has(mode.base)) return ALI_BOSS[mode.round] || "aliA-13";
+    const bl = (G && BOARD_LAYERS[G.modeId]) || BOARD_LAYERS[mode.base];
+    if (bl) return bl[layerIndex(bl.length)];
     if (ALI_LAYERS[mode.base]) return ALI_LAYERS[mode.base][tier];
     const h = ALI_HOME[mode.base] || "aliA-1", i = ALI_ORDER.indexOf(h);
     return tier === "calm" ? h : tier === "tense" ? ALI_ORDER[Math.min(2, i + 1)] : "aliA-13";
   }
   // Endless rotates through 4 base tracks as Honor climbs (a new one every 20,000), and the speed picks the tempo:
   // levels 1-5 the original, 6-10 faster, 11-15 fastest. Stack height still picks the arrangement.
-  const END_BASES = ["ali", "march", "salt", "siege"], END_STEP = 20000;
+  const END_BASES = ["ali", "p1B", "march", "salt", "siege"], END_STEP = 20000;
   const ALI_TIERS = { calm: ["aliA-1", "aliB-b", "aliC-b"], tense: ["aliA-11", "aliB-d", "aliC-d"], danger: ["aliA-13", "aliB-c", "aliC-c"] };
   const endlessBase = () => END_BASES[Math.floor((G.score || 0) / END_STEP) % END_BASES.length];
   function endlessFile(charge) {
@@ -1657,16 +1673,17 @@ body {
     if (charge) tier = Math.min(3, tier + 1);
     const base = endlessBase(), layer = musicTier();
     if (base === "ali") return ALI_TIERS[layer][tier - 1];
+    if (base === "p1B") return (tier > 1 ? "p1Bf-" : "p1B-") + (layerIndex(4) + 1);
     return base + (tier > 1 ? "2" : "") + "-" + layer;
   }
   // Tracks in one group are the same piece at different tempos or arrangements: switching keeps the bar position.
-  const musGroup = (f) => { const fam = family(f); return /^(ali[ABC]|charge2)$/.test(fam) ? "ali" : fam.replace(/2$/, ""); };
-  const END_GROUPS = new Set(["ali", "march", "salt", "siege"]);
+  const musGroup = (f) => { const fam = family(f); return /^(ali[ABC]|charge2)$/.test(fam) ? "ali" : /^p1/.test(fam) ? fam.replace(/f$/, "") : fam.replace(/2$/, ""); };
+  const END_GROUPS = new Set(["ali", "p1B", "march", "salt", "siege"]);
   const ALI_EVENTS = { broadside: "powder2", scatter: "scramble2", charge: "charge2" };
   const BOARD_THEME = { s11: "march", s12: "salt", s13: "siege" };
   function wantedMusic() {
     if (!AU.ctx || !AU.musicOn) return null;
-    if (!$("menu").hidden) return "menu";
+    if (!$("menu").hidden) return "menu2";
     if (!G || G.paused || G.state === "over") return null;
     const w = wantedTrack();
     if (ALI_MUSIC) {
@@ -1709,7 +1726,7 @@ body {
   function realMusicTick() {
     const want = wantedMusic();
     if (!want) { RM.pending = null; if (RM.src) rmStop(0.3); return; }
-    if (want === RM.file && (RM.game === G || want === "menu")) { RM.pending = null; return; }
+    if (want === RM.file && (RM.game === G || want === "menu2")) { RM.pending = null; return; }
     if (want === RM.pending) return;
     RM.pending = want;
     loadBuf("music/" + want + ".mp4").then((buf) => {
@@ -1717,7 +1734,7 @@ body {
       RM.pending = null;
       if (!buf) { AUD.musicReal = false; rmStop(0.2); return; }
       const same = RM.src && RM.game === G;
-      const sync = same && family(want) === family(RM.file) && family(want) !== "menu";
+      const sync = same && family(want) === family(RM.file) && family(want) !== "menu2";
       // Tempo twins (same piece, same 32 bars, different tempo) keep the bar position across the switch.
       const twin = !sync && same && musGroup(want) === musGroup(RM.file);
       const dur = (MUS_INFO[want] && MUS_INFO[want].dur) || buf.duration;
